@@ -59,3 +59,9 @@ fun sgf(block: SgfCollectionBuilder.() -> Unit): SgfCollection {
 
     return SgfCollection(builder.trees)
 }
+
+fun gameTree(block: SgfGameTreeBuilder.() -> Unit): SgfGameTree {
+    val builder = GameTreeBuilderImpl()
+    builder.block()
+    return SgfGameTree(builder.sequence, builder.trees)
+}

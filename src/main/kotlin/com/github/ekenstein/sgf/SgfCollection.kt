@@ -9,7 +9,11 @@ data class SgfCollection(val trees: List<SgfGameTree>) {
     companion object
 }
 
-data class SgfGameTree(val sequence: List<SgfNode>, val trees: List<SgfGameTree>)
+data class SgfGameTree(val sequence: List<SgfNode>, val trees: List<SgfGameTree>) {
+    companion object {
+        val empty = SgfGameTree(emptyList(), emptyList())
+    }
+}
 data class SgfNode(val properties: Set<SgfProperty>)
 
 sealed class SgfProperty {
@@ -176,6 +180,8 @@ enum class SgfDouble {
     Normal,
     Emphasized
 }
+
+enum class VariationStyle(internal val value: Int)
 
 enum class GameType(internal val value: Int) {
     Go(1),
