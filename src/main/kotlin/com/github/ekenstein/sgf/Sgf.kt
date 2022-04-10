@@ -4,7 +4,7 @@ import com.github.ekenstein.sgf.parser.Marker
 import com.github.ekenstein.sgf.parser.SgfLexer
 import com.github.ekenstein.sgf.parser.SgfParseException
 import com.github.ekenstein.sgf.parser.SgfParser
-import com.github.ekenstein.sgf.parser.parseSgf
+import com.github.ekenstein.sgf.parser.parse
 import com.github.ekenstein.sgf.serialization.serialize
 import org.antlr.v4.runtime.BaseErrorListener
 import org.antlr.v4.runtime.CharStream
@@ -18,7 +18,12 @@ import java.io.OutputStream
 import java.io.PrintStream
 import java.nio.file.Path
 
-class SgfConfiguration
+class SgfConfiguration {
+    /**
+     * Whether decoding should be lenient or not. If true, properties that are malformed will be ignored.
+     */
+    var isLenient: Boolean = false
+}
 
 class Sgf(private val configure: SgfConfiguration.() -> Unit = { }) {
     private val sgfErrorListener = object : BaseErrorListener() {
@@ -53,7 +58,7 @@ class Sgf(private val configure: SgfConfiguration.() -> Unit = { }) {
         parser.removeErrorListeners()
         parser.addErrorListener(sgfErrorListener)
 
-        return parseSgf(parser)
+        return parser.parse(config.isLenient)
     }
 
     private val config by lazy {

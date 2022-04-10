@@ -85,6 +85,14 @@ class SgfParserTest {
     }
 
     @Test
+    fun `lenient ignores broken property values`() {
+        val sgf = "(;BM[3])"
+        val collection = Sgf { isLenient = true }.decode(sgf)
+        val expected = sgf { tree { node { } } }
+        assertEquals(expected, collection)
+    }
+
+    @Test
     fun `real game`() {
         val sgf = Sgf()
         val (raw, collection) = withResource("3bn6-gokifu-20220324-Byun_Sangil-Gu_Zihao.sgf") {
