@@ -11,7 +11,7 @@ interface SgfNodeBuilder {
 @SgfMarker
 interface SgfGameTreeBuilder {
     fun node(block: SgfNodeBuilder.() -> Unit)
-    fun gameTree(block: SgfGameTreeBuilder.() -> Unit)
+    fun tree(block: SgfGameTreeBuilder.() -> Unit)
 }
 
 @SgfMarker
@@ -38,7 +38,7 @@ private class GameTreeBuilderImpl : SgfGameTreeBuilder {
         sequence.add(SgfNode(builder.properties.toSet()))
     }
 
-    override fun gameTree(block: SgfGameTreeBuilder.() -> Unit) {
+    override fun tree(block: SgfGameTreeBuilder.() -> Unit) {
         val builder = GameTreeBuilderImpl()
         builder.block()
         trees.add(SgfGameTree(builder.sequence, builder.trees))

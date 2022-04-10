@@ -4,6 +4,9 @@ import java.nio.file.Paths
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.inputStream
 
+val kotlinVersion by extra("1.6.20")
+val junitVersion by extra("5.8.2")
+
 plugins {
     kotlin("jvm") version "1.6.20"
     id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
@@ -20,10 +23,12 @@ repositories {
 }
 
 dependencies {
-    val kotlinVersion = "1.6.20"
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
+    implementation("org.jetbrains.kotlin", "kotlin-stdlib-jdk8", kotlinVersion)
     antlr("org.antlr:antlr4:4.9.3")
     testImplementation(kotlin("test"))
+    testImplementation("org.junit.jupiter", "junit-jupiter-params", junitVersion)
+    testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)
+    testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
 }
 
 tasks {
@@ -76,6 +81,10 @@ tasks {
         dependsOn(test)
         dependsOn(ktlintCheck)
         dependsOn(dependencyUpdateSentinel)
+    }
+
+    test {
+        useJUnitPlatform()
     }
 }
 

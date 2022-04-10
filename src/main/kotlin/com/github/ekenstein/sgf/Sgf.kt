@@ -21,6 +21,7 @@ import java.nio.file.Path
 class SgfConfiguration {
     /**
      * Whether decoding should be lenient or not. If true, properties that are malformed will be ignored.
+     * Default is false.
      */
     var isLenient: Boolean = false
 }
