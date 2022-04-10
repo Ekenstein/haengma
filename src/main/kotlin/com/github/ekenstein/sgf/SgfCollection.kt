@@ -64,7 +64,7 @@ sealed class SgfProperty {
             constructor(size: Int) : this(size, size)
         }
         data class CA(val charset: String) : Root()
-        data class GM(val game: Int) : Root()
+        data class GM(val game: GameType) : Root()
         data class ST(val style: Int) : Root()
     }
 
@@ -175,4 +175,47 @@ enum class SgfColor {
 enum class SgfDouble {
     Normal,
     Emphasized
+}
+
+enum class GameType(internal val value: Int) {
+    Go(1),
+    Othello(2),
+    Chess(3),
+    GomokuRenju(4),
+    NineMensMorris(5),
+    Backgammon(6),
+    ChineseChess(7),
+    Shogi(8),
+    LinesOfAction(9),
+    Ataxx(10),
+    Hex(11),
+    Jungle(12),
+    Neutron(13),
+    PhilosophersFootball(14),
+    Quadrature(15),
+    Trax(16),
+    Tantrix(17),
+    Amazons(18),
+    Octi(19),
+    Gess(20),
+    Twixt(21),
+    Zertz(22),
+    Plateau(23),
+    Yinsh(24),
+    Punct(25),
+    Gobblet(26),
+    Hive(27),
+    Exxit(28),
+    Hnefatal(29),
+    Kuba(30),
+    Tripples(31),
+    Chase(32),
+    TumblingDown(33),
+    Sahara(34),
+    Byte(35),
+    Focus(36),
+    Dvonn(37),
+    Tamsk(38),
+    Gipf(39),
+    Kropki(40);
 }

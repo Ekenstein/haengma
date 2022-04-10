@@ -1,5 +1,6 @@
 package com.github.ekenstein.sgf.parser
 
+import com.github.ekenstein.sgf.GameType
 import com.github.ekenstein.sgf.Sgf
 import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.SgfProperty
@@ -98,19 +99,19 @@ class SgfParserTest {
         @ParameterizedTest
         @CsvSource(
             "(;GM[0])",
-            "(;GM[17])"
+            "(;GM[41])"
         )
         fun `GM value must be in range 1-16`(sgf: String) {
             assertThrows<SgfParseException> { Sgf().decode(sgf) }
         }
 
         @Test
-        fun `GM can be parsed iff number is in range 1-16`() {
-            val sgf = (1..16).map { "(;GM[$it])" to it }
-            val assertions = sgf.map { (sgf, number) ->
+        fun `GM can be parsed iff number can be translated to a game type`() {
+            val sgf = GameType.values().map { "(;GM[${it.value}])" to it }
+            val assertions = sgf.map { (sgf, gameType) ->
                 {
                     val collection = Sgf().decode(sgf)
-                    val expected = sgf { tree { node { property(SgfProperty.Root.GM(number)) } } }
+                    val expected = sgf { tree { node { property(SgfProperty.Root.GM(gameType)) } } }
                     assertEquals(expected, collection)
                 }
             }

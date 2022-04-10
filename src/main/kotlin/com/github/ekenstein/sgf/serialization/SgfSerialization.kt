@@ -274,7 +274,7 @@ private val SgfProperty.valueSerializer: SgfSerializer
         )
         is SgfProperty.Root.CA -> valueSerializer(simpleTextSerializer(charset, false))
         is SgfProperty.Root.FF -> valueSerializer(numberSerializer(format))
-        is SgfProperty.Root.GM -> valueSerializer(numberSerializer(game))
+        is SgfProperty.Root.GM -> valueSerializer(numberSerializer(game.value))
         is SgfProperty.Root.ST -> valueSerializer(numberSerializer(style))
         is SgfProperty.Root.SZ -> {
             val serializer = if (width == height) {

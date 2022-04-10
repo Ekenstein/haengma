@@ -1,5 +1,6 @@
 package com.github.ekenstein.sgf.parser
 
+import com.github.ekenstein.sgf.GameType
 import com.github.ekenstein.sgf.Move
 import com.github.ekenstein.sgf.SgfCollection
 import com.github.ekenstein.sgf.SgfColor
@@ -123,7 +124,14 @@ private fun SgfParser.RootContext.extract(): SgfProperty.Root = when (this) {
         SgfProperty.Root.AP(name, version)
     }
     is SgfParser.FileFormatContext -> SgfProperty.Root.FF(VALUE().asNumber(1..4))
-    is SgfParser.GameContext -> SgfProperty.Root.GM(VALUE().asNumber(1..16))
+    is SgfParser.GameContext -> {
+        val raw = VALUE()
+        val number = raw.asNumber()
+        val allGameTypes = GameType.values()
+        val gameType = allGameTypes.singleOrNull { it.value == number }
+            ?: raw.symbol.toMarker().throwParseException("Expected a game type, but got $number")
+        SgfProperty.Root.GM(gameType)
+    }
     is SgfParser.SizeContext -> {
         val raw = VALUE()
         val numberParser = numberParser(1..52)
