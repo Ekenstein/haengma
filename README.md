@@ -14,7 +14,9 @@ import com.github.ekenstein.sgf.Sgf
 import com.github.ekenstein.sgf.SgfCollection
 
 fun main() {
-    val sgf = Sgf { /* configure */ }
+    val sgf = Sgf { 
+        isLenient = true /* if you wish to ignore malformed property values */
+    }
     val collection: SgfCollection = sgf.decode(Path.of("game.sgf"))
     val raw: String = sgf.encodeToString(collection)
 }
