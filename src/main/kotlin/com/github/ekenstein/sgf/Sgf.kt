@@ -73,3 +73,10 @@ fun Sgf.encodeToString(collection: SgfCollection): String = ByteArrayOutputStrea
     encode(it, collection)
     String(it.toByteArray())
 }
+
+fun Sgf.encodeToString(gameTree: SgfGameTree): String = encodeToString(SgfCollection(listOf(gameTree)))
+
+fun Sgf.encode(outputStream: OutputStream, gameTree: SgfGameTree) = encode(
+    outputStream,
+    SgfCollection(listOf(gameTree))
+)

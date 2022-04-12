@@ -18,8 +18,18 @@ data class SgfNode(val properties: Set<SgfProperty>)
 
 sealed class SgfProperty {
     sealed class Move : SgfProperty() {
-        data class B(val move: com.github.ekenstein.sgf.Move) : Move()
-        data class W(val move: com.github.ekenstein.sgf.Move) : Move()
+        data class B(val move: com.github.ekenstein.sgf.Move) : Move() {
+            constructor(x: Int, y: Int) : this(com.github.ekenstein.sgf.Move.Stone(SgfPoint(x, y)))
+            companion object {
+                fun pass() = B(com.github.ekenstein.sgf.Move.Pass)
+            }
+        }
+        data class W(val move: com.github.ekenstein.sgf.Move) : Move() {
+            constructor(x: Int, y: Int) : this(com.github.ekenstein.sgf.Move.Stone(SgfPoint(x, y)))
+            companion object {
+                fun pass() = B(com.github.ekenstein.sgf.Move.Pass)
+            }
+        }
         object KO : Move()
         data class MN(val number: Int) : Move()
     }

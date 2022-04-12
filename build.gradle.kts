@@ -24,7 +24,7 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin", "kotlin-stdlib-jdk8", kotlinVersion)
-    antlr("org.antlr:antlr4:4.9.3")
+    antlr("org.antlr", "antlr4", "4.10")
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter", "junit-jupiter-params", junitVersion)
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)
