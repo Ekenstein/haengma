@@ -8,27 +8,44 @@ import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.SgfProperty
+import java.io.ByteArrayOutputStream
+import java.io.OutputStream
+import java.io.PrintStream
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
 
-internal fun SgfCollection.serialize(appendable: Appendable) {
-    trees.forEach { it.serialize(appendable) }
+fun SgfCollection.encode(outputStream: OutputStream) {
+    val printStream = PrintStream(outputStream)
+    encode(printStream as Appendable)
 }
 
-private fun SgfGameTree.serialize(appendable: Appendable) {
+fun SgfGameTree.encode(outputStream: OutputStream) = SgfCollection(listOf(this)).encode(outputStream)
+
+fun SgfCollection.encodeToString(): String = ByteArrayOutputStream().use {
+    encode(it)
+    String(it.toByteArray())
+}
+
+fun SgfGameTree.encodeToString(): String = SgfCollection(listOf(this)).encodeToString()
+
+fun SgfCollection.encode(appendable: Appendable) {
+    trees.forEach { it.encode(appendable) }
+}
+
+private fun SgfGameTree.encode(appendable: Appendable) {
     appendable.append('(')
-    sequence.forEach { it.serialize(appendable) }
-    trees.forEach { it.serialize(appendable) }
+    sequence.forEach { it.encode(appendable) }
+    trees.forEach { it.encode(appendable) }
     appendable.append(')')
 }
 
-private fun SgfNode.serialize(appendable: Appendable) {
+private fun SgfNode.encode(appendable: Appendable) {
     appendable.append(';')
-    properties.forEach { it.serialize(appendable) }
+    properties.forEach { it.encode(appendable) }
 }
 
-private fun SgfProperty.serialize(appendable: Appendable) {
+private fun SgfProperty.encode(appendable: Appendable) {
     appendable.append(identifier)
     valueSerializer.serialize(appendable)
 }

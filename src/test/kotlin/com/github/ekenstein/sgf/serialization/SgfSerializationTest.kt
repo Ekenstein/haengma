@@ -1,9 +1,7 @@
 package com.github.ekenstein.sgf.serialization
 
-import com.github.ekenstein.sgf.Sgf
 import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfProperty
-import com.github.ekenstein.sgf.encodeToString
 import com.github.ekenstein.sgf.extensions.addProperty
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
@@ -16,7 +14,7 @@ class SgfSerializationTest {
     fun `regardless of locale, real values will always have a dot as decimal separator`(locale: Locale) {
         val tree = SgfGameTree.empty.addProperty(SgfProperty.GameInfo.KM(6.5))
         val actual = withLocale(locale) {
-            Sgf().encodeToString(tree)
+            tree.encodeToString()
         }
 
         val expected = "(;KM[6.5])"

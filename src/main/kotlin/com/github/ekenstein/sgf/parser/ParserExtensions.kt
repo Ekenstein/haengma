@@ -9,41 +9,85 @@ import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.SgfProperty
+import org.antlr.v4.runtime.BaseErrorListener
+import org.antlr.v4.runtime.CharStream
+import org.antlr.v4.runtime.CharStreams
+import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.ParserRuleContext
+import org.antlr.v4.runtime.RecognitionException
+import org.antlr.v4.runtime.Recognizer
 import org.antlr.v4.runtime.Token
 import org.antlr.v4.runtime.tree.TerminalNode
+import java.io.InputStream
+import java.nio.file.Path
 
-private fun <T> withParseExceptionHandler(isLenient: Boolean, block: () -> T): T? = try {
-    block()
-} catch (ex: SgfParseException) {
-    if (isLenient) {
-        null
-    } else {
-        throw ex
+private class SgfErrorListener : BaseErrorListener() {
+    override fun syntaxError(
+        recognizer: Recognizer<*, *>?,
+        offendingSymbol: Any?,
+        line: Int,
+        charPositionInLine: Int,
+        msg: String?,
+        e: RecognitionException?
+    ) {
+        throw SgfParseException(msg!!, Marker(line, charPositionInLine, line, charPositionInLine))
     }
 }
 
-internal fun SgfParser.parse(lenient: Boolean): SgfCollection {
-    val collection = collection()
-    val gameTrees = collection.gameTree().map { it.extract(lenient) }
-    return SgfCollection(gameTrees)
+fun SgfCollection.Companion.from(
+    string: String,
+    configure: SgfParserConfiguration.() -> Unit = { }
+): SgfCollection = from(CharStreams.fromString(string), configure)
+
+fun SgfCollection.Companion.from(
+    path: Path,
+    configure: SgfParserConfiguration.() -> Unit = { }
+): SgfCollection = from(CharStreams.fromPath(path), configure)
+
+fun SgfCollection.Companion.from(
+    inputStream: InputStream,
+    configure: SgfParserConfiguration.() -> Unit = { }
+): SgfCollection = from(CharStreams.fromStream(inputStream), configure)
+
+private fun SgfCollection.Companion.from(
+    charStream: CharStream,
+    configure: SgfParserConfiguration.() -> Unit = { }
+): SgfCollection {
+    val config = SgfParserConfiguration()
+    val sgfErrorListener = SgfErrorListener()
+    config.configure()
+    val lexer = SgfLexer(charStream)
+    lexer.removeErrorListeners()
+    lexer.addErrorListener(sgfErrorListener)
+
+    val tokenStream = CommonTokenStream(lexer)
+    val parser = SgfParser(tokenStream)
+    parser.removeErrorListeners()
+    parser.addErrorListener(sgfErrorListener)
+
+    return parser.collection().extract(config)
 }
 
-private fun SgfParser.GameTreeContext.extract(lenient: Boolean): SgfGameTree {
-    val sequence = sequence().extract(lenient)
-    val variations = gameTree().map { it.extract(lenient) }
+private fun SgfParser.CollectionContext.extract(configuration: SgfParserConfiguration) = SgfCollection(
+    gameTree().map { it.extract(configuration) }
+)
+
+private fun SgfParser.GameTreeContext.extract(configuration: SgfParserConfiguration): SgfGameTree {
+    val sequence = sequence().extract(configuration)
+    val variations = gameTree().map { it.extract(configuration) }
 
     return SgfGameTree(sequence, variations)
 }
 
-private fun SgfParser.SequenceContext.extract(lenient: Boolean) = node().map { it.extract(lenient) }
+private fun SgfParser.SequenceContext.extract(configuration: SgfParserConfiguration) =
+    node().map { it.extract(configuration) }
 
-private fun SgfParser.NodeContext.extract(lenient: Boolean): SgfNode {
-    val props = prop().mapNotNull { it.extract(lenient) }.toSet()
+private fun SgfParser.NodeContext.extract(configuration: SgfParserConfiguration): SgfNode {
+    val props = prop().mapNotNull { it.extract(configuration) }.toSet()
     return SgfNode(props)
 }
 
-private fun SgfParser.PropContext.extract(lenient: Boolean) = withParseExceptionHandler(lenient) {
+private fun SgfParser.PropContext.extract(configuration: SgfParserConfiguration) =
     when {
         move() != null -> move().extract()
         markup() != null -> markup().extract()
@@ -54,10 +98,12 @@ private fun SgfParser.PropContext.extract(lenient: Boolean) = withParseException
         nodeAnnotation() != null -> nodeAnnotation().extract()
         setup() != null -> setup().extract()
         timing() != null -> timing().extract()
-        privateProp() != null -> privateProp().extract()
+        privateProp() != null -> when (configuration.preserveUnknownProperties) {
+            true -> privateProp().extract()
+            false -> null
+        }
         else -> throw SgfParseException("Unrecognized property", toMarker())
     }
-}
 
 private fun SgfParser.PrivatePropContext.extract(): SgfProperty = SgfProperty.Private(
     identifier = PROP_IDENTIFIER().text,
@@ -65,12 +111,8 @@ private fun SgfParser.PrivatePropContext.extract(): SgfProperty = SgfProperty.Pr
 )
 
 private fun SgfParser.MoveContext.extract(): SgfProperty.Move = when (this) {
-    is SgfParser.BlackMoveContext -> SgfProperty.Move.B(
-        NONE()?.let { Move.Pass } ?: VALUE().asMove()
-    )
-    is SgfParser.WhiteMoveContext -> SgfProperty.Move.W(
-        NONE()?.let { Move.Pass } ?: VALUE().asMove()
-    )
+    is SgfParser.BlackMoveContext -> SgfProperty.Move.B(VALUE()?.asMove() ?: Move.Pass)
+    is SgfParser.WhiteMoveContext -> SgfProperty.Move.W(VALUE()?.asMove() ?: Move.Pass)
     is SgfParser.KoContext -> SgfProperty.Move.KO
     is SgfParser.MoveNumberContext -> SgfProperty.Move.MN(VALUE().asNumber())
     else -> throw SgfParseException("Unrecognized move property $text", toMarker())
