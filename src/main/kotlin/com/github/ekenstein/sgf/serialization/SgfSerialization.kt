@@ -9,6 +9,7 @@ import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.SgfProperty
 import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
 
 internal fun SgfCollection.serialize(appendable: Appendable) {
@@ -80,21 +81,14 @@ private fun moveSerializer(move: Move) = SgfSerializer { appendable ->
     }
 }
 
-private fun numberFormatter(serializeSign: Boolean): NumberFormat = DecimalFormat().apply {
-    when (serializeSign) {
-        true -> {
-            negativePrefix = "-"
-            positivePrefix = "+"
-        }
-        false -> {
-            negativePrefix = ""
-            positivePrefix = ""
-        }
+private val numberFormatter: NumberFormat = DecimalFormat().apply {
+    decimalFormatSymbols = DecimalFormatSymbols().apply {
+        decimalSeparator = '.'
     }
 }
 
-private fun numberSerializer(number: Number, serializeSign: Boolean = false) = SgfSerializer { appendable ->
-    appendable.append(numberFormatter(serializeSign).format(number))
+private fun numberSerializer(number: Number) = SgfSerializer { appendable ->
+    appendable.append(numberFormatter.format(number))
 }
 
 private val whitespaceExceptNewLineRegex = Regex("""[^\S\r\n]""")
