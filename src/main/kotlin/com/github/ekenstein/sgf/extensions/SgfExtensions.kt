@@ -6,12 +6,23 @@ import com.github.ekenstein.sgf.SgfProperty
 import com.github.ekenstein.sgf.utils.replace
 import com.github.ekenstein.sgf.utils.replaceLast
 
+operator fun SgfNode.plus(other: SgfNode): SgfNode {
+    val allProperties = properties + other.properties
+    return allProperties.fold(SgfNode.empty) { node, property -> node.addProperty(property) }
+}
+
 private fun SgfGameTree.appendNode(vararg properties: SgfProperty): SgfGameTree = copy(
     sequence = sequence + SgfNode(properties.toSet())
 )
 
+internal inline fun <reified T : SgfProperty> SgfNode.property() = properties.filterIsInstance<T>().singleOrNull()
+
 inline fun <reified T : SgfProperty> SgfNode.addProperty(property: T) = copy(
     properties = properties.filter { it::class != property::class }.toSet() + property
+)
+
+inline fun <reified T : SgfProperty> SgfNode.removeProperty() = copy(
+    properties = properties.filter { it::class != T::class }.toSet()
 )
 
 private inline fun <reified T : SgfProperty> SgfGameTree.addPropertyToRootNode(property: T): SgfGameTree {

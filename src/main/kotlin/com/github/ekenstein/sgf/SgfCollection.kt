@@ -14,7 +14,11 @@ data class SgfGameTree(val sequence: List<SgfNode>, val trees: List<SgfGameTree>
         val empty = SgfGameTree(emptyList(), emptyList())
     }
 }
-data class SgfNode(val properties: Set<SgfProperty>)
+data class SgfNode(val properties: Set<SgfProperty>) {
+    companion object {
+        val empty = SgfNode(emptySet())
+    }
+}
 
 sealed class SgfProperty {
     sealed class Move : SgfProperty() {

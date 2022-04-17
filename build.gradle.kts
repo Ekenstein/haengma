@@ -12,10 +12,11 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
     id("com.github.ben-manes.versions") version "0.42.0"
     antlr
+    `maven-publish`
 }
 
 group = "com.github.ekenstein"
-version = "1.0-SNAPSHOT"
+version = "0.1.0"
 val kotlinJvmTarget = "1.8"
 
 repositories {
@@ -24,7 +25,7 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin", "kotlin-stdlib-jdk8", kotlinVersion)
-    antlr("org.antlr", "antlr4", "4.10")
+    antlr("org.antlr", "antlr4", "4.10.1")
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter", "junit-jupiter-params", junitVersion)
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)
@@ -90,6 +91,40 @@ tasks {
 
 ktlint {
     version.set("0.45.2")
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/Ekenstein/ktsgf")
+            credentials {
+                username = System.getenv("PUBLISH_USER")
+                password = System.getenv("PUBLISH_TOKEN")
+            }
+        }
+    }
+
+    publications {
+        create<MavenPublication>("ktsgf") {
+            groupId = project.group.toString()
+            artifactId = "ktsgf"
+            version = project.version.toString()
+            from(components["kotlin"])
+
+            pom {
+                name.set("ktsgf")
+                description.set("Simple SGF parser")
+                url.set("https://github.com/Ekenstein/ktsgf")
+                licenses {
+                    license {
+                        name.set("MIT")
+                        url.set("https://github.com/Ekenstein/ktsgf/blob/main/LICENSE")
+                    }
+                }
+            }
+        }
+    }
 }
 
 class UpgradeToUnstableFilter : com.github.benmanes.gradle.versions.updates.resolutionstrategy.ComponentFilter {
