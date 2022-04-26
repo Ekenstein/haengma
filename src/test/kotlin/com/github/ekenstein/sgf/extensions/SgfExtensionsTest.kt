@@ -49,7 +49,7 @@ class SgfExtensionsTest {
         val tree = gameTree {
             node {
                 property(SgfProperty.Root.GM(GameType.Chess))
-                property(SgfProperty.Root.CA("UTF-8"))
+                property(SgfProperty.Root.CA(Charsets.UTF_8))
             }
             node {
                 property(SgfProperty.Move.B(Move.Stone(SgfPoint(1, 1))))
@@ -60,7 +60,7 @@ class SgfExtensionsTest {
         val expected = gameTree {
             node {
                 property(property)
-                property(SgfProperty.Root.CA("UTF-8"))
+                property(SgfProperty.Root.CA(Charsets.UTF_8))
             }
             node {
                 property(SgfProperty.Move.B(Move.Stone(SgfPoint(1, 1))))
