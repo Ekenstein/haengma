@@ -356,7 +356,7 @@ class SgfParserTest {
         @Test
         fun `VW can have an empty list`() {
             val collection = SgfCollection.from("(;VW[])")
-            val expected = sgf { tree { node { property(SgfProperty.Misc.VW(emptyList())) } } }
+            val expected = sgf { tree { node { property(SgfProperty.Misc.VW(emptySet())) } } }
             assertEquals(expected, collection)
         }
 
@@ -368,7 +368,7 @@ class SgfParserTest {
                     node {
                         property(
                             SgfProperty.Misc.VW(
-                                listOf(
+                                setOf(
                                     SgfPoint(1, 1),
                                     SgfPoint(2, 2),
                                     SgfPoint(3, 3)
@@ -421,7 +421,7 @@ class SgfParserTest {
         @Test
         fun `DD can have an empty list`() {
             val collection = SgfCollection.from("(;DD[])")
-            val expected = sgf { tree { node { property(SgfProperty.Markup.DD(emptyList())) } } }
+            val expected = sgf { tree { node { property(SgfProperty.Markup.DD(emptySet())) } } }
             assertEquals(expected, collection)
         }
 
@@ -433,7 +433,7 @@ class SgfParserTest {
                     node {
                         property(
                             SgfProperty.Markup.DD(
-                                listOf(
+                                setOf(
                                     SgfPoint(1, 1),
                                     SgfPoint(2, 2),
                                     SgfPoint(3, 3)
@@ -496,6 +496,150 @@ class SgfParserTest {
                         tree {
                             node {
                                 property(SgfProperty.GameInfo.RE(GameResult.Draw))
+                            }
+                        }
+                    }
+                    assertEquals(expected, actual)
+                },
+                {
+                    val sgf = "(;RE[B+Time])"
+                    val actual = SgfCollection.from(sgf)
+                    val expected = sgf {
+                        tree {
+                            node {
+                                property(SgfProperty.GameInfo.RE(GameResult.Time(SgfColor.Black)))
+                            }
+                        }
+                    }
+                    assertEquals(expected, actual)
+                },
+                {
+                    val sgf = "(;RE[B+T])"
+                    val actual = SgfCollection.from(sgf)
+                    val expected = sgf {
+                        tree {
+                            node {
+                                property(SgfProperty.GameInfo.RE(GameResult.Time(SgfColor.Black)))
+                            }
+                        }
+                    }
+                    assertEquals(expected, actual)
+                },
+                {
+                    val sgf = "(;RE[B+R])"
+                    val actual = SgfCollection.from(sgf)
+                    val expected = sgf {
+                        tree {
+                            node {
+                                property(SgfProperty.GameInfo.RE(GameResult.Resignation(SgfColor.Black)))
+                            }
+                        }
+                    }
+                    assertEquals(expected, actual)
+                },
+                {
+                    val sgf = "(;RE[B+Resign])"
+                    val actual = SgfCollection.from(sgf)
+                    val expected = sgf {
+                        tree {
+                            node {
+                                property(SgfProperty.GameInfo.RE(GameResult.Resignation(SgfColor.Black)))
+                            }
+                        }
+                    }
+                    assertEquals(expected, actual)
+                },
+                {
+                    val sgf = "(;RE[W+R])"
+                    val actual = SgfCollection.from(sgf)
+                    val expected = sgf {
+                        tree {
+                            node {
+                                property(SgfProperty.GameInfo.RE(GameResult.Resignation(SgfColor.White)))
+                            }
+                        }
+                    }
+                    assertEquals(expected, actual)
+                },
+                {
+                    val sgf = "(;RE[W+Resign])"
+                    val actual = SgfCollection.from(sgf)
+                    val expected = sgf {
+                        tree {
+                            node {
+                                property(SgfProperty.GameInfo.RE(GameResult.Resignation(SgfColor.White)))
+                            }
+                        }
+                    }
+                    assertEquals(expected, actual)
+                },
+                {
+                    val sgf = "(;RE[B+F])"
+                    val actual = SgfCollection.from(sgf)
+                    val expected = sgf {
+                        tree {
+                            node {
+                                property(SgfProperty.GameInfo.RE(GameResult.Forfeit(SgfColor.Black)))
+                            }
+                        }
+                    }
+                    assertEquals(expected, actual)
+                },
+                {
+                    val sgf = "(;RE[B+Forfeit])"
+                    val actual = SgfCollection.from(sgf)
+                    val expected = sgf {
+                        tree {
+                            node {
+                                property(SgfProperty.GameInfo.RE(GameResult.Forfeit(SgfColor.Black)))
+                            }
+                        }
+                    }
+                    assertEquals(expected, actual)
+                },
+                {
+                    val sgf = "(;RE[W+Forfeit])"
+                    val actual = SgfCollection.from(sgf)
+                    val expected = sgf {
+                        tree {
+                            node {
+                                property(SgfProperty.GameInfo.RE(GameResult.Forfeit(SgfColor.White)))
+                            }
+                        }
+                    }
+                    assertEquals(expected, actual)
+                },
+                {
+                    val sgf = "(;RE[W+F])"
+                    val actual = SgfCollection.from(sgf)
+                    val expected = sgf {
+                        tree {
+                            node {
+                                property(SgfProperty.GameInfo.RE(GameResult.Forfeit(SgfColor.White)))
+                            }
+                        }
+                    }
+                    assertEquals(expected, actual)
+                },
+                {
+                    val sgf = "(;RE[Void])"
+                    val actual = SgfCollection.from(sgf)
+                    val expected = sgf {
+                        tree {
+                            node {
+                                property(SgfProperty.GameInfo.RE(GameResult.Suspended))
+                            }
+                        }
+                    }
+                    assertEquals(expected, actual)
+                },
+                {
+                    val sgf = "(;RE[?])"
+                    val actual = SgfCollection.from(sgf)
+                    val expected = sgf {
+                        tree {
+                            node {
+                                property(SgfProperty.GameInfo.RE(GameResult.Unknown))
                             }
                         }
                     }
@@ -601,13 +745,53 @@ class SgfParserTest {
                 },
             )
         }
+
+        @Test
+        fun `parse error if DT contains invalid sequence of dates`() {
+            assertAll(
+                {
+                    assertThrowsParseException(marker(6, 8)) {
+                        SgfCollection.from("(;DT[06])")
+                    }
+                },
+                {
+                    assertThrowsParseException(marker(6, 16)) {
+                        SgfCollection.from("(;DT[2022,02-27])")
+                    }
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `compressed points can be parsed`() {
+        val uncompressedSgf = """
+            (;GM[1]SZ[9]FF[4]
+              AB[ac][bc][cc][dc][ec][fc][gc][hc][ic]
+              AW[ae][be][ce][de][ee][fe][ge][he][ie]
+             ;DD[aa][ab][ac][ad][ae][af][ag][ah][ai][bi][bh][bg][bf]
+                [be][bd][bc][bb][ba][ca][cb][cc][cd][ce]
+              VW[aa:bi][ca:ee][ge:ie][ga:ia][gc:ic][gb][ib]
+            )
+        """.trimIndent()
+
+        val compressedSgf = """
+            (;GM[1]SZ[9]FF[4]
+              AB[ac:ic]AW[ae:ie]
+             ;DD[aa:bi][ca:ce]
+              VW[aa:bi][ca:ee][ge:ie][ga:ia][gc:ic][gb][ib]
+            )
+        """.trimIndent()
+
+        val uncompressedCollection = SgfCollection.from(uncompressedSgf)
+        val compressedCollection = SgfCollection.from(compressedSgf)
+        assertEquals(uncompressedCollection, compressedCollection)
     }
 
     private fun assertThrowsParseException(marker: Marker, block: () -> Unit) = try {
         block()
         assertTrue(false, "Expected an SgfParseException")
     } catch (ex: SgfParseException) {
-        println(ex)
         assertEquals(marker, ex.marker)
     }
 
