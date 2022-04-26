@@ -1,19 +1,24 @@
 package com.github.ekenstein.sgf.serialization
 
-import com.github.ekenstein.sgf.Move
 import com.github.ekenstein.sgf.SgfCollection
-import com.github.ekenstein.sgf.SgfColor
-import com.github.ekenstein.sgf.SgfDouble
 import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfNode
-import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.SgfProperty
+import com.github.ekenstein.sgf.serialization.serializers.ValueSerializer
+import com.github.ekenstein.sgf.serialization.serializers.colorSerializer
+import com.github.ekenstein.sgf.serialization.serializers.composedSerializer
+import com.github.ekenstein.sgf.serialization.serializers.doubleSerializer
+import com.github.ekenstein.sgf.serialization.serializers.gameDateSerializer
+import com.github.ekenstein.sgf.serialization.serializers.gameResultSerializer
+import com.github.ekenstein.sgf.serialization.serializers.moveSerializer
+import com.github.ekenstein.sgf.serialization.serializers.noneSerializer
+import com.github.ekenstein.sgf.serialization.serializers.numberSerializer
+import com.github.ekenstein.sgf.serialization.serializers.pointSerializer
+import com.github.ekenstein.sgf.serialization.serializers.simpleTextSerializer
+import com.github.ekenstein.sgf.serialization.serializers.textSerializer
 import java.io.ByteArrayOutputStream
 import java.io.OutputStream
 import java.io.PrintStream
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
-import java.text.NumberFormat
 
 fun SgfCollection.encode(outputStream: OutputStream) {
     val printStream = PrintStream(outputStream)
@@ -50,12 +55,8 @@ private fun SgfProperty.encode(appendable: Appendable) {
     valueSerializer.serialize(appendable)
 }
 
-private fun interface SgfSerializer {
-    fun serialize(appendable: Appendable)
-}
-
-private fun valueSerializer(serializer: SgfSerializer) = valueSerializer(listOf(serializer))
-private fun valueSerializer(serializers: List<SgfSerializer>) = SgfSerializer { appendable ->
+private fun valueSerializer(serializer: ValueSerializer) = valueSerializer(listOf(serializer))
+private fun valueSerializer(serializers: List<ValueSerializer>) = ValueSerializer { appendable ->
     if (serializers.isEmpty()) {
         appendable.append("[]")
     } else {
@@ -65,78 +66,6 @@ private fun valueSerializer(serializers: List<SgfSerializer>) = SgfSerializer { 
             appendable.append(']')
         }
     }
-}
-
-private fun colorSerializer(color: SgfColor) = SgfSerializer { appendable ->
-    when (color) {
-        SgfColor.Black -> appendable.append('B')
-        SgfColor.White -> appendable.append('W')
-    }
-}
-
-private fun doubleSerializer(double: SgfDouble) = SgfSerializer { appendable ->
-    when (double) {
-        SgfDouble.Normal -> appendable.append('1')
-        SgfDouble.Emphasized -> appendable.append('2')
-    }
-}
-
-private fun pointSerializer(point: SgfPoint) = SgfSerializer { appendable ->
-    fun intToChar(n: Int) = when {
-        n > 26 -> ((n % 27) + 'A'.code).toChar()
-        else -> ((n - 1) + 'a'.code).toChar()
-    }
-
-    appendable.append(intToChar(point.x))
-    appendable.append(intToChar(point.y))
-}
-
-private fun moveSerializer(move: Move) = SgfSerializer { appendable ->
-    when (move) {
-        Move.Pass -> Unit
-        is Move.Stone -> pointSerializer(move.point).serialize(appendable)
-    }
-}
-
-private val numberFormatter: NumberFormat = DecimalFormat().apply {
-    decimalFormatSymbols = DecimalFormatSymbols().apply {
-        decimalSeparator = '.'
-    }
-}
-
-private fun numberSerializer(number: Number) = SgfSerializer { appendable ->
-    appendable.append(numberFormatter.format(number))
-}
-
-private val whitespaceExceptNewLineRegex = Regex("""[^\S\r\n]""")
-private val whitespaceExceptSpaceRegex = Regex("""[^\S ]+""")
-private fun escapeRegex(isComposed: Boolean): Regex {
-    val needsEscapingIfComposed = listOf(':').filter { isComposed }
-    val needsEscaping = listOf("\\]", "\\\\") + needsEscapingIfComposed
-
-    val escapeChars = needsEscaping.joinToString("")
-
-    return Regex("""[$escapeChars]""")
-}
-
-private fun simpleTextSerializer(string: String, isComposed: Boolean) = SgfSerializer { appendable ->
-    val serialized = string.replace(whitespaceExceptSpaceRegex, " ")
-        .replace(escapeRegex(isComposed), "\\$0")
-
-    appendable.append(serialized)
-}
-
-private fun textSerializer(string: String, isComposed: Boolean) = SgfSerializer { appendable ->
-    val serialized = string.replace(whitespaceExceptNewLineRegex, " ")
-        .replace(escapeRegex(isComposed), "\\$0")
-
-    appendable.append(serialized)
-}
-
-private fun composedSerializer(left: SgfSerializer, right: SgfSerializer) = SgfSerializer { appendable ->
-    left.serialize(appendable)
-    appendable.append(':')
-    right.serialize(appendable)
 }
 
 private val SgfProperty.identifier: String
@@ -209,15 +138,13 @@ private val SgfProperty.identifier: String
         is SgfProperty.Timing.WL -> "WL"
     }
 
-private val noneSerializer: SgfSerializer = SgfSerializer { }
-
-private val SgfProperty.valueSerializer: SgfSerializer
+private val SgfProperty.valueSerializer: ValueSerializer
     get() = when (this) {
         is SgfProperty.GameInfo.AN -> valueSerializer(simpleTextSerializer(annotation, false))
         is SgfProperty.GameInfo.BR -> valueSerializer(simpleTextSerializer(rank, false))
         is SgfProperty.GameInfo.BT -> valueSerializer(simpleTextSerializer(team, false))
         is SgfProperty.GameInfo.CP -> valueSerializer(simpleTextSerializer(copyright, false))
-        is SgfProperty.GameInfo.DT -> valueSerializer(simpleTextSerializer(date, false))
+        is SgfProperty.GameInfo.DT -> valueSerializer(gameDateSerializer(dates))
         is SgfProperty.GameInfo.EV -> valueSerializer(simpleTextSerializer(event, false))
         is SgfProperty.GameInfo.GC -> valueSerializer(textSerializer(comment, false))
         is SgfProperty.GameInfo.GN -> valueSerializer(simpleTextSerializer(name, false))
@@ -228,7 +155,7 @@ private val SgfProperty.valueSerializer: SgfSerializer
         is SgfProperty.GameInfo.PB -> valueSerializer(simpleTextSerializer(name, false))
         is SgfProperty.GameInfo.PC -> valueSerializer(simpleTextSerializer(place, false))
         is SgfProperty.GameInfo.PW -> valueSerializer(simpleTextSerializer(name, false))
-        is SgfProperty.GameInfo.RE -> valueSerializer(simpleTextSerializer(result, false))
+        is SgfProperty.GameInfo.RE -> valueSerializer(gameResultSerializer(result))
         is SgfProperty.GameInfo.RO -> valueSerializer(simpleTextSerializer(round, false))
         is SgfProperty.GameInfo.RU -> valueSerializer(simpleTextSerializer(rules, false))
         is SgfProperty.GameInfo.SO -> valueSerializer(simpleTextSerializer(source, false))
@@ -283,7 +210,7 @@ private val SgfProperty.valueSerializer: SgfSerializer
         is SgfProperty.Root.AP -> valueSerializer(
             composedSerializer(simpleTextSerializer(name, true), simpleTextSerializer(version, true))
         )
-        is SgfProperty.Root.CA -> valueSerializer(simpleTextSerializer(charset, false))
+        is SgfProperty.Root.CA -> valueSerializer(simpleTextSerializer(charset.displayName(), false))
         is SgfProperty.Root.FF -> valueSerializer(numberSerializer(format))
         is SgfProperty.Root.GM -> valueSerializer(numberSerializer(game.value))
         is SgfProperty.Root.ST -> valueSerializer(numberSerializer(style))

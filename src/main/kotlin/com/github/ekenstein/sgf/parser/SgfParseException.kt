@@ -7,4 +7,13 @@ data class Marker(
     val endColumn: Int
 )
 
-class SgfParseException(override val message: String, val marker: Marker) : Exception()
+internal fun Marker.throwParseException(message: String, cause: Throwable? = null): Nothing =
+    throw SgfParseException(message, this, cause)
+
+class SgfParseException(
+    override val message: String,
+    val marker: Marker,
+    override val cause: Throwable?
+) : Exception() {
+    constructor(message: String, marker: Marker) : this(message, marker, null)
+}

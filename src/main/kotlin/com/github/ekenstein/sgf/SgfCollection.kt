@@ -1,9 +1,8 @@
 package com.github.ekenstein.sgf
 
-import java.time.OffsetDateTime
-import java.time.format.DateTimeFormatter
-
-private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+import java.nio.charset.Charset
+import java.time.LocalDate
+import java.time.temporal.ChronoField
 
 data class SgfCollection(val trees: List<SgfGameTree>) {
     companion object
@@ -81,7 +80,7 @@ sealed class SgfProperty {
         data class SZ(val width: Int, val height: Int) : Root() {
             constructor(size: Int) : this(size, size)
         }
-        data class CA(val charset: String) : Root()
+        data class CA(val charset: Charset) : Root()
         data class GM(val game: GameType) : Root()
         data class ST(val style: Int) : Root()
     }
@@ -92,53 +91,15 @@ sealed class SgfProperty {
         data class EV(val event: String) : GameInfo()
         data class PB(val name: String) : GameInfo()
         data class PW(val name: String) : GameInfo()
-        data class RE(val result: String) : GameInfo() {
-            companion object {
-                fun draw() = withLabel { "0" }
-
-                fun resignation(winner: SgfColor) = withLabel {
-                    when (winner) {
-                        SgfColor.Black -> "B+R"
-                        SgfColor.White -> "W+R"
-                    }
-                }
-
-                fun score(winner: SgfColor, score: Double) = withLabel {
-                    when (winner) {
-                        SgfColor.Black -> "B+$score"
-                        SgfColor.White -> "W+$score"
-                    }
-                }
-
-                fun time(winner: SgfColor) = withLabel {
-                    when (winner) {
-                        SgfColor.Black -> "B+T"
-                        SgfColor.White -> "W+T"
-                    }
-                }
-
-                fun forfeit(winner: SgfColor) = withLabel {
-                    when (winner) {
-                        SgfColor.Black -> "B+F"
-                        SgfColor.White -> "W+F"
-                    }
-                }
-
-                private fun withLabel(label: () -> String) = RE(label())
-            }
-        }
+        data class RE(val result: GameResult) : GameInfo()
         data class BR(val rank: String) : GameInfo()
         data class WR(val rank: String) : GameInfo()
         data class GN(val name: String) : GameInfo()
-        data class DT(val date: String) : GameInfo() {
-            companion object {
-                fun from(vararg date: OffsetDateTime): DT {
-                    require(date.isNotEmpty()) {
-                        "There must be at least one date."
-                    }
-
-                    val formatted = date.joinToString(",") { dateTimeFormatter.format(it) }
-                    return DT(formatted)
+        data class DT(val dates: List<GameDate>) : GameInfo() {
+            constructor(vararg date: GameDate) : this(date.toList())
+            init {
+                require(dates.isNotEmpty()) {
+                    "The game dates must not be empty"
                 }
             }
         }
@@ -195,6 +156,17 @@ enum class SgfDouble {
     Emphasized
 }
 
+sealed class GameResult {
+    object Draw : GameResult()
+    object Unknown : GameResult()
+    object Suspended : GameResult()
+    data class Time(val winner: SgfColor) : GameResult()
+    data class Forfeit(val winner: SgfColor) : GameResult()
+    data class Resignation(val winner: SgfColor) : GameResult()
+    data class Score(val winner: SgfColor, val score: Double) : GameResult()
+    data class Wins(val winner: SgfColor) : GameResult()
+}
+
 enum class VariationStyle(internal val value: Int)
 
 enum class GameType(internal val value: Int) {
@@ -238,4 +210,35 @@ enum class GameType(internal val value: Int) {
     Tamsk(38),
     Gipf(39),
     Kropki(40);
+}
+
+sealed class GameDate {
+    data class YearAndMonth(val year: Int, val month: Int) : GameDate() {
+        init {
+            ChronoField.YEAR.checkValidValue(year.toLong())
+            ChronoField.MONTH_OF_YEAR.checkValidValue(month.toLong())
+        }
+    }
+
+    data class Year(val year: Int) : GameDate() {
+        init {
+            ChronoField.YEAR.checkValidValue(year.toLong())
+        }
+    }
+
+    data class Date(val year: Int, val month: Int, val day: Int) : GameDate() {
+        init {
+            ChronoField.YEAR.checkValidValue(year.toLong())
+            ChronoField.MONTH_OF_YEAR.checkValidValue(month.toLong())
+            ChronoField.DAY_OF_MONTH.checkValidValue(day.toLong())
+        }
+
+        constructor(date: LocalDate) : this(date.year, date.monthValue, date.dayOfMonth)
+    }
+
+    companion object {
+        fun of(year: Int) = Year(year)
+        fun of(year: Int, month: Int) = YearAndMonth(year, month)
+        fun of(year: Int, month: Int, day: Int) = Date(year, month, day)
+    }
 }

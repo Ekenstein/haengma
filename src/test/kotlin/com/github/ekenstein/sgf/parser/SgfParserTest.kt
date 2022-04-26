@@ -1,7 +1,10 @@
 package com.github.ekenstein.sgf.parser
 
+import com.github.ekenstein.sgf.GameDate
+import com.github.ekenstein.sgf.GameResult
 import com.github.ekenstein.sgf.GameType
 import com.github.ekenstein.sgf.SgfCollection
+import com.github.ekenstein.sgf.SgfColor
 import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.SgfProperty
 import com.github.ekenstein.sgf.sgf
@@ -12,6 +15,7 @@ import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import java.nio.charset.Charset
 import kotlin.test.assertEquals
 
 class SgfParserTest {
@@ -189,12 +193,11 @@ class SgfParserTest {
         @ParameterizedTest
         @CsvSource(
             "(;CA[UTF-8]), UTF-8",
-            "(;CA[ISO-8859-1]), ISO-8859-1",
-            "(;CA[foobar]), foobar",
+            "(;CA[ISO-8859-1]), ISO-8859-1"
         )
         fun `CA parses to the charset`(sgf: String, charset: String) {
             val collection = SgfCollection.from(sgf)
-            val expected = sgf { tree { node { property(SgfProperty.Root.CA(charset)) } } }
+            val expected = sgf { tree { node { property(SgfProperty.Root.CA(Charset.forName(charset))) } } }
             assertEquals(expected, collection)
         }
     }
@@ -442,6 +445,161 @@ class SgfParserTest {
             }
 
             assertEquals(expected, collection)
+        }
+    }
+
+    @Nested
+    inner class `game info properties` {
+        @Test
+        fun `RE contains the game result`() {
+            assertAll(
+                {
+                    val sgf = "(;RE[B+0.5])"
+                    val actual = SgfCollection.from(sgf)
+                    val expected = sgf {
+                        tree {
+                            node {
+                                property(SgfProperty.GameInfo.RE(GameResult.Score(SgfColor.Black, 0.5)))
+                            }
+                        }
+                    }
+                    assertEquals(expected, actual)
+                },
+                {
+                    val sgf = "(;RE[W+0.5])"
+                    val actual = SgfCollection.from(sgf)
+                    val expected = sgf {
+                        tree {
+                            node {
+                                property(SgfProperty.GameInfo.RE(GameResult.Score(SgfColor.White, 0.5)))
+                            }
+                        }
+                    }
+                    assertEquals(expected, actual)
+                },
+                {
+                    val sgf = "(;RE[W+5])"
+                    val actual = SgfCollection.from(sgf)
+                    val expected = sgf {
+                        tree {
+                            node {
+                                property(SgfProperty.GameInfo.RE(GameResult.Score(SgfColor.White, 5.0)))
+                            }
+                        }
+                    }
+                    assertEquals(expected, actual)
+                },
+                {
+                    val sgf = "(;RE[0])"
+                    val actual = SgfCollection.from(sgf)
+                    val expected = sgf {
+                        tree {
+                            node {
+                                property(SgfProperty.GameInfo.RE(GameResult.Draw))
+                            }
+                        }
+                    }
+                    assertEquals(expected, actual)
+                }
+            )
+        }
+
+        @Test
+        fun `DT contains local dates`() {
+            assertAll(
+                {
+                    val sgf = "(;DT[2022-04-20])"
+                    val actual = SgfCollection.from(sgf)
+                    val expected = sgf {
+                        tree {
+                            node {
+                                property(SgfProperty.GameInfo.DT(listOf(GameDate.of(2022, 4, 20))))
+                            }
+                        }
+                    }
+                    assertEquals(expected, actual)
+                },
+                {
+                    val sgf = "(;DT[2022-04-20,21])"
+                    val actual = SgfCollection.from(sgf)
+                    val expected = sgf {
+                        tree {
+                            node {
+                                property(
+                                    SgfProperty.GameInfo.DT(
+                                        listOf(
+                                            GameDate.of(2022, 4, 20),
+                                            GameDate.of(2022, 4, 21)
+                                        )
+                                    )
+                                )
+                            }
+                        }
+                    }
+                    assertEquals(expected, actual)
+                },
+                {
+                    val sgf = "(;DT[2022-04-20,21,2023-05-06])"
+                    val actual = SgfCollection.from(sgf)
+                    val expected = sgf {
+                        tree {
+                            node {
+                                property(
+                                    SgfProperty.GameInfo.DT(
+                                        listOf(
+                                            GameDate.of(2022, 4, 20),
+                                            GameDate.of(2022, 4, 21),
+                                            GameDate.of(2023, 5, 6)
+                                        )
+                                    )
+                                )
+                            }
+                        }
+                    }
+                    assertEquals(expected, actual)
+                },
+                {
+                    val sgf = "(;DT[2022-04-20,05-06,07])"
+                    val actual = SgfCollection.from(sgf)
+                    val expected = sgf {
+                        tree {
+                            node {
+                                property(
+                                    SgfProperty.GameInfo.DT(
+                                        listOf(
+                                            GameDate.of(2022, 4, 20),
+                                            GameDate.of(2022, 5, 6),
+                                            GameDate.of(2022, 5, 7)
+                                        )
+                                    )
+                                )
+                            }
+                        }
+                    }
+                    assertEquals(expected, actual)
+                },
+                {
+                    val sgf = "(;DT[2022-04-06,07,06-01,06])"
+                    val actual = SgfCollection.from(sgf)
+                    val expected = sgf {
+                        tree {
+                            node {
+                                property(
+                                    SgfProperty.GameInfo.DT(
+                                        listOf(
+                                            GameDate.of(2022, 4, 6),
+                                            GameDate.of(2022, 4, 7),
+                                            GameDate.of(2022, 6, 1),
+                                            GameDate.of(2022, 6, 6)
+                                        )
+                                    )
+                                )
+                            }
+                        }
+                    }
+                    assertEquals(expected, actual)
+                },
+            )
         }
     }
 
