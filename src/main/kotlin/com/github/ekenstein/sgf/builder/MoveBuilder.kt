@@ -5,7 +5,7 @@ import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfProperty
 import com.github.ekenstein.sgf.extensions.addProperty
 
-@SgfMarker
+@SgfDslMarker
 interface MoveBuilder : NodeBuilder {
     fun moveNumber(value: Int)
     fun stone(color: SgfColor, x: Int, y: Int)

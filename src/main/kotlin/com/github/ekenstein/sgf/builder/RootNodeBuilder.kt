@@ -7,7 +7,7 @@ import com.github.ekenstein.sgf.extensions.addProperty
 import com.github.ekenstein.sgf.extensions.plus
 import java.nio.charset.Charset
 
-@SgfMarker
+@SgfDslMarker
 interface RootNodeBuilder : NodeBuilder {
     fun size(size: Int)
     fun size(width: Int, height: Int)
@@ -19,9 +19,7 @@ interface RootNodeBuilder : NodeBuilder {
     fun gameInfo(block: GameInfoNodeBuilder.() -> Unit)
 }
 
-internal class DefaultRootNodeBuilder : RootNodeBuilder {
-    var node = SgfNode.empty
-        private set
+internal class DefaultRootNodeBuilder(var node: SgfNode) : RootNodeBuilder {
 
     override fun size(size: Int) {
         node = node.addProperty(SgfProperty.Root.SZ(size))
@@ -40,7 +38,7 @@ internal class DefaultRootNodeBuilder : RootNodeBuilder {
     }
 
     override fun charset(value: Charset) {
-        node = node.addProperty(SgfProperty.Root.CA(value.name()))
+        node = node.addProperty(SgfProperty.Root.CA(value))
     }
 
     override fun application(name: String, version: String) {
@@ -48,7 +46,7 @@ internal class DefaultRootNodeBuilder : RootNodeBuilder {
     }
 
     override fun gameInfo(block: GameInfoNodeBuilder.() -> Unit) {
-        val builder = DefaultGameInfoNodeBuilder()
+        val builder = DefaultGameInfoNodeBuilder(node)
         builder.block()
         node += builder.node
     }

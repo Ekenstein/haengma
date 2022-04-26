@@ -1,29 +1,28 @@
 package com.github.ekenstein.sgf.builder
 
 import com.github.ekenstein.sgf.SgfGameTree
+import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.extensions.addProperty
 
-@SgfMarker
+@SgfDslMarker
 interface SgfBuilder {
     fun root(block: RootNodeBuilder.() -> Unit)
     fun move(block: MoveBuilder.() -> Unit)
     fun variation(block: GameTreeBuilder.() -> Unit)
 }
 
-private class DefaultSgfBuilder : SgfBuilder {
-    var gameTree = SgfGameTree.empty
-        private set
-
+private class DefaultSgfBuilder(var gameTree: SgfGameTree) : SgfBuilder {
     override fun root(block: RootNodeBuilder.() -> Unit) {
-        val builder = DefaultRootNodeBuilder()
+        val rootNode = gameTree.sequence.firstOrNull() ?: SgfNode.empty
+        val builder = DefaultRootNodeBuilder(rootNode)
         builder.block()
-        builder.node.properties.fold(gameTree) { gameTree, property -> gameTree.addProperty(property) }
+        gameTree = builder.node.properties.fold(gameTree) { gameTree, property -> gameTree.addProperty(property) }
     }
 
     override fun move(block: MoveBuilder.() -> Unit) {
         val builder = DefaultMoveBuilder()
         builder.block()
-        builder.node.properties.fold(gameTree) { gameTree, property -> gameTree.addProperty(property) }
+        gameTree = builder.node.properties.fold(gameTree) { gameTree, property -> gameTree.addProperty(property) }
     }
 
     override fun variation(block: GameTreeBuilder.() -> Unit) {
@@ -35,8 +34,10 @@ private class DefaultSgfBuilder : SgfBuilder {
     }
 }
 
-fun sgf(block: SgfBuilder.() -> Unit): SgfGameTree {
-    val builder = DefaultSgfBuilder()
+fun sgf(block: SgfBuilder.() -> Unit) = sgf(SgfGameTree.empty, block)
+
+fun sgf(sgfGameTree: SgfGameTree, block: SgfBuilder.() -> Unit): SgfGameTree {
+    val builder = DefaultSgfBuilder(sgfGameTree)
     builder.block()
     return builder.gameTree
 }

@@ -32,16 +32,16 @@ internal val compressedPointParser = ValueParser { marker, value ->
     }
 
     pointOrRectangle.mapLeft { setOf(it) }.mapRight { (topLeft, bottomRight) ->
-        Rectangle(topLeft, bottomRight).points()
+        val rectangle = Rectangle(topLeft.x to topLeft.y, bottomRight.x to bottomRight.y)
+        val points = rectangle.points()
+        points.map { (x, y) -> SgfPoint(x, y) }.toSet()
     }.match()
 }
 
-private data class Rectangle(val topLeft: SgfPoint, val bottomRight: SgfPoint) {
-    fun points(): Set<SgfPoint> {
-        return (topLeft.x..bottomRight.x).flatMap { x ->
-            (topLeft.y..bottomRight.y).map { y ->
-                SgfPoint(x, y)
-            }
-        }.toSet()
-    }
+private data class Rectangle(val topLeft: Pair<Int, Int>, val bottomRight: Pair<Int, Int>) {
+    fun points() = (topLeft.first..bottomRight.first).flatMap { x ->
+        (topLeft.second..bottomRight.second).map { y ->
+            x to y
+        }
+    }.toSet()
 }

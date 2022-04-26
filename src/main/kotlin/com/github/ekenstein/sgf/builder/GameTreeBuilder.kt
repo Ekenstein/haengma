@@ -3,7 +3,7 @@ package com.github.ekenstein.sgf.builder
 import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.extensions.addProperty
 
-@SgfMarker
+@SgfDslMarker
 interface GameTreeBuilder {
     fun move(block: MoveBuilder.() -> Unit)
     fun variation(block: GameTreeBuilder.() -> Unit)
