@@ -3,6 +3,8 @@ package com.github.ekenstein.sgf
 import java.nio.charset.Charset
 import java.time.LocalDate
 import java.time.temporal.ChronoField
+import java.util.Calendar
+import java.util.GregorianCalendar
 
 data class SgfCollection(val trees: List<SgfGameTree>) {
     companion object
@@ -64,14 +66,14 @@ sealed class SgfProperty {
 
     sealed class Markup : SgfProperty() {
         data class AR(val points: List<Pair<SgfPoint, SgfPoint>>) : Markup()
-        data class CR(val points: List<SgfPoint>) : Markup()
+        data class CR(val points: Set<SgfPoint>) : Markup()
         data class LB(val label: List<Pair<SgfPoint, String>>) : Markup()
         data class LN(val line: List<Pair<SgfPoint, SgfPoint>>) : Markup()
-        data class MA(val points: List<SgfPoint>) : Markup()
-        data class SL(val selected: List<SgfPoint>) : Markup()
-        data class SQ(val points: List<SgfPoint>) : Markup()
-        data class TR(val points: List<SgfPoint>) : Markup()
-        data class DD(val points: List<SgfPoint>) : Markup()
+        data class MA(val points: Set<SgfPoint>) : Markup()
+        data class SL(val selected: Set<SgfPoint>) : Markup()
+        data class SQ(val points: Set<SgfPoint>) : Markup()
+        data class TR(val points: Set<SgfPoint>) : Markup()
+        data class DD(val points: Set<SgfPoint>) : Markup()
     }
 
     sealed class Root : SgfProperty() {
@@ -131,7 +133,7 @@ sealed class SgfProperty {
             constructor(diagramName: String, flag: Int) : this(flag to diagramName)
         }
         data class PM(val printMoveMode: Int) : Misc()
-        data class VW(val points: List<SgfPoint>) : Misc()
+        data class VW(val points: Set<SgfPoint>) : Misc()
     }
 
     data class Private(val identifier: String, val values: List<String>) : SgfProperty()
@@ -166,8 +168,6 @@ sealed class GameResult {
     data class Score(val winner: SgfColor, val score: Double) : GameResult()
     data class Wins(val winner: SgfColor) : GameResult()
 }
-
-enum class VariationStyle(internal val value: Int)
 
 enum class GameType(internal val value: Int) {
     Go(1),
@@ -230,7 +230,12 @@ sealed class GameDate {
         init {
             ChronoField.YEAR.checkValidValue(year.toLong())
             ChronoField.MONTH_OF_YEAR.checkValidValue(month.toLong())
-            ChronoField.DAY_OF_MONTH.checkValidValue(day.toLong())
+
+            val calendar = GregorianCalendar(year, month, 1)
+            val daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+            require(day in 1..daysInMonth) {
+                "The day in month for the year $year and month $month must be within the range 1-$daysInMonth"
+            }
         }
 
         constructor(date: LocalDate) : this(date.year, date.monthValue, date.dayOfMonth)
