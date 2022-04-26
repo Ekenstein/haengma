@@ -1,4 +1,4 @@
-package com.github.ekenstein.sgf.serialization.serializers
+package com.github.ekenstein.sgf.serialization.valueserializers
 
 internal fun composedSerializer(left: ValueSerializer, right: ValueSerializer) = ValueSerializer { appendable ->
     left.serialize(appendable)

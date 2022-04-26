@@ -1,4 +1,4 @@
-package com.github.ekenstein.sgf.serialization.serializers
+package com.github.ekenstein.sgf.serialization.valueserializers
 
 import com.github.ekenstein.sgf.SgfDouble
 

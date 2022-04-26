@@ -1,7 +1,8 @@
-package com.github.ekenstein.sgf.parser
+package com.github.ekenstein.sgf.parser.valueparsers
 
 import com.github.ekenstein.sgf.GameResult
 import com.github.ekenstein.sgf.SgfColor
+import com.github.ekenstein.sgf.parser.throwParseException
 
 internal val gameResultParser = ValueParser { marker, value ->
     val parts = value.split("+")

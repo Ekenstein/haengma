@@ -1,4 +1,6 @@
-package com.github.ekenstein.sgf.parser
+package com.github.ekenstein.sgf.parser.valueparsers
+
+import com.github.ekenstein.sgf.parser.throwParseException
 
 internal val realParser = ValueParser { marker, value ->
     value.toDoubleOrNull()

@@ -3,12 +3,23 @@ package com.github.ekenstein.sgf.parser
 import com.github.ekenstein.sgf.GameType
 import com.github.ekenstein.sgf.Move
 import com.github.ekenstein.sgf.SgfCollection
-import com.github.ekenstein.sgf.SgfColor
-import com.github.ekenstein.sgf.SgfDouble
 import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfNode
-import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.SgfProperty
+import com.github.ekenstein.sgf.parser.valueparsers.ValueParser
+import com.github.ekenstein.sgf.parser.valueparsers.charsetParser
+import com.github.ekenstein.sgf.parser.valueparsers.colorParser
+import com.github.ekenstein.sgf.parser.valueparsers.composed
+import com.github.ekenstein.sgf.parser.valueparsers.compressedPointParser
+import com.github.ekenstein.sgf.parser.valueparsers.dateParser
+import com.github.ekenstein.sgf.parser.valueparsers.doubleParser
+import com.github.ekenstein.sgf.parser.valueparsers.gameResultParser
+import com.github.ekenstein.sgf.parser.valueparsers.moveParser
+import com.github.ekenstein.sgf.parser.valueparsers.numberParser
+import com.github.ekenstein.sgf.parser.valueparsers.pointParser
+import com.github.ekenstein.sgf.parser.valueparsers.realParser
+import com.github.ekenstein.sgf.parser.valueparsers.simpleTextParser
+import com.github.ekenstein.sgf.parser.valueparsers.textParser
 import org.antlr.v4.runtime.BaseErrorListener
 import org.antlr.v4.runtime.CharStream
 import org.antlr.v4.runtime.CharStreams
@@ -119,9 +130,9 @@ private fun SgfParser.MoveContext.extract(): SgfProperty.Move = when (this) {
 }
 
 private fun SgfParser.SetupContext.extract(): SgfProperty.Setup = when (this) {
-    is SgfParser.AddEmptyContext -> SgfProperty.Setup.AE(VALUE().map { it.asPoint() }.toSet())
-    is SgfParser.AddBlackContext -> SgfProperty.Setup.AB(VALUE().map { it.asPoint() }.toSet())
-    is SgfParser.AddWhiteContext -> SgfProperty.Setup.AW(VALUE().map { it.asPoint() }.toSet())
+    is SgfParser.AddEmptyContext -> SgfProperty.Setup.AE(VALUE().flatMap { it.asCompressedPoint() }.toSet())
+    is SgfParser.AddBlackContext -> SgfProperty.Setup.AB(VALUE().flatMap { it.asCompressedPoint() }.toSet())
+    is SgfParser.AddWhiteContext -> SgfProperty.Setup.AW(VALUE().flatMap { it.asCompressedPoint() }.toSet())
     is SgfParser.PlayerToPlayContext -> SgfProperty.Setup.PL(VALUE().asColor(true))
     else -> throw SgfParseException("Unrecognized setup property $text", toMarker())
 }
@@ -148,15 +159,17 @@ private fun SgfParser.MoveAnnotationContext.extract(): SgfProperty.MoveAnnotatio
     }
 
 private fun SgfParser.MarkupContext.extract(): SgfProperty.Markup = when (this) {
-    is SgfParser.CircleContext -> SgfProperty.Markup.CR(VALUE().map { it.asPoint() })
+    is SgfParser.CircleContext -> SgfProperty.Markup.CR(VALUE().flatMap { it.asCompressedPoint() }.toSet())
     is SgfParser.ArrowContext -> SgfProperty.Markup.AR(VALUE().map { it.asComposed(pointParser, pointParser) })
     is SgfParser.LabelContext -> SgfProperty.Markup.LB(VALUE().map { it.asComposed(pointParser, simpleTextParser) })
     is SgfParser.LineContext -> SgfProperty.Markup.LN(VALUE().map { it.asComposed(pointParser, pointParser) })
-    is SgfParser.MarkContext -> SgfProperty.Markup.MA(VALUE().map { it.asPoint() })
-    is SgfParser.SelectedContext -> SgfProperty.Markup.SL(VALUE().map { it.asPoint() })
-    is SgfParser.SquareContext -> SgfProperty.Markup.SQ(VALUE().map { it.asPoint() })
-    is SgfParser.TriangleContext -> SgfProperty.Markup.TR(VALUE().map { it.asPoint() })
-    is SgfParser.DimPointsContext -> SgfProperty.Markup.DD(VALUE()?.map { it.asPoint() } ?: emptyList())
+    is SgfParser.MarkContext -> SgfProperty.Markup.MA(VALUE().flatMap { it.asCompressedPoint() }.toSet())
+    is SgfParser.SelectedContext -> SgfProperty.Markup.SL(VALUE().flatMap { it.asCompressedPoint() }.toSet())
+    is SgfParser.SquareContext -> SgfProperty.Markup.SQ(VALUE().flatMap { it.asCompressedPoint() }.toSet())
+    is SgfParser.TriangleContext -> SgfProperty.Markup.TR(VALUE().flatMap { it.asCompressedPoint() }.toSet())
+    is SgfParser.DimPointsContext -> SgfProperty.Markup.DD(
+        VALUE()?.flatMap { it.asCompressedPoint() }?.toSet().orEmpty()
+    )
     else -> throw SgfParseException("Unrecognized markup property $text", toMarker())
 }
 
@@ -191,7 +204,7 @@ private fun SgfParser.RootContext.extract(): SgfProperty.Root = when (this) {
         }
         SgfProperty.Root.SZ(width, height)
     }
-    is SgfParser.CharsetContext -> SgfProperty.Root.CA(VALUE().asSimpleText())
+    is SgfParser.CharsetContext -> SgfProperty.Root.CA(VALUE().asCharset())
     is SgfParser.StyleContext -> SgfProperty.Root.ST(VALUE().asNumber(0..3))
     else -> throw SgfParseException("Unrecognized root property $text", toMarker())
 }
@@ -204,8 +217,8 @@ private fun SgfParser.GameInfoContext.extract(): SgfProperty.GameInfo = when (th
     is SgfParser.PlayerWhiteContext -> SgfProperty.GameInfo.PW(VALUE().asSimpleText())
     is SgfParser.WhiteRankContext -> SgfProperty.GameInfo.WR(VALUE().asSimpleText())
     is SgfParser.BlackRankContext -> SgfProperty.GameInfo.BR(VALUE().asSimpleText())
-    is SgfParser.DateContext -> SgfProperty.GameInfo.DT(VALUE().asSimpleText())
-    is SgfParser.ResultContext -> SgfProperty.GameInfo.RE(VALUE().asSimpleText())
+    is SgfParser.DateContext -> SgfProperty.GameInfo.DT(VALUE().asGameDates())
+    is SgfParser.ResultContext -> SgfProperty.GameInfo.RE(VALUE().asGameResult())
     is SgfParser.TimeLimitContext -> SgfProperty.GameInfo.TM(VALUE().asReal())
     is SgfParser.SourceContext -> SgfProperty.GameInfo.SO(VALUE().asSimpleText())
     is SgfParser.GameNameContext -> SgfProperty.GameInfo.GN(VALUE().asSimpleText())
@@ -234,7 +247,7 @@ private fun SgfParser.TimingContext.extract(): SgfProperty.Timing = when (this) 
 private fun SgfParser.MiscContext.extract(): SgfProperty.Misc = when (this) {
     is SgfParser.FigureContext -> SgfProperty.Misc.FG(VALUE()?.asComposed(numberParser(), simpleTextParser))
     is SgfParser.PrintMoveModeContext -> SgfProperty.Misc.PM(VALUE().asNumber())
-    is SgfParser.ViewContext -> SgfProperty.Misc.VW(VALUE().map { it.asPoint() })
+    is SgfParser.ViewContext -> SgfProperty.Misc.VW(VALUE().flatMap { it.asCompressedPoint() }.toSet())
     else -> throw SgfParseException("Unrecognized misc property $text", toMarker())
 }
 
@@ -249,132 +262,29 @@ private fun ParserRuleContext.toMarker(): Marker {
     )
 }
 
-private val escapedCharRegex = Regex("""\\([\\:\]])""")
-private val whitespaceExceptNewLineRegex = Regex("""[^\S\r\n]""")
-private val whitespaceExceptSpaceRegex = Regex("""[^\S ]+""")
-
-internal fun interface ValueParser<T> {
-    fun parse(marker: Marker, string: String): T
-}
-
-private fun <L, R> composed(
-    leftParser: ValueParser<L>,
-    rightParser: ValueParser<R>
-) = ValueParser { marker, value ->
-    val regex = Regex("""(?<=[^\\]):""")
-    val parts = value.split(regex)
-
-    if (parts.size != 2) {
-        marker.throwParseException("Expected a composed value, but got $value")
-    }
-
-    val (leftPart, rightPart) = parts
-
-    val left = leftParser.parse(
-        marker.copy(
-            endColumn = marker.endColumn - leftPart.length - 1
-        ),
-        leftPart
-    )
-
-    val right = rightParser.parse(
-        marker.copy(
-            startColumn = marker.startColumn + leftPart.length + 1,
-            endColumn = marker.endColumn - 1
-        ),
-        rightPart
-    )
-
-    left to right
-}
-
-internal val colorParser = ValueParser { marker, value ->
-    when (value) {
-        "W" -> SgfColor.White
-        "B" -> SgfColor.Black
-        else -> marker.throwParseException("Expected a color, but got $value")
-    }
-}
-
-internal val doubleParser = ValueParser { marker, value ->
-    when (value) {
-        "1" -> SgfDouble.Normal
-        "2" -> SgfDouble.Emphasized
-        else -> marker.throwParseException("Expected a double, but got $value")
-    }
-}
-
-internal val realParser = ValueParser { marker, value ->
-    value.toDoubleOrNull()
-        ?: marker.throwParseException("Expected a real value, but got $value")
-}
-
-internal fun numberParser(range: IntRange? = null) = ValueParser { marker, value ->
-    val number = value.toIntOrNull()
-        ?: marker.throwParseException("Expected a number, but got $value")
-
-    if (range != null && number !in range) {
-        marker.throwParseException("The number $number must be within the range ${range.first} - ${range.last}")
-    }
-
-    number
-}
-
-internal val simpleTextParser = ValueParser { _, value ->
-    value
-        .replace(escapedCharRegex, "$1")
-        .replace(whitespaceExceptSpaceRegex, " ")
-}
-internal val textParser = ValueParser { _, value ->
-    value
-        .replace(escapedCharRegex, "$1")
-        .replace(whitespaceExceptNewLineRegex, " ")
-}
-
-internal val pointParser = ValueParser { marker, value ->
-    fun fromCharToInt(char: Char): Int = when (char) {
-        in 'a'..'z' -> char - 'a' + 1
-        in 'A'..'Z' -> char - 'A' + 27
-        else -> marker.throwParseException("Expected a point, but got $value")
-    }
-
-    when (value.length) {
-        2 -> SgfPoint(
-            x = fromCharToInt(value[0]),
-            y = fromCharToInt(value[1])
-        )
-        else -> marker.throwParseException("Expected a point, but got $value")
-    }
-}
-
-internal val moveParser = ValueParser { marker, value ->
-    when (value.length) {
-        0 -> Move.Pass
-        2 -> Move.Stone(pointParser.parse(marker, value))
-        else -> marker.throwParseException("Expected a move, but got $value")
-    }
-}
-
-internal fun <L, R> TerminalNode.asComposed(left: ValueParser<L>, right: ValueParser<R>) = composed(left, right)
+private fun <L, R> TerminalNode.asComposed(left: ValueParser<L>, right: ValueParser<R>) = composed(left, right)
     .parse(symbol.toMarker(), textStrippedFromBrackets)
 
-internal fun TerminalNode.asColor(stripBrackets: Boolean) = colorParser.parse(
+private fun TerminalNode.asColor(stripBrackets: Boolean) = colorParser.parse(
     symbol.toMarker(stripBrackets),
     if (stripBrackets) textStrippedFromBrackets else text
 )
 
-internal fun TerminalNode.asDouble() = doubleParser.parse(symbol.toMarker(), textStrippedFromBrackets)
-internal fun TerminalNode.asNumber(range: IntRange? = null) = numberParser(range).parse(
+private fun TerminalNode.asDouble() = doubleParser.parse(symbol.toMarker(), textStrippedFromBrackets)
+private fun TerminalNode.asNumber(range: IntRange? = null) = numberParser(range).parse(
     symbol.toMarker(),
     textStrippedFromBrackets
 )
-internal fun TerminalNode.asReal() = realParser.parse(symbol.toMarker(), textStrippedFromBrackets)
-internal fun TerminalNode.asSimpleText() = simpleTextParser.parse(symbol.toMarker(), textStrippedFromBrackets)
-internal fun TerminalNode.asText() = textParser.parse(symbol.toMarker(), textStrippedFromBrackets)
-internal fun TerminalNode.asMove() = moveParser.parse(symbol.toMarker(), textStrippedFromBrackets)
-internal fun TerminalNode.asPoint() = pointParser.parse(symbol.toMarker(), textStrippedFromBrackets)
+private fun TerminalNode.asReal() = realParser.parse(symbol.toMarker(), textStrippedFromBrackets)
+private fun TerminalNode.asSimpleText() = simpleTextParser.parse(symbol.toMarker(), textStrippedFromBrackets)
+private fun TerminalNode.asText() = textParser.parse(symbol.toMarker(), textStrippedFromBrackets)
+private fun TerminalNode.asMove() = moveParser.parse(symbol.toMarker(), textStrippedFromBrackets)
+private fun TerminalNode.asCompressedPoint() = compressedPointParser.parse(symbol.toMarker(), textStrippedFromBrackets)
+private fun TerminalNode.asGameResult() = gameResultParser.parse(symbol.toMarker(), textStrippedFromBrackets)
+private fun TerminalNode.asGameDates() = dateParser.parse(symbol.toMarker(), textStrippedFromBrackets)
+private fun TerminalNode.asCharset() = charsetParser.parse(symbol.toMarker(), textStrippedFromBrackets)
 
-internal val TerminalNode.textStrippedFromBrackets
+private val TerminalNode.textStrippedFromBrackets
     get() = stripBrackets(text)
 
 private fun stripBrackets(string: String) = string.substring(1, string.length - 1)
@@ -393,5 +303,3 @@ private fun Token.toMarker(strippedBrackets: Boolean = true): Marker {
         endColumn = startColumn + text.length - 2
     )
 }
-
-private fun Marker.throwParseException(message: String): Nothing = throw SgfParseException(message, this)

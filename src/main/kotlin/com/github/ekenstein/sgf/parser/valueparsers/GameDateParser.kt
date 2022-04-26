@@ -1,6 +1,8 @@
-package com.github.ekenstein.sgf.parser
+package com.github.ekenstein.sgf.parser.valueparsers
 
 import com.github.ekenstein.sgf.GameDate
+import com.github.ekenstein.sgf.parser.Marker
+import com.github.ekenstein.sgf.parser.throwParseException
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException

@@ -1,6 +1,7 @@
-package com.github.ekenstein.sgf.parser
+package com.github.ekenstein.sgf.parser.valueparsers
 
 import com.github.ekenstein.sgf.SgfDouble
+import com.github.ekenstein.sgf.parser.throwParseException
 
 internal val doubleParser = ValueParser { marker, value ->
     when (value) {

@@ -1,4 +1,4 @@
-package com.github.ekenstein.sgf.parser
+package com.github.ekenstein.sgf.parser.valueparsers
 
 private val escapedCharRegex = Regex("""\\([\\:\]])""")
 private val whitespaceExceptNewLineRegex = Regex("""[^\S\r\n]""")

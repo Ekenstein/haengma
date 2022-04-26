@@ -1,5 +1,6 @@
-package com.github.ekenstein.sgf.parser
+package com.github.ekenstein.sgf.parser.valueparsers
 
+import com.github.ekenstein.sgf.parser.throwParseException
 import java.nio.charset.Charset
 import java.nio.charset.UnsupportedCharsetException
 

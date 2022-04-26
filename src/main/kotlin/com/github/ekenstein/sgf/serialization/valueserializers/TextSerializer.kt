@@ -1,4 +1,4 @@
-package com.github.ekenstein.sgf.serialization.serializers
+package com.github.ekenstein.sgf.serialization.valueserializers
 
 private val whitespaceExceptNewLineRegex = Regex("""[^\S\r\n]""")
 private val whitespaceExceptSpaceRegex = Regex("""[^\S ]+""")
