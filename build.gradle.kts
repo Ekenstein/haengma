@@ -8,7 +8,7 @@ val kotlinVersion by extra("1.6.20")
 val junitVersion by extra("5.8.2")
 
 plugins {
-    kotlin("jvm") version "1.6.20"
+    kotlin("jvm") version "1.6.21"
     id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
     id("com.github.ben-manes.versions") version "0.42.0"
     antlr
@@ -16,7 +16,7 @@ plugins {
 }
 
 group = "com.github.ekenstein"
-version = "0.1.0"
+version = "0.1.1"
 val kotlinJvmTarget = "1.8"
 
 repositories {
@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin", "kotlin-stdlib-jdk8", kotlinVersion)
+    implementation(kotlin("stdlib"))
     antlr("org.antlr", "antlr4", "4.10.1")
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter", "junit-jupiter-params", junitVersion)
@@ -50,6 +50,11 @@ tasks {
         outputDirectory = Paths
             .get("build", "generated-src", "antlr", "main", "com", "github", "ekenstein", "sgf", "parser")
             .toFile()
+        mustRunAfter(ktlintMainSourceSetCheck)
+    }
+
+    generateTestGrammarSource {
+        mustRunAfter(ktlintTestSourceSetCheck)
     }
 
     compileKotlin {
