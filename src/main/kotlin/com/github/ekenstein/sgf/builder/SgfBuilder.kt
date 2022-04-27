@@ -13,7 +13,7 @@ interface SgfBuilder {
 
 private class DefaultSgfBuilder(var gameTree: SgfGameTree) : SgfBuilder {
     override fun root(block: RootNodeBuilder.() -> Unit) {
-        val rootNode = gameTree.sequence.firstOrNull() ?: SgfNode.empty
+        val rootNode = gameTree.sequence.firstOrNull() ?: SgfNode()
         val builder = DefaultRootNodeBuilder(rootNode)
         builder.block()
         gameTree = builder.node.properties.fold(gameTree) { gameTree, property -> gameTree.addProperty(property) }

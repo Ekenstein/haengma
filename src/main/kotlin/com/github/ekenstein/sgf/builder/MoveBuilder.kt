@@ -13,7 +13,7 @@ interface MoveBuilder : NodeBuilder {
 }
 
 internal class DefaultMoveBuilder : MoveBuilder {
-    var node = SgfNode.empty
+    var node = SgfNode()
         private set
 
     override fun moveNumber(value: Int) {

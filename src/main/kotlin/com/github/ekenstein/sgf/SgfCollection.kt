@@ -16,9 +16,7 @@ data class SgfGameTree(val sequence: List<SgfNode>, val trees: List<SgfGameTree>
     }
 }
 data class SgfNode(val properties: Set<SgfProperty>) {
-    companion object {
-        val empty = SgfNode(emptySet())
-    }
+    constructor(vararg property: SgfProperty) : this(property.toSet())
 }
 
 sealed class SgfProperty {
