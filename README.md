@@ -20,31 +20,42 @@ import com.github.ekenstein.sgf.encodeToString
 import com.github.ekenstein.sgf.extensions.addProperty
 
 fun main() {
-    val sgf = Sgf { 
-        isLenient = true /* if you wish to ignore malformed property values */
-    }
     // you can retrieve a collection by decoding a file
-    val collection: SgfCollection = sgf.decode(Path.of("game.sgf"))
+    val collection: SgfCollection = SgfCollection.from(Path.of("game.sgf"))  {
+        preserveUnknownProperties = true // If you wish to ignore or preserve unknown properties
+    }
     
     // ... or a string
-    val collection: SgfCollection = sgf.decode("(;B[aa])")
+    val collection: SgfCollection = SgfCollection.from("(;AB[ac:ic];B[jj])") {
+        preserveUnknownProperties = true // If you wish to ignore or preserve unknown properties
+    }
     
     // ... or an input stream
     val inputStream: InputStream = Path.of("game.sgf").toFile().inputStream()
-    val collection: SgfCollection = sgf.decode(inputStream)
+    val collection: SgfCollection = SgfCollection.from(inputStream) {
+        preserveUnknownProperties = true // If you wish to ignore or preserve unknown properties
+    }
     
-    // or you can create your own game tree ...
+    // ... or you can create your own game tree
     val tree: SgfGameTree = SgfGameTree.empty
         .addProperty(SgfProperty.Root.GM(GameType.Go))
         .addProperty(SgfProperty.Root.SZ(19))
+        .addProperty(SgfProperty.GameInfo.DT(GameDate.of(2022, 4, 27), GameDate.of(2022, 4, 28)))
         .addProperty(SgfProperty.GameInfo.KM(6.5))
         .addProperty(SgfProperty.Move.B(4, 4))
         .addProperty(SgfProperty.Move.W(16, 4))
     
-    // which can be encoded to SGF ...
-    val string: String = sgf.encodeToString(tree)
+    // ... which can be encoded to SGF
+    val string: String = tree.encodeToString(tree)
     
-    // which prints to (;GM[1]SZ[19]KM[6.5];B[dd];W[pd])
+    // ... which prints to (;GM[1]SZ[19]DT[2022-04-27,28]KM[6.5];B[dd];W[pd])
     println(string)
+    
+    // ... or by writing directly to an output stream
+    val file = Path.of("game.sgf").toFile()
+    file.createNewFile()
+    file.outputStream().use { 
+        tree.encode(it)
+    }
 }
 ```
