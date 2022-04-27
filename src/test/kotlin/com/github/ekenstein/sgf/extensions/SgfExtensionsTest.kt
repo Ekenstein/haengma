@@ -2,6 +2,7 @@ package com.github.ekenstein.sgf.extensions
 
 import com.github.ekenstein.sgf.GameType
 import com.github.ekenstein.sgf.Move
+import com.github.ekenstein.sgf.SgfDouble
 import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfPoint
@@ -244,5 +245,93 @@ class SgfExtensionsTest {
         }
 
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `UC must not be mixed with GB, GW, DM`() {
+        val initial = SgfGameTree.empty.addProperty(SgfProperty.NodeAnnotation.UC(SgfDouble.Normal))
+        assertAll(
+            {
+                val actual = initial.addProperty(SgfProperty.NodeAnnotation.GB(SgfDouble.Normal))
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.NodeAnnotation.GB(SgfDouble.Normal))
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = initial.addProperty(SgfProperty.NodeAnnotation.GW(SgfDouble.Normal))
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.NodeAnnotation.GW(SgfDouble.Normal))
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = initial.addProperty(SgfProperty.NodeAnnotation.DM(SgfDouble.Normal))
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.NodeAnnotation.DM(SgfDouble.Normal))
+                assertEquals(expected, actual)
+            }
+        )
+    }
+
+    @Test
+    fun `DM must not be mixed with GB, GW, UC`() {
+        val initial = SgfGameTree.empty.addProperty(SgfProperty.NodeAnnotation.DM(SgfDouble.Normal))
+        assertAll(
+            {
+                val actual = initial.addProperty(SgfProperty.NodeAnnotation.GB(SgfDouble.Normal))
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.NodeAnnotation.GB(SgfDouble.Normal))
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = initial.addProperty(SgfProperty.NodeAnnotation.GW(SgfDouble.Normal))
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.NodeAnnotation.GW(SgfDouble.Normal))
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = initial.addProperty(SgfProperty.NodeAnnotation.UC(SgfDouble.Normal))
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.NodeAnnotation.UC(SgfDouble.Normal))
+                assertEquals(expected, actual)
+            }
+        )
+    }
+
+    @Test
+    fun `GB must not be mixed with DM, GW, UC`() {
+        val initial = SgfGameTree.empty.addProperty(SgfProperty.NodeAnnotation.DM(SgfDouble.Normal))
+        assertAll(
+            {
+                val actual = initial.addProperty(SgfProperty.NodeAnnotation.DM(SgfDouble.Normal))
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.NodeAnnotation.DM(SgfDouble.Normal))
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = initial.addProperty(SgfProperty.NodeAnnotation.GW(SgfDouble.Normal))
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.NodeAnnotation.GW(SgfDouble.Normal))
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = initial.addProperty(SgfProperty.NodeAnnotation.UC(SgfDouble.Normal))
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.NodeAnnotation.UC(SgfDouble.Normal))
+                assertEquals(expected, actual)
+            }
+        )
+    }
+
+    @Test
+    fun `GW must not be mixed with DM, GB, UC`() {
+        val initial = SgfGameTree.empty.addProperty(SgfProperty.NodeAnnotation.DM(SgfDouble.Normal))
+        assertAll(
+            {
+                val actual = initial.addProperty(SgfProperty.NodeAnnotation.DM(SgfDouble.Normal))
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.NodeAnnotation.DM(SgfDouble.Normal))
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = initial.addProperty(SgfProperty.NodeAnnotation.GB(SgfDouble.Normal))
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.NodeAnnotation.GB(SgfDouble.Normal))
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = initial.addProperty(SgfProperty.NodeAnnotation.UC(SgfDouble.Normal))
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.NodeAnnotation.UC(SgfDouble.Normal))
+                assertEquals(expected, actual)
+            }
+        )
     }
 }

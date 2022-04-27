@@ -25,21 +25,14 @@ inline fun <reified T : SgfProperty> SgfNode.removeProperty() = copy(
     properties = properties.filter { it::class != T::class }.toSet()
 )
 
-private inline fun <reified T : SgfProperty> SgfGameTree.addPropertyToRootNode(property: T): SgfGameTree {
-    val rootNode = sequence.firstOrNull()?.takeIf { !it.hasMoveProperties() }
-    return if (rootNode != null) {
-        copy(
-            sequence = listOf(rootNode.addProperty(property)) + sequence.drop(1)
-        )
-    } else {
-        copy(
-            sequence = listOf(SgfNode(setOf(property))) + sequence
-        )
+private inline fun <reified T : SgfProperty> SgfGameTree.addPropertyToRootNode(property: T) =
+    when (val rootNode = sequence.firstOrNull()?.takeIf { !it.hasMoveProperties() }) {
+        null -> copy(sequence = listOf(SgfNode(setOf(property))) + sequence)
+        else -> copy(sequence = listOf(rootNode.addProperty(property)) + sequence.drop(1))
     }
-}
 
 private inline fun <reified T : SgfProperty> SgfGameTree.addPropertyToGameInfoNode(property: T): SgfGameTree {
-    val gameInfoNode = sequence.singleOrNull() { it.hasGameInfoProperties() }
+    val gameInfoNode = sequence.singleOrNull { it.hasGameInfoProperties() }
 
     return if (gameInfoNode != null) {
         val index = sequence.indexOf(gameInfoNode)
@@ -53,35 +46,60 @@ private inline fun <reified T : SgfProperty> SgfGameTree.addPropertyToGameInfoNo
 
 private inline fun <reified T : SgfProperty> SgfGameTree.addPropertyToLastNode(
     property: T,
-    condition: (SgfNode) -> Boolean = { true }
-): SgfGameTree {
-    val lastNode = sequence.lastOrNull()?.takeIf(condition)
-    return if (lastNode != null) {
-        copy(
-            sequence = sequence.replaceLast(lastNode.addProperty(property))
-        )
-    } else {
-        appendNode(property)
-    }
+    addPropertyToNode: (SgfNode) -> SgfNode? = { it.addProperty(property) }
+) = when (val lastNode = sequence.lastOrNull()?.let(addPropertyToNode)) {
+    null -> appendNode(property)
+    else -> copy(sequence = sequence.replaceLast(lastNode.addProperty(property)))
 }
 
 private inline fun <reified T : SgfProperty.Move> SgfGameTree.addMoveProperty(property: T): SgfGameTree =
-    addPropertyToLastNode(property) {
-        val condition = !it.hasRootProperties() && !it.hasSetupProperties()
-
-        condition && when (property) {
+    addPropertyToLastNode(property) { node ->
+        val condition = !node.hasRootProperties() && !node.hasSetupProperties()
+        val canPropertyBeAddedToNode = condition && when (property) {
             is SgfProperty.Move.B,
-            is SgfProperty.Move.W -> !it.hasProperty<T>()
+            is SgfProperty.Move.W -> !node.hasProperty<T>()
             else -> true
+        }
+
+        if (canPropertyBeAddedToNode) {
+            node.addProperty(property)
+        } else {
+            null
         }
     }
 
-private fun SgfGameTree.addSetupProperty(property: SgfProperty.Setup): SgfGameTree {
-    return when (sequence.lastOrNull()?.takeIf { !it.hasMoveProperties() }) {
-        null -> appendNode(property)
-        else -> addPropertyToLastNode(property)
+private fun SgfGameTree.addSetupProperty(property: SgfProperty.Setup) = addPropertyToLastNode(property) {
+    if (!it.hasMoveProperties()) {
+        it.addProperty(property)
+    } else {
+        null
     }
 }
+
+private fun SgfGameTree.addNodeAnnotationProperty(property: SgfProperty.NodeAnnotation) =
+    addPropertyToLastNode(property) { node ->
+        val removeProperties = when (property) {
+            is SgfProperty.NodeAnnotation.DM, // must not be mixed with UC, GB or GW within a node.
+            is SgfProperty.NodeAnnotation.GB, // must not be mixed with GW, DM or UC within a node.
+            is SgfProperty.NodeAnnotation.GW, // must not be mixed with GB, DM or UC within a node.
+            is SgfProperty.NodeAnnotation.UC -> true // must not be mixed with DM, GB or GW
+            is SgfProperty.NodeAnnotation.C,
+            is SgfProperty.NodeAnnotation.V,
+            is SgfProperty.NodeAnnotation.HO,
+            is SgfProperty.NodeAnnotation.N -> false
+        }
+
+        val newNode = if (removeProperties) {
+            node.removeProperty<SgfProperty.NodeAnnotation.DM>()
+                .removeProperty<SgfProperty.NodeAnnotation.GB>()
+                .removeProperty<SgfProperty.NodeAnnotation.GW>()
+                .removeProperty<SgfProperty.NodeAnnotation.UC>()
+        } else {
+            node
+        }
+
+        newNode.addProperty(property)
+    }
 
 private inline fun <reified T : SgfProperty> SgfNode.hasProperty() = properties.filterIsInstance<T>().any()
 private fun SgfNode.hasSetupProperties() = hasProperty<SgfProperty.Setup>()
@@ -89,17 +107,27 @@ private fun SgfNode.hasRootProperties() = hasProperty<SgfProperty.Root>()
 private fun SgfNode.hasMoveProperties() = hasProperty<SgfProperty.Move>()
 private fun SgfNode.hasGameInfoProperties() = hasProperty<SgfProperty.GameInfo>()
 
-fun SgfGameTree.addProperty(property: SgfProperty): SgfGameTree {
-    return when (property) {
-        is SgfProperty.GameInfo -> addPropertyToGameInfoNode(property)
-        is SgfProperty.Move -> addMoveProperty(property)
-        is SgfProperty.Root -> addPropertyToRootNode(property)
-        is SgfProperty.Setup -> addSetupProperty(property)
-        is SgfProperty.Timing,
-        is SgfProperty.Markup,
-        is SgfProperty.Misc,
-        is SgfProperty.MoveAnnotation,
-        is SgfProperty.Private,
-        is SgfProperty.NodeAnnotation -> addPropertyToLastNode(property)
-    }
+/**
+ * Will add the given [property] to the game tree. The property will be added
+ * to its appropriate node. If that appropriate node isn't part of the game tree, the node will
+ * be added to the tree in its appropriate position. E.g. root properties will be added to the root node,
+ * and if a root node does not exist a root node will be added.
+ *
+ * Note that some properties may replace other properties, e.g. if they must not be mixed.
+ * This case applies to some of the [SgfProperty.NodeAnnotation] properties, such as DM, GB, GW, UC.
+ *
+ * @param property The property that will be added to the game tree.
+ * @return A new tree containing the added [property]
+ */
+fun SgfGameTree.addProperty(property: SgfProperty) = when (property) {
+    is SgfProperty.GameInfo -> addPropertyToGameInfoNode(property)
+    is SgfProperty.Move -> addMoveProperty(property)
+    is SgfProperty.Root -> addPropertyToRootNode(property)
+    is SgfProperty.Setup -> addSetupProperty(property)
+    is SgfProperty.NodeAnnotation -> addNodeAnnotationProperty(property)
+    is SgfProperty.Timing,
+    is SgfProperty.Markup,
+    is SgfProperty.Misc,
+    is SgfProperty.MoveAnnotation,
+    is SgfProperty.Private -> addPropertyToLastNode(property)
 }
