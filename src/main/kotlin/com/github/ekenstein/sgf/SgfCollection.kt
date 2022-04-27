@@ -140,9 +140,7 @@ sealed class SgfProperty {
 }
 
 sealed class Move {
-    data class Stone(val point: SgfPoint) : Move() {
-        constructor(x: Int, y: Int) : this(SgfPoint(x, y))
-    }
+    data class Stone(val point: SgfPoint) : Move()
     object Pass : Move()
 }
 

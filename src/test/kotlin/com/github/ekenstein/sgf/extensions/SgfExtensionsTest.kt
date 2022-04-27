@@ -334,4 +334,92 @@ class SgfExtensionsTest {
             }
         )
     }
+
+    @Test
+    fun `BM must not be mixed with TE, DO, IT`() {
+        val initial = SgfGameTree.empty.addProperty(SgfProperty.MoveAnnotation.BM(SgfDouble.Normal))
+        assertAll(
+            {
+                val actual = initial.addProperty(SgfProperty.MoveAnnotation.TE(SgfDouble.Normal))
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.MoveAnnotation.TE(SgfDouble.Normal))
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = initial.addProperty(SgfProperty.MoveAnnotation.DO)
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.MoveAnnotation.DO)
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = initial.addProperty(SgfProperty.MoveAnnotation.IT)
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.MoveAnnotation.IT)
+                assertEquals(expected, actual)
+            }
+        )
+    }
+
+    @Test
+    fun `TE must not be mixed with BM, DO, IT`() {
+        val initial = SgfGameTree.empty.addProperty(SgfProperty.MoveAnnotation.TE(SgfDouble.Normal))
+        assertAll(
+            {
+                val actual = initial.addProperty(SgfProperty.MoveAnnotation.BM(SgfDouble.Normal))
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.MoveAnnotation.BM(SgfDouble.Normal))
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = initial.addProperty(SgfProperty.MoveAnnotation.DO)
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.MoveAnnotation.DO)
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = initial.addProperty(SgfProperty.MoveAnnotation.IT)
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.MoveAnnotation.IT)
+                assertEquals(expected, actual)
+            }
+        )
+    }
+
+    @Test
+    fun `DO must not be mixed with BM, TE, IT`() {
+        val initial = SgfGameTree.empty.addProperty(SgfProperty.MoveAnnotation.DO)
+        assertAll(
+            {
+                val actual = initial.addProperty(SgfProperty.MoveAnnotation.BM(SgfDouble.Normal))
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.MoveAnnotation.BM(SgfDouble.Normal))
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = initial.addProperty(SgfProperty.MoveAnnotation.TE(SgfDouble.Normal))
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.MoveAnnotation.TE(SgfDouble.Normal))
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = initial.addProperty(SgfProperty.MoveAnnotation.IT)
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.MoveAnnotation.IT)
+                assertEquals(expected, actual)
+            }
+        )
+    }
+
+    @Test
+    fun `IT must not be mixed with BM, TE, DO`() {
+        val initial = SgfGameTree.empty.addProperty(SgfProperty.MoveAnnotation.IT)
+        assertAll(
+            {
+                val actual = initial.addProperty(SgfProperty.MoveAnnotation.BM(SgfDouble.Normal))
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.MoveAnnotation.BM(SgfDouble.Normal))
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = initial.addProperty(SgfProperty.MoveAnnotation.TE(SgfDouble.Normal))
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.MoveAnnotation.TE(SgfDouble.Normal))
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = initial.addProperty(SgfProperty.MoveAnnotation.DO)
+                val expected = SgfGameTree.empty.addProperty(SgfProperty.MoveAnnotation.DO)
+                assertEquals(expected, actual)
+            }
+        )
+    }
 }

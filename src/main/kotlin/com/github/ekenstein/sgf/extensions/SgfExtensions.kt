@@ -4,6 +4,7 @@ import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfProperty
 import com.github.ekenstein.sgf.utils.replace
+import com.github.ekenstein.sgf.utils.replaceFirst
 import com.github.ekenstein.sgf.utils.replaceLast
 
 operator fun SgfNode.plus(other: SgfNode): SgfNode {
@@ -28,7 +29,7 @@ inline fun <reified T : SgfProperty> SgfNode.removeProperty() = copy(
 private inline fun <reified T : SgfProperty> SgfGameTree.addPropertyToRootNode(property: T) =
     when (val rootNode = sequence.firstOrNull()?.takeIf { !it.hasMoveProperties() }) {
         null -> copy(sequence = listOf(SgfNode(setOf(property))) + sequence)
-        else -> copy(sequence = listOf(rootNode.addProperty(property)) + sequence.drop(1))
+        else -> copy(sequence = sequence.replaceFirst(rootNode.addProperty(property)))
     }
 
 private inline fun <reified T : SgfProperty> SgfGameTree.addPropertyToGameInfoNode(property: T): SgfGameTree {
@@ -101,6 +102,28 @@ private fun SgfGameTree.addNodeAnnotationProperty(property: SgfProperty.NodeAnno
         newNode.addProperty(property)
     }
 
+private fun SgfGameTree.addMoveAnnotationProperty(property: SgfProperty.MoveAnnotation) =
+    addPropertyToLastNode(property) { node ->
+        when (property) {
+            is SgfProperty.MoveAnnotation.BM -> node.removeProperty<SgfProperty.MoveAnnotation.DO>()
+                .removeProperty<SgfProperty.MoveAnnotation.IT>()
+                .removeProperty<SgfProperty.MoveAnnotation.TE>()
+                .addProperty(property)
+            SgfProperty.MoveAnnotation.DO -> node.removeProperty<SgfProperty.MoveAnnotation.BM>()
+                .removeProperty<SgfProperty.MoveAnnotation.IT>()
+                .removeProperty<SgfProperty.MoveAnnotation.TE>()
+                .addProperty(property)
+            SgfProperty.MoveAnnotation.IT -> node.removeProperty<SgfProperty.MoveAnnotation.DO>()
+                .removeProperty<SgfProperty.MoveAnnotation.BM>()
+                .removeProperty<SgfProperty.MoveAnnotation.TE>()
+                .addProperty(property)
+            is SgfProperty.MoveAnnotation.TE -> node.removeProperty<SgfProperty.MoveAnnotation.DO>()
+                .removeProperty<SgfProperty.MoveAnnotation.IT>()
+                .removeProperty<SgfProperty.MoveAnnotation.BM>()
+                .addProperty(property)
+        }
+    }
+
 private inline fun <reified T : SgfProperty> SgfNode.hasProperty() = properties.filterIsInstance<T>().any()
 private fun SgfNode.hasSetupProperties() = hasProperty<SgfProperty.Setup>()
 private fun SgfNode.hasRootProperties() = hasProperty<SgfProperty.Root>()
@@ -109,7 +132,8 @@ private fun SgfNode.hasGameInfoProperties() = hasProperty<SgfProperty.GameInfo>(
 
 /**
  * Will add the given [property] to the game tree. The property will be added
- * to its appropriate node. If that appropriate node isn't part of the game tree, the node will
+ * to its appropriate node according to the appropriate style.
+ * If that appropriate node isn't part of the game tree, the node will
  * be added to the tree in its appropriate position. E.g. root properties will be added to the root node,
  * and if a root node does not exist a root node will be added.
  *
@@ -125,9 +149,9 @@ fun SgfGameTree.addProperty(property: SgfProperty) = when (property) {
     is SgfProperty.Root -> addPropertyToRootNode(property)
     is SgfProperty.Setup -> addSetupProperty(property)
     is SgfProperty.NodeAnnotation -> addNodeAnnotationProperty(property)
+    is SgfProperty.MoveAnnotation -> addMoveAnnotationProperty(property)
     is SgfProperty.Timing,
     is SgfProperty.Markup,
     is SgfProperty.Misc,
-    is SgfProperty.MoveAnnotation,
     is SgfProperty.Private -> addPropertyToLastNode(property)
 }
