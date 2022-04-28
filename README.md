@@ -2,9 +2,19 @@
 A small, SGF parser library for Kotlin.
 
 # Usage
-### 1. Obtain an SGF file
-```
-(;FF[4]GM[1]SZ[19];B[aa];W[bb];B[cc];W[dd];B[ad];W[bd])
+### 1. Add a dependency on ktsgf
+For `build.gradle.kts`:
+
+```kotlin
+repositories {
+    maven {
+        url = uri("https://jitpack.io")
+    }
+}
+
+dependencies {
+    implementation("com.github.Ekenstein:ktsgf:0.1.1")
+}
 ```
 
 ### 2. Write some code
