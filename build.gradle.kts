@@ -57,6 +57,10 @@ tasks {
         mustRunAfter(ktlintTestSourceSetCheck)
     }
 
+    kotlinSourcesJar {
+        dependsOn("generateGrammarSource")
+    }
+
     compileKotlin {
         dependsOn(generateGrammarSource)
         kotlinOptions {
@@ -99,23 +103,13 @@ ktlint {
 }
 
 publishing {
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/Ekenstein/ktsgf")
-            credentials {
-                username = System.getenv("PUBLISH_USER")
-                password = System.getenv("PUBLISH_TOKEN")
-            }
-        }
-    }
-
     publications {
         create<MavenPublication>("ktsgf") {
             groupId = project.group.toString()
             artifactId = "ktsgf"
             version = project.version.toString()
             from(components["kotlin"])
+            artifact(tasks.kotlinSourcesJar)
 
             pom {
                 name.set("ktsgf")
