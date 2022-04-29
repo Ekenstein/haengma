@@ -3,7 +3,7 @@ package com.github.ekenstein.sgf.builder
 import com.github.ekenstein.sgf.SgfDouble
 import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfProperty
-import com.github.ekenstein.sgf.extensions.addProperty
+import com.github.ekenstein.sgf.extensions.plus
 import com.github.ekenstein.sgf.extensions.property
 
 interface NodeBuilder {
@@ -17,17 +17,17 @@ internal abstract class DefaultNodeBuilder : NodeBuilder {
     abstract var node: SgfNode
 
     override fun property(value: SgfProperty) {
-        node = node.addProperty(value)
+        node += value
     }
 
     override fun property(identifier: String, values: List<String>) {
-        node = node.addProperty(SgfProperty.Private(identifier, values))
+        node += SgfProperty.Private(identifier, values)
     }
 
     override var comment: String
         get() = node.property<SgfProperty.NodeAnnotation.C>()?.comment ?: ""
         set(value) {
-            node.addProperty(SgfProperty.NodeAnnotation.C(value))
+            node += SgfProperty.NodeAnnotation.C(value)
         }
 
     override fun annotate(annotation: NodeAnnotation) {
@@ -39,7 +39,7 @@ internal abstract class DefaultNodeBuilder : NodeBuilder {
             NodeAnnotation.Unclear -> SgfProperty.NodeAnnotation.UC(SgfDouble.Normal)
         }
 
-        node = node.addProperty(property)
+        node += property
     }
 }
 

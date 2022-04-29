@@ -4,7 +4,7 @@ import com.github.ekenstein.sgf.GameDate
 import com.github.ekenstein.sgf.GameResult
 import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfProperty
-import com.github.ekenstein.sgf.extensions.addProperty
+import com.github.ekenstein.sgf.extensions.plus
 
 sealed class Overtime {
     data class ByoYomi(val periods: Int, val seconds: Int) : Overtime()
@@ -70,31 +70,31 @@ interface GameInfoNodeBuilder : NodeBuilder {
 
 internal class DefaultGameInfoNodeBuilder(override var node: SgfNode) : GameInfoNodeBuilder, DefaultNodeBuilder() {
     override fun handicap(value: Int) {
-        node = node.addProperty(SgfProperty.GameInfo.HA(value))
+        node += SgfProperty.GameInfo.HA(value)
     }
 
     override fun komi(value: Double) {
-        node = node.addProperty(SgfProperty.GameInfo.KM(value))
+        node += SgfProperty.GameInfo.KM(value)
     }
 
     override fun result(value: GameResult) {
-        node = node.addProperty(SgfProperty.GameInfo.RE(value))
+        node += SgfProperty.GameInfo.RE(value)
     }
 
     override fun event(name: String) {
-        node = node.addProperty(SgfProperty.GameInfo.EV(name))
+        node += SgfProperty.GameInfo.EV(name)
     }
 
     override fun playerBlack(name: String) {
-        node = node.addProperty(SgfProperty.GameInfo.PB(name))
+        node += SgfProperty.GameInfo.PB(name)
     }
 
     override fun playerWhite(name: String) {
-        node = node.addProperty(SgfProperty.GameInfo.PW(name))
+        node += SgfProperty.GameInfo.PW(name)
     }
 
     override fun blackRank(rank: String) {
-        node = node.addProperty(SgfProperty.GameInfo.BR(rank))
+        node += SgfProperty.GameInfo.BR(rank)
     }
 
     override fun blackRank(rank: Rank) {
@@ -102,7 +102,7 @@ internal class DefaultGameInfoNodeBuilder(override var node: SgfNode) : GameInfo
     }
 
     override fun whiteRank(rank: String) {
-        node = node.addProperty(SgfProperty.GameInfo.WR(rank))
+        node += SgfProperty.GameInfo.WR(rank)
     }
 
     override fun whiteRank(rank: Rank) {
@@ -110,11 +110,11 @@ internal class DefaultGameInfoNodeBuilder(override var node: SgfNode) : GameInfo
     }
 
     override fun gameDate(vararg date: GameDate) {
-        node = node.addProperty(SgfProperty.GameInfo.DT(date.toList()))
+        node += SgfProperty.GameInfo.DT(date.toList())
     }
 
     override fun timeLimit(value: Double) {
-        node = node.addProperty(SgfProperty.GameInfo.TM(value))
+        node += SgfProperty.GameInfo.TM(value)
     }
 
     override fun overtime(value: Overtime) {
@@ -122,6 +122,6 @@ internal class DefaultGameInfoNodeBuilder(override var node: SgfNode) : GameInfo
     }
 
     override fun overtime(value: String) {
-        node = node.addProperty(SgfProperty.GameInfo.OT(value))
+        node += SgfProperty.GameInfo.OT(value)
     }
 }

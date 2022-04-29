@@ -4,7 +4,7 @@ import com.github.ekenstein.sgf.SgfColor
 import com.github.ekenstein.sgf.SgfDouble
 import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfProperty
-import com.github.ekenstein.sgf.extensions.addProperty
+import com.github.ekenstein.sgf.extensions.plus
 
 @SgfDslMarker
 interface MoveBuilder : NodeBuilder {
@@ -16,21 +16,25 @@ interface MoveBuilder : NodeBuilder {
 
 internal class DefaultMoveBuilder(override var node: SgfNode) : MoveBuilder, DefaultNodeBuilder() {
     override fun moveNumber(value: Int) {
-        node = node.addProperty(SgfProperty.Move.MN(value))
+        node += SgfProperty.Move.MN(value)
     }
 
     override fun stone(color: SgfColor, x: Int, y: Int) {
-        node = when (color) {
-            SgfColor.Black -> node.addProperty(SgfProperty.Move.B(x, y))
-            SgfColor.White -> node.addProperty(SgfProperty.Move.W(x, y))
+        val property = when (color) {
+            SgfColor.Black -> SgfProperty.Move.B(x, y)
+            SgfColor.White -> SgfProperty.Move.W(x, y)
         }
+
+        node += property
     }
 
     override fun pass(color: SgfColor) {
-        node = when (color) {
-            SgfColor.Black -> node.addProperty(SgfProperty.Move.B.pass())
-            SgfColor.White -> node.addProperty(SgfProperty.Move.W.pass())
+        val property = when (color) {
+            SgfColor.Black -> SgfProperty.Move.B.pass()
+            SgfColor.White -> SgfProperty.Move.W.pass()
         }
+
+        node += property
     }
 
     override fun annotate(annotation: MoveAnnotation) {
@@ -41,15 +45,15 @@ internal class DefaultMoveBuilder(override var node: SgfNode) : MoveBuilder, Def
             MoveAnnotation.Interesting -> SgfProperty.MoveAnnotation.IT
         }
 
-        node = node.addProperty(property)
+        node += property
     }
 
     override fun property(value: SgfProperty) {
-        node = node.addProperty(value)
+        node += value
     }
 
     override fun property(identifier: String, values: List<String>) {
-        node = node.addProperty(SgfProperty.Private(identifier, values))
+        node += SgfProperty.Private(identifier, values)
     }
 }
 

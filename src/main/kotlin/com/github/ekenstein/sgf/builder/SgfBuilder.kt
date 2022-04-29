@@ -41,9 +41,3 @@ fun sgf(sgfGameTree: SgfGameTree, block: SgfBuilder.() -> Unit): SgfGameTree {
     builder.block()
     return builder.gameTree
 }
-
-fun foo() = sgf {
-    move {
-        annotate(MoveAnnotation.Bad)
-    }
-}
