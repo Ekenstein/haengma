@@ -19,7 +19,7 @@ interface RootNodeBuilder : NodeBuilder {
     fun gameInfo(block: GameInfoNodeBuilder.() -> Unit)
 }
 
-internal class DefaultRootNodeBuilder(var node: SgfNode) : RootNodeBuilder {
+internal class DefaultRootNodeBuilder(override var node: SgfNode) : RootNodeBuilder, DefaultNodeBuilder() {
 
     override fun size(size: Int) {
         node = node.addProperty(SgfProperty.Root.SZ(size))
@@ -49,13 +49,5 @@ internal class DefaultRootNodeBuilder(var node: SgfNode) : RootNodeBuilder {
         val builder = DefaultGameInfoNodeBuilder(node)
         builder.block()
         node += builder.node
-    }
-
-    override fun property(value: SgfProperty) {
-        node = node.addProperty(value)
-    }
-
-    override fun property(identifier: String, values: List<String>) {
-        node = node.addProperty(SgfProperty.Private(identifier, values))
     }
 }

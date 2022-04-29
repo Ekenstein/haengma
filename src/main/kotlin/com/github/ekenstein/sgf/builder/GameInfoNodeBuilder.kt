@@ -68,7 +68,7 @@ interface GameInfoNodeBuilder : NodeBuilder {
     fun overtime(value: String)
 }
 
-internal class DefaultGameInfoNodeBuilder(var node: SgfNode) : GameInfoNodeBuilder {
+internal class DefaultGameInfoNodeBuilder(override var node: SgfNode) : GameInfoNodeBuilder, DefaultNodeBuilder() {
     override fun handicap(value: Int) {
         node = node.addProperty(SgfProperty.GameInfo.HA(value))
     }
@@ -123,13 +123,5 @@ internal class DefaultGameInfoNodeBuilder(var node: SgfNode) : GameInfoNodeBuild
 
     override fun overtime(value: String) {
         node = node.addProperty(SgfProperty.GameInfo.OT(value))
-    }
-
-    override fun property(value: SgfProperty) {
-        node = node.addProperty(value)
-    }
-
-    override fun property(identifier: String, values: List<String>) {
-        node = node.addProperty(SgfProperty.Private(identifier, values))
     }
 }

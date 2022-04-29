@@ -1,6 +1,7 @@
 package com.github.ekenstein.sgf.builder
 
 import com.github.ekenstein.sgf.SgfGameTree
+import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.extensions.addProperty
 
 @SgfDslMarker
@@ -14,7 +15,7 @@ internal class DefaultGameTreeBuilder : GameTreeBuilder {
         private set
 
     override fun move(block: MoveBuilder.() -> Unit) {
-        val builder = DefaultMoveBuilder()
+        val builder = DefaultMoveBuilder(SgfNode())
         builder.block()
         gameTree = builder.node.properties.fold(gameTree) { tree, property -> tree.addProperty(property) }
     }

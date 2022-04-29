@@ -20,7 +20,7 @@ private class DefaultSgfBuilder(var gameTree: SgfGameTree) : SgfBuilder {
     }
 
     override fun move(block: MoveBuilder.() -> Unit) {
-        val builder = DefaultMoveBuilder()
+        val builder = DefaultMoveBuilder(SgfNode())
         builder.block()
         gameTree = builder.node.properties.fold(gameTree) { gameTree, property -> gameTree.addProperty(property) }
     }
@@ -40,4 +40,10 @@ fun sgf(sgfGameTree: SgfGameTree, block: SgfBuilder.() -> Unit): SgfGameTree {
     val builder = DefaultSgfBuilder(sgfGameTree)
     builder.block()
     return builder.gameTree
+}
+
+fun foo() = sgf {
+    move {
+        annotate(MoveAnnotation.Bad)
+    }
 }
