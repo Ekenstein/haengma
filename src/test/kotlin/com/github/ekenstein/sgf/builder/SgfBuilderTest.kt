@@ -2,7 +2,9 @@ package com.github.ekenstein.sgf.builder
 
 import com.github.ekenstein.sgf.GameType
 import com.github.ekenstein.sgf.SgfColor
+import com.github.ekenstein.sgf.SgfDouble
 import com.github.ekenstein.sgf.SgfGameTree
+import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfProperty
 import com.github.ekenstein.sgf.extensions.addProperty
 import org.junit.jupiter.api.Test
@@ -31,6 +33,54 @@ class SgfBuilderTest {
                 stone(SgfColor.Black, 3, 3)
             }
         }
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `can only have one move annotation per node`() {
+        val actual = sgf {
+            move {
+                annotate(MoveAnnotation.Bad)
+                annotate(MoveAnnotation.Doubtful)
+            }
+        }
+
+        val expected = SgfGameTree.empty.addProperty(SgfProperty.MoveAnnotation.DO)
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `can only have one node annotation per node`() {
+        val actual = sgf {
+            move {
+                annotate(NodeAnnotation.EvenPosition)
+                annotate(NodeAnnotation.GoodForBlack)
+            }
+        }
+
+        val expected = SgfGameTree.empty.addProperty(SgfProperty.NodeAnnotation.GB(SgfDouble.Normal))
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `adding a private property will update the old private property with the same identifier`() {
+        val actual = sgf {
+            move {
+                property("APA", emptyList())
+                property("BEPA", emptyList())
+                property("APA", listOf("Hello"))
+            }
+        }
+
+        val expected = SgfGameTree(
+            listOf(
+                SgfNode(
+                    SgfProperty.Private("APA", listOf("Hello")),
+                    SgfProperty.Private("BEPA", emptyList())
+                )
+            )
+        )
 
         assertEquals(expected, actual)
     }

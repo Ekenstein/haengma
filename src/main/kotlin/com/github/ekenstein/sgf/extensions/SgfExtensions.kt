@@ -13,6 +13,8 @@ operator fun SgfNode.plus(other: SgfNode): SgfNode {
     return allProperties.fold(SgfNode()) { node, property -> node.addProperty(property) }
 }
 
+operator fun SgfNode.plus(property: SgfProperty): SgfNode = addProperty(property)
+
 private fun SgfGameTree.appendNode(vararg properties: SgfProperty): SgfGameTree = copy(
     sequence = sequence + SgfNode(properties.toSet())
 )
