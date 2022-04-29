@@ -11,6 +11,7 @@ data class SgfCollection(val trees: List<SgfGameTree>) {
 }
 
 data class SgfGameTree(val sequence: List<SgfNode>, val trees: List<SgfGameTree>) {
+    constructor(sequence: List<SgfNode>) : this(sequence, emptyList())
     companion object {
         val empty = SgfGameTree(emptyList(), emptyList())
     }

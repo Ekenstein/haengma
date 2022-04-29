@@ -422,4 +422,30 @@ class SgfExtensionsTest {
             }
         )
     }
+
+    @Test
+    fun `Can have multiple private properties on a node`() {
+        val actual = SgfGameTree.empty
+            .addProperty(SgfProperty.Private("FOO", emptyList()))
+            .addProperty(SgfProperty.Private("BAR", emptyList()))
+
+        val expected = SgfGameTree(
+            listOf(
+                SgfNode(
+                    SgfProperty.Private("FOO", emptyList()),
+                    SgfProperty.Private("BAR", emptyList())
+                )
+            )
+        )
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `Adding a private property will remove the old private property with the same identifier`() {
+        val tree = SgfGameTree.empty.addProperty(SgfProperty.Private("FOO", emptyList()))
+        val actual = tree.addProperty(SgfProperty.Private("FOO", listOf("Hello")))
+        val expected = SgfGameTree.empty.addProperty(SgfProperty.Private("FOO", listOf("Hello")))
+        assertEquals(expected, actual)
+    }
 }

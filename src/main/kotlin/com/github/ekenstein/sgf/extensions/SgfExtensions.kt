@@ -19,9 +19,18 @@ private fun SgfGameTree.appendNode(vararg properties: SgfProperty): SgfGameTree 
 
 internal inline fun <reified T : SgfProperty> SgfNode.property() = properties.filterIsInstance<T>().singleOrNull()
 
-inline fun <reified T : SgfProperty> SgfNode.addProperty(property: T) = copy(
-    properties = properties.filter { it::class != property::class }.toSet() + property
-)
+inline fun <reified T : SgfProperty> SgfNode.addProperty(property: T): SgfNode = when (property) {
+    is SgfProperty.Private -> copy(
+        properties = properties.filter {
+            it !is SgfProperty.Private || it.identifier != property.identifier
+        }.toSet() + property
+    )
+    else -> copy(
+        properties = properties.filter {
+            it::class != property::class
+        }.toSet() + property
+    )
+}
 
 inline fun <reified T : SgfProperty> SgfNode.removeProperty() = copy(
     properties = properties.filter { it::class != T::class }.toSet()
