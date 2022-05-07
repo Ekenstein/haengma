@@ -1,8 +1,8 @@
-# ktsgf
-A small, SGF parser library for Kotlin.
+# haengma
+SGF parser and serializer written in Kotlin.
 
 # Usage
-### 1. Add a dependency on ktsgf
+### 1. Add a dependency on haengma
 For `build.gradle.kts`:
 
 ```kotlin
@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.Ekenstein:ktsgf:0.1.1")
+    implementation("com.github.Ekenstein:haengma:0.1.1")
 }
 ```
 
@@ -21,7 +21,6 @@ dependencies {
 ```kotlin
 import java.nio.file.Path
 import java.io.InputStream
-import com.github.ekenstein.sgf.Sgf
 import com.github.ekenstein.sgf.SgfCollection
 import com.github.ekenstein.sgf.GameType
 import com.github.ekenstein.sgf.SgfGameTree

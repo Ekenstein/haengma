@@ -9,7 +9,7 @@ val junitVersion by extra("5.8.2")
 
 plugins {
     kotlin("jvm") version "1.6.21"
-    id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
+    id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
     id("com.github.ben-manes.versions") version "0.42.0"
     antlr
     `maven-publish`
@@ -104,21 +104,21 @@ ktlint {
 
 publishing {
     publications {
-        create<MavenPublication>("ktsgf") {
+        create<MavenPublication>("haengma") {
             groupId = project.group.toString()
-            artifactId = "ktsgf"
+            artifactId = "haengma"
             version = project.version.toString()
             from(components["kotlin"])
             artifact(tasks.kotlinSourcesJar)
 
             pom {
-                name.set("ktsgf")
+                name.set("haengma")
                 description.set("Simple SGF parser")
-                url.set("https://github.com/Ekenstein/ktsgf")
+                url.set("https://github.com/Ekenstein/haengma")
                 licenses {
                     license {
                         name.set("MIT")
-                        url.set("https://github.com/Ekenstein/ktsgf/blob/main/LICENSE")
+                        url.set("https://github.com/Ekenstein/haengma/blob/main/LICENSE")
                     }
                 }
             }

@@ -1,2 +1,2 @@
 
-rootProject.name = "ktsgf"
+rootProject.name = "haengma"
