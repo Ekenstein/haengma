@@ -27,7 +27,6 @@ import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfProperty
 import com.github.ekenstein.sgf.encodeToString
 import com.github.ekenstein.sgf.extensions.addProperty
-import com.github.ekenstein.sgf.viewer.GameTreeZipper
 
 fun main() {
     // you can retrieve a collection by decoding a file
@@ -126,6 +125,6 @@ fun main() {
     //  .  .  .  O  .  .  .  .  .  .  .  .  .  .  .  #  .  .  .
     //  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
     //  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-//  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
 }
 ```

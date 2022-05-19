@@ -187,7 +187,7 @@ fun SgfEditor.placeStone(color: SgfColor, x: Int, y: Int): SgfEditor {
 }
 
 fun SgfEditor.pass(color: SgfColor): SgfEditor {
-    require(nextToPlay == color) {
+    checkMove(nextToPlay == color) {
         "It's not ${color.asString}'s turn to play"
     }
 
