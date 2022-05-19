@@ -367,6 +367,10 @@ class SgfEditorTest {
                     .addProperty(SgfProperty.Setup.PL(SgfColor.Black))
 
                 assertThrows<SgfException.IllegalMove> { SgfEditor(tree).placeStone(SgfColor.White, 3, 3) }
+            },
+            {
+                val tree = SgfGameTree.newGame(19, 6.5, 9)
+                assertThrows<SgfException.IllegalMove> { SgfEditor(tree).pass(SgfColor.Black) }
             }
         )
     }
