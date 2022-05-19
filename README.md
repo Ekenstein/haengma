@@ -27,6 +27,7 @@ import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfProperty
 import com.github.ekenstein.sgf.encodeToString
 import com.github.ekenstein.sgf.extensions.addProperty
+import com.github.ekenstein.sgf.viewer.GameTreeZipper
 
 fun main() {
     // you can retrieve a collection by decoding a file
@@ -46,11 +47,9 @@ fun main() {
     }
     
     // ... or you can create your own game tree
-    val tree: SgfGameTree = SgfGameTree.empty
+    val tree: SgfGameTree = SgfGameTree.newGame(size = 19, komi = 6.5, handicap = 0)
         .addProperty(SgfProperty.Root.GM(GameType.Go))
-        .addProperty(SgfProperty.Root.SZ(19))
         .addProperty(SgfProperty.GameInfo.DT(GameDate.of(2022, 4, 27), GameDate.of(2022, 4, 28)))
-        .addProperty(SgfProperty.GameInfo.KM(6.5))
         .addProperty(SgfProperty.Move.B(4, 4))
         .addProperty(SgfProperty.Move.W(16, 4))
     
@@ -66,5 +65,67 @@ fun main() {
     file.outputStream().use { 
         tree.encode(it)
     }
+}
+```
+
+### 2.1 Navigating a tree
+```kotlin
+import com.github.ekenstein.sgf.extensions.newGame
+import com.github.ekenstein.sgf.serialization.encodeToString
+import com.github.ekenstein.sgf.viewer.SgfEditor
+import com.github.ekenstein.sgf.viewer.commit
+import com.github.ekenstein.sgf.viewer.goToPreviousNodeOrStay
+import com.github.ekenstein.sgf.viewer.goToRootNode
+import com.github.ekenstein.sgf.viewer.pass
+import com.github.ekenstein.sgf.viewer.placeStone
+
+fun main() {
+    val tree = SgfGameTree.newGame(boardSize = 19, komi = 6.5, handicap = 0)
+    
+    // build your SGF tree and navigate through it
+    val editor = SgfEditor(tree)
+        .placeStone(SgfColor.Black, 4, 4)
+        .placeStone(SgfColor.White, 16, 4)
+        .goToPreviousNodeOrStay()
+        .placeStone(SgfColor.White, 16, 16)
+        .placeStone(SgfColor.Black, 16, 4)
+        .goToRootNode()
+        .placeStone(SgfColor.Black, 3, 3)
+        .placeStone(SgfColor.White, 16, 4)
+        .placeStone(SgfColor.Black, 16, 16)
+        .placeStone(SgfColor.White, 4, 16)
+
+    // ... then commit your changes 
+    val newTree = editor.commit()
+    
+    // ... and the resulting SGF would look like (;SZ[19]KM[6.5]FF[4]GM[1](;B[cc];W[pd];B[pp];W[dp])(;B[dd](;W[pp];B[pd])(;W[pd])))
+    println(newTree.encodeToString())
+    
+    // ... you can also look at the current position by extracting the board
+    val board = editor.board
+    
+    // ... which you can also print to a string
+    println(board.print())
+            
+    // ... which in the current position of the editor would look
+    //  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //  .  .  #  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  O  .  .  .
+    //  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //  .  .  .  O  .  .  .  .  .  .  .  .  .  .  .  #  .  .  .
+    //  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+//  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
 }
 ```

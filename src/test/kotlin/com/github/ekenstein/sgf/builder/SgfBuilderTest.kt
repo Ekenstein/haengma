@@ -7,13 +7,15 @@ import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfProperty
 import com.github.ekenstein.sgf.extensions.addProperty
+import com.github.ekenstein.sgf.extensions.newGame
+import com.github.ekenstein.sgf.utils.nelOf
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class SgfBuilderTest {
     @Test
     fun `given a game tree one can change root information of the tree`() {
-        val gameTree = SgfGameTree.empty
+        val gameTree = SgfGameTree.newGame(19, 6.5, 0)
             .addProperty(SgfProperty.Root.SZ(19))
             .addProperty(SgfProperty.Root.GM(GameType.Go))
             .addProperty(SgfProperty.Move.B(3, 3))
@@ -25,8 +27,12 @@ class SgfBuilderTest {
 
         val expected = sgf {
             root {
+                fileFormat(4)
                 size(13)
                 gameType(GameType.Go)
+                gameInfo {
+                    komi(6.5)
+                }
             }
 
             move {
@@ -46,7 +52,7 @@ class SgfBuilderTest {
             }
         }
 
-        val expected = SgfGameTree.empty.addProperty(SgfProperty.MoveAnnotation.DO)
+        val expected = SgfGameTree(nelOf(SgfNode(SgfProperty.MoveAnnotation.DO)))
         assertEquals(expected, actual)
     }
 
@@ -59,7 +65,7 @@ class SgfBuilderTest {
             }
         }
 
-        val expected = SgfGameTree.empty.addProperty(SgfProperty.NodeAnnotation.GB(SgfDouble.Normal))
+        val expected = SgfGameTree(nelOf(SgfNode(SgfProperty.NodeAnnotation.GB(SgfDouble.Normal))))
         assertEquals(expected, actual)
     }
 
@@ -74,7 +80,7 @@ class SgfBuilderTest {
         }
 
         val expected = SgfGameTree(
-            listOf(
+            nelOf(
                 SgfNode(
                     SgfProperty.Private("APA", listOf("Hello")),
                     SgfProperty.Private("BEPA", emptyList())

@@ -5,9 +5,12 @@ import com.github.ekenstein.sgf.GameResult
 import com.github.ekenstein.sgf.GameType
 import com.github.ekenstein.sgf.SgfCollection
 import com.github.ekenstein.sgf.SgfColor
+import com.github.ekenstein.sgf.SgfException
+import com.github.ekenstein.sgf.SgfGameTree
+import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.SgfProperty
-import com.github.ekenstein.sgf.sgf
+import com.github.ekenstein.sgf.utils.nelOf
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -23,9 +26,17 @@ class SgfParserTest {
     inner class `private properties` {
         @Test
         fun `unrecognized properties are saved as private properties`() {
-            fun expected(identifier: String, vararg values: String) = sgf {
-                tree { node { property(SgfProperty.Private(identifier, values.toList())) } }
-            }
+            fun expected(identifier: String, vararg values: String) = SgfCollection(
+                nelOf(
+                    SgfGameTree(
+                        nelOf(
+                            SgfNode(
+                                SgfProperty.Private(identifier, values.toList())
+                            )
+                        )
+                    )
+                )
+            )
             assertAll(
                 {
                     val sgf = "(;FOO[a][b][c])"
@@ -51,7 +62,7 @@ class SgfParserTest {
             "(;FF[0])"
         )
         fun `FF value must be in range 1-4`(sgf: String) {
-            assertThrows<SgfParseException> { SgfCollection.from(sgf) }
+            assertThrows<SgfException.ParseError> { SgfCollection.from(sgf) }
         }
 
         @ParameterizedTest
@@ -63,7 +74,7 @@ class SgfParserTest {
         )
         fun `FF can be parsed iff the number is in range 1-4`(sgf: String, number: Int) {
             val collection = SgfCollection.from(sgf)
-            val expected = sgf { tree { node { property(SgfProperty.Root.FF(number)) } } }
+            val expected = SgfCollection(nelOf(SgfGameTree(nelOf(SgfNode(SgfProperty.Root.FF(number))))))
             assertEquals(expected, collection)
         }
 
@@ -73,7 +84,7 @@ class SgfParserTest {
             "(;ST[4])"
         )
         fun `ST must be in range 0-3`(sgf: String) {
-            assertThrows<SgfParseException> { SgfCollection.from(sgf) }
+            assertThrows<SgfException.ParseError> { SgfCollection.from(sgf) }
         }
 
         @ParameterizedTest
@@ -85,7 +96,7 @@ class SgfParserTest {
         )
         fun `ST can be parsed iff the number is in range 0-3`(sgf: String, number: Int) {
             val collection = SgfCollection.from(sgf)
-            val expected = sgf { tree { node { property(SgfProperty.Root.ST(number)) } } }
+            val expected = SgfCollection(nelOf(SgfGameTree(nelOf(SgfNode(SgfProperty.Root.ST(number))))))
             assertEquals(expected, collection)
         }
 
@@ -96,7 +107,7 @@ class SgfParserTest {
         )
         fun `SZ can both have a composed value and a single value`(sgf: String, width: Int, height: Int) {
             val collection = SgfCollection.from(sgf)
-            val expected = sgf { tree { node { property(SgfProperty.Root.SZ(width, height)) } } }
+            val expected = SgfCollection(nelOf(SgfGameTree(nelOf(SgfNode(SgfProperty.Root.SZ(width, height))))))
             assertEquals(expected, collection)
         }
 
@@ -106,7 +117,7 @@ class SgfParserTest {
             "(;GM[41])"
         )
         fun `GM value must be in range 1-16`(sgf: String) {
-            assertThrows<SgfParseException> { SgfCollection.from(sgf) }
+            assertThrows<SgfException.ParseError> { SgfCollection.from(sgf) }
         }
 
         @Test
@@ -115,7 +126,7 @@ class SgfParserTest {
             val assertions = sgf.map { (sgf, gameType) ->
                 {
                     val collection = SgfCollection.from(sgf)
-                    val expected = sgf { tree { node { property(SgfProperty.Root.GM(gameType)) } } }
+                    val expected = SgfCollection(nelOf(SgfGameTree(nelOf(SgfNode(SgfProperty.Root.GM(gameType))))))
                     assertEquals(expected, collection)
                 }
             }
@@ -145,7 +156,7 @@ class SgfParserTest {
         )
         fun `SZ can have a number as a value`(sgf: String, size: Int) {
             val collection = SgfCollection.from(sgf)
-            val expected = sgf { tree { node { property(SgfProperty.Root.SZ(size)) } } }
+            val expected = SgfCollection(nelOf(SgfGameTree(nelOf(SgfNode(SgfProperty.Root.SZ(size))))))
             assertEquals(expected, collection)
         }
 
@@ -157,7 +168,7 @@ class SgfParserTest {
         )
         fun `SZ can have a composed value`(sgf: String, width: Int, height: Int) {
             val collection = SgfCollection.from(sgf)
-            val expected = sgf { tree { node { property(SgfProperty.Root.SZ(width, height)) } } }
+            val expected = SgfCollection(nelOf(SgfGameTree(nelOf(SgfNode(SgfProperty.Root.SZ(width, height))))))
             assertEquals(expected, collection)
         }
 
@@ -186,7 +197,7 @@ class SgfParserTest {
         )
         fun `AP parses to name and version`(sgf: String, name: String, version: String) {
             val collection = SgfCollection.from(sgf)
-            val expected = sgf { tree { node { property(SgfProperty.Root.AP(name, version)) } } }
+            val expected = SgfCollection(nelOf(SgfGameTree(nelOf(SgfNode(SgfProperty.Root.AP(name, version))))))
             assertEquals(expected, collection)
         }
 
@@ -197,7 +208,7 @@ class SgfParserTest {
         )
         fun `CA parses to the charset`(sgf: String, charset: String) {
             val collection = SgfCollection.from(sgf)
-            val expected = sgf { tree { node { property(SgfProperty.Root.CA(Charset.forName(charset))) } } }
+            val expected = SgfCollection(nelOf(SgfGameTree(nelOf(SgfNode(SgfProperty.Root.CA(Charset.forName(charset)))))))
             assertEquals(expected, collection)
         }
     }
@@ -225,7 +236,7 @@ class SgfParserTest {
         )
         fun `OB can parse a value that is a number`(sgf: String, number: Int) {
             val collection = SgfCollection.from(sgf)
-            val expected = sgf { tree { node { property(SgfProperty.Timing.OB(number)) } } }
+            val expected = SgfCollection(nelOf(SgfGameTree(nelOf(SgfNode(SgfProperty.Timing.OB(number))))))
             assertEquals(expected, collection)
         }
 
@@ -250,7 +261,7 @@ class SgfParserTest {
         )
         fun `OW can parse a value that is a number`(sgf: String, number: Int) {
             val collection = SgfCollection.from(sgf)
-            val expected = sgf { tree { node { property(SgfProperty.Timing.OW(number)) } } }
+            val expected = SgfCollection(nelOf(SgfGameTree(nelOf(SgfNode(SgfProperty.Timing.OW(number))))))
             assertEquals(expected, collection)
         }
 
@@ -276,7 +287,7 @@ class SgfParserTest {
         )
         fun `BL can parse a value that is a number or real`(sgf: String, number: Double) {
             val collection = SgfCollection.from(sgf)
-            val expected = sgf { tree { node { property(SgfProperty.Timing.BL(number)) } } }
+            val expected = SgfCollection(nelOf(SgfGameTree(nelOf(SgfNode(SgfProperty.Timing.BL(number))))))
             assertEquals(expected, collection)
         }
 
@@ -302,7 +313,7 @@ class SgfParserTest {
         )
         fun `WL can parse a value that is a number or real`(sgf: String, number: Double) {
             val collection = SgfCollection.from(sgf)
-            val expected = sgf { tree { node { property(SgfProperty.Timing.WL(number)) } } }
+            val expected = SgfCollection(nelOf(SgfGameTree(nelOf(SgfNode(SgfProperty.Timing.WL(number))))))
             assertEquals(expected, collection)
         }
     }
@@ -328,7 +339,7 @@ class SgfParserTest {
         fun `FG can have no value`() {
             val sgf = "(;FG[])"
             val collection = SgfCollection.from(sgf)
-            val expected = sgf { tree { node { property(SgfProperty.Misc.FG()) } } }
+            val expected = SgfCollection(nelOf(SgfGameTree(nelOf(SgfNode(SgfProperty.Misc.FG())))))
             assertEquals(expected, collection)
         }
 
@@ -339,7 +350,7 @@ class SgfParserTest {
         )
         fun `FG can have a figure flag and a diagram name`(sgf: String, flag: Int, name: String) {
             val collection = SgfCollection.from(sgf)
-            val expected = sgf { tree { node { property(SgfProperty.Misc.FG(name, flag)) } } }
+            val expected = SgfCollection(nelOf(SgfGameTree(nelOf(SgfNode(SgfProperty.Misc.FG(name, flag))))))
             assertEquals(expected, collection)
         }
 
@@ -356,28 +367,30 @@ class SgfParserTest {
         @Test
         fun `VW can have an empty list`() {
             val collection = SgfCollection.from("(;VW[])")
-            val expected = sgf { tree { node { property(SgfProperty.Misc.VW(emptySet())) } } }
+            val expected = SgfCollection(nelOf(SgfGameTree(nelOf(SgfNode(SgfProperty.Misc.VW(emptySet()))))))
             assertEquals(expected, collection)
         }
 
         @Test
         fun `VW can contain a list of points`() {
             val collection = SgfCollection.from("(;VW[aa][bb][cc])")
-            val expected = sgf {
-                tree {
-                    node {
-                        property(
-                            SgfProperty.Misc.VW(
-                                setOf(
-                                    SgfPoint(1, 1),
-                                    SgfPoint(2, 2),
-                                    SgfPoint(3, 3)
+            val expected = SgfCollection(
+                nelOf(
+                    SgfGameTree(
+                        nelOf(
+                            SgfNode(
+                                SgfProperty.Misc.VW(
+                                    setOf(
+                                        SgfPoint(1, 1),
+                                        SgfPoint(2, 2),
+                                        SgfPoint(3, 3)
+                                    )
                                 )
                             )
                         )
-                    }
-                }
-            }
+                    )
+                )
+            )
 
             assertEquals(expected, collection)
         }
@@ -401,7 +414,7 @@ class SgfParserTest {
         )
         fun `PM will parse to print mode`(sgf: String, number: Int) {
             val collection = SgfCollection.from(sgf)
-            val expected = sgf { tree { node { property(SgfProperty.Misc.PM(number)) } } }
+            val expected = SgfCollection(nelOf(SgfGameTree(nelOf(SgfNode(SgfProperty.Misc.PM(number))))))
             assertEquals(expected, collection)
         }
     }
@@ -421,28 +434,30 @@ class SgfParserTest {
         @Test
         fun `DD can have an empty list`() {
             val collection = SgfCollection.from("(;DD[])")
-            val expected = sgf { tree { node { property(SgfProperty.Markup.DD(emptySet())) } } }
+            val expected = SgfCollection(nelOf(SgfGameTree(nelOf(SgfNode(SgfProperty.Markup.DD(emptySet()))))))
             assertEquals(expected, collection)
         }
 
         @Test
         fun `DD can contain a list of points`() {
             val collection = SgfCollection.from("(;DD[aa][bb][cc])")
-            val expected = sgf {
-                tree {
-                    node {
-                        property(
-                            SgfProperty.Markup.DD(
-                                setOf(
-                                    SgfPoint(1, 1),
-                                    SgfPoint(2, 2),
-                                    SgfPoint(3, 3)
+            val expected = SgfCollection(
+                nelOf(
+                    SgfGameTree(
+                        nelOf(
+                            SgfNode(
+                                SgfProperty.Markup.DD(
+                                    setOf(
+                                        SgfPoint(1, 1),
+                                        SgfPoint(2, 2),
+                                        SgfPoint(3, 3)
+                                    )
                                 )
                             )
                         )
-                    }
-                }
-            }
+                    )
+                )
+            )
 
             assertEquals(expected, collection)
         }
@@ -456,193 +471,265 @@ class SgfParserTest {
                 {
                     val sgf = "(;RE[B+0.5])"
                     val actual = SgfCollection.from(sgf)
-                    val expected = sgf {
-                        tree {
-                            node {
-                                property(SgfProperty.GameInfo.RE(GameResult.Score(SgfColor.Black, 0.5)))
-                            }
-                        }
-                    }
+                    val expected = SgfCollection(
+                        nelOf(
+                            SgfGameTree(
+                                nelOf(
+                                    SgfNode(
+                                        SgfProperty.GameInfo.RE(GameResult.Score(SgfColor.Black, 0.5))
+                                    )
+                                )
+                            )
+                        )
+                    )
                     assertEquals(expected, actual)
                 },
                 {
                     val sgf = "(;RE[W+0.5])"
                     val actual = SgfCollection.from(sgf)
-                    val expected = sgf {
-                        tree {
-                            node {
-                                property(SgfProperty.GameInfo.RE(GameResult.Score(SgfColor.White, 0.5)))
-                            }
-                        }
-                    }
+                    val expected = SgfCollection(
+                        nelOf(
+                            SgfGameTree(
+                                nelOf(
+                                    SgfNode(
+                                        SgfProperty.GameInfo.RE(GameResult.Score(SgfColor.White, 0.5))
+                                    )
+                                )
+                            )
+                        )
+                    )
                     assertEquals(expected, actual)
                 },
                 {
                     val sgf = "(;RE[W+5])"
                     val actual = SgfCollection.from(sgf)
-                    val expected = sgf {
-                        tree {
-                            node {
-                                property(SgfProperty.GameInfo.RE(GameResult.Score(SgfColor.White, 5.0)))
-                            }
-                        }
-                    }
+                    val expected = SgfCollection(
+                        nelOf(
+                            SgfGameTree(
+                                nelOf(
+                                    SgfNode(
+                                        SgfProperty.GameInfo.RE(GameResult.Score(SgfColor.White, 5.0))
+                                    )
+                                )
+                            )
+                        )
+                    )
                     assertEquals(expected, actual)
                 },
                 {
                     val sgf = "(;RE[0])"
                     val actual = SgfCollection.from(sgf)
-                    val expected = sgf {
-                        tree {
-                            node {
-                                property(SgfProperty.GameInfo.RE(GameResult.Draw))
-                            }
-                        }
-                    }
+                    val expected = SgfCollection(
+                        nelOf(
+                            SgfGameTree(
+                                nelOf(
+                                    SgfNode(
+                                        SgfProperty.GameInfo.RE(GameResult.Draw)
+                                    )
+                                )
+                            )
+                        )
+                    )
                     assertEquals(expected, actual)
                 },
                 {
                     val sgf = "(;RE[B+Time])"
                     val actual = SgfCollection.from(sgf)
-                    val expected = sgf {
-                        tree {
-                            node {
-                                property(SgfProperty.GameInfo.RE(GameResult.Time(SgfColor.Black)))
-                            }
-                        }
-                    }
+                    val expected = SgfCollection(
+                        nelOf(
+                            SgfGameTree(
+                                nelOf(
+                                    SgfNode(
+                                        SgfProperty.GameInfo.RE(GameResult.Time(SgfColor.Black))
+                                    )
+                                )
+                            )
+                        )
+                    )
                     assertEquals(expected, actual)
                 },
                 {
                     val sgf = "(;RE[B+T])"
                     val actual = SgfCollection.from(sgf)
-                    val expected = sgf {
-                        tree {
-                            node {
-                                property(SgfProperty.GameInfo.RE(GameResult.Time(SgfColor.Black)))
-                            }
-                        }
-                    }
+                    val expected = SgfCollection(
+                        nelOf(
+                            SgfGameTree(
+                                nelOf(
+                                    SgfNode(
+                                        SgfProperty.GameInfo.RE(GameResult.Time(SgfColor.Black))
+                                    )
+                                )
+                            )
+                        )
+                    )
                     assertEquals(expected, actual)
                 },
                 {
                     val sgf = "(;RE[B+R])"
                     val actual = SgfCollection.from(sgf)
-                    val expected = sgf {
-                        tree {
-                            node {
-                                property(SgfProperty.GameInfo.RE(GameResult.Resignation(SgfColor.Black)))
-                            }
-                        }
-                    }
+                    val expected = SgfCollection(
+                        nelOf(
+                            SgfGameTree(
+                                nelOf(
+                                    SgfNode(
+                                        SgfProperty.GameInfo.RE(GameResult.Resignation(SgfColor.Black))
+                                    )
+                                )
+                            )
+                        )
+                    )
                     assertEquals(expected, actual)
                 },
                 {
                     val sgf = "(;RE[B+Resign])"
                     val actual = SgfCollection.from(sgf)
-                    val expected = sgf {
-                        tree {
-                            node {
-                                property(SgfProperty.GameInfo.RE(GameResult.Resignation(SgfColor.Black)))
-                            }
-                        }
-                    }
+                    val expected = SgfCollection(
+                        nelOf(
+                            SgfGameTree(
+                                nelOf(
+                                    SgfNode(
+                                        SgfProperty.GameInfo.RE(GameResult.Resignation(SgfColor.Black))
+                                    )
+                                )
+                            )
+                        )
+                    )
                     assertEquals(expected, actual)
                 },
                 {
                     val sgf = "(;RE[W+R])"
                     val actual = SgfCollection.from(sgf)
-                    val expected = sgf {
-                        tree {
-                            node {
-                                property(SgfProperty.GameInfo.RE(GameResult.Resignation(SgfColor.White)))
-                            }
-                        }
-                    }
+                    val expected = SgfCollection(
+                        nelOf(
+                            SgfGameTree(
+                                nelOf(
+                                    SgfNode(
+                                        SgfProperty.GameInfo.RE(GameResult.Resignation(SgfColor.White))
+                                    )
+                                )
+                            )
+                        )
+                    )
+
                     assertEquals(expected, actual)
                 },
                 {
                     val sgf = "(;RE[W+Resign])"
                     val actual = SgfCollection.from(sgf)
-                    val expected = sgf {
-                        tree {
-                            node {
-                                property(SgfProperty.GameInfo.RE(GameResult.Resignation(SgfColor.White)))
-                            }
-                        }
-                    }
+                    val expected = SgfCollection(
+                        nelOf(
+                            SgfGameTree(
+                                nelOf(
+                                    SgfNode(
+                                        SgfProperty.GameInfo.RE(GameResult.Resignation(SgfColor.White))
+                                    )
+                                )
+                            )
+                        )
+                    )
+
                     assertEquals(expected, actual)
                 },
                 {
                     val sgf = "(;RE[B+F])"
                     val actual = SgfCollection.from(sgf)
-                    val expected = sgf {
-                        tree {
-                            node {
-                                property(SgfProperty.GameInfo.RE(GameResult.Forfeit(SgfColor.Black)))
-                            }
-                        }
-                    }
+                    val expected = SgfCollection(
+                        nelOf(
+                            SgfGameTree(
+                                nelOf(
+                                    SgfNode(
+                                        SgfProperty.GameInfo.RE(GameResult.Forfeit(SgfColor.Black))
+                                    )
+                                )
+                            )
+                        )
+                    )
+
                     assertEquals(expected, actual)
                 },
                 {
                     val sgf = "(;RE[B+Forfeit])"
                     val actual = SgfCollection.from(sgf)
-                    val expected = sgf {
-                        tree {
-                            node {
-                                property(SgfProperty.GameInfo.RE(GameResult.Forfeit(SgfColor.Black)))
-                            }
-                        }
-                    }
+                    val expected = SgfCollection(
+                        nelOf(
+                            SgfGameTree(
+                                nelOf(
+                                    SgfNode(
+                                        SgfProperty.GameInfo.RE(GameResult.Forfeit(SgfColor.Black))
+                                    )
+                                )
+                            )
+                        )
+                    )
+
                     assertEquals(expected, actual)
                 },
                 {
                     val sgf = "(;RE[W+Forfeit])"
                     val actual = SgfCollection.from(sgf)
-                    val expected = sgf {
-                        tree {
-                            node {
-                                property(SgfProperty.GameInfo.RE(GameResult.Forfeit(SgfColor.White)))
-                            }
-                        }
-                    }
+                    val expected = SgfCollection(
+                        nelOf(
+                            SgfGameTree(
+                                nelOf(
+                                    SgfNode(
+                                        SgfProperty.GameInfo.RE(GameResult.Forfeit(SgfColor.White))
+                                    )
+                                )
+                            )
+                        )
+                    )
+
                     assertEquals(expected, actual)
                 },
                 {
                     val sgf = "(;RE[W+F])"
                     val actual = SgfCollection.from(sgf)
-                    val expected = sgf {
-                        tree {
-                            node {
-                                property(SgfProperty.GameInfo.RE(GameResult.Forfeit(SgfColor.White)))
-                            }
-                        }
-                    }
+                    val expected = SgfCollection(
+                        nelOf(
+                            SgfGameTree(
+                                nelOf(
+                                    SgfNode(
+                                        SgfProperty.GameInfo.RE(GameResult.Forfeit(SgfColor.White))
+                                    )
+                                )
+                            )
+                        )
+                    )
+
                     assertEquals(expected, actual)
                 },
                 {
                     val sgf = "(;RE[Void])"
                     val actual = SgfCollection.from(sgf)
-                    val expected = sgf {
-                        tree {
-                            node {
-                                property(SgfProperty.GameInfo.RE(GameResult.Suspended))
-                            }
-                        }
-                    }
+                    val expected = SgfCollection(
+                        nelOf(
+                            SgfGameTree(
+                                nelOf(
+                                    SgfNode(
+                                        SgfProperty.GameInfo.RE(GameResult.Suspended)
+                                    )
+                                )
+                            )
+                        )
+                    )
+
                     assertEquals(expected, actual)
                 },
                 {
                     val sgf = "(;RE[?])"
                     val actual = SgfCollection.from(sgf)
-                    val expected = sgf {
-                        tree {
-                            node {
-                                property(SgfProperty.GameInfo.RE(GameResult.Unknown))
-                            }
-                        }
-                    }
+                    val expected = SgfCollection(
+                        nelOf(
+                            SgfGameTree(
+                                nelOf(
+                                    SgfNode(
+                                        SgfProperty.GameInfo.RE(GameResult.Unknown)
+                                    )
+                                )
+                            )
+                        )
+                    )
+
                     assertEquals(expected, actual)
                 }
             )
@@ -654,93 +741,108 @@ class SgfParserTest {
                 {
                     val sgf = "(;DT[2022-04-20])"
                     val actual = SgfCollection.from(sgf)
-                    val expected = sgf {
-                        tree {
-                            node {
-                                property(SgfProperty.GameInfo.DT(listOf(GameDate.of(2022, 4, 20))))
-                            }
-                        }
-                    }
+                    val expected = SgfCollection(
+                        nelOf(
+                            SgfGameTree(
+                                nelOf(
+                                    SgfNode(
+                                        SgfProperty.GameInfo.DT(listOf(GameDate.of(2022, 4, 20)))
+                                    )
+                                )
+                            )
+                        )
+                    )
+
                     assertEquals(expected, actual)
                 },
                 {
                     val sgf = "(;DT[2022-04-20,21])"
                     val actual = SgfCollection.from(sgf)
-                    val expected = sgf {
-                        tree {
-                            node {
-                                property(
-                                    SgfProperty.GameInfo.DT(
-                                        listOf(
-                                            GameDate.of(2022, 4, 20),
-                                            GameDate.of(2022, 4, 21)
+                    val expected = SgfCollection(
+                        nelOf(
+                            SgfGameTree(
+                                nelOf(
+                                    SgfNode(
+                                        SgfProperty.GameInfo.DT(
+                                            listOf(
+                                                GameDate.of(2022, 4, 20),
+                                                GameDate.of(2022, 4, 21)
+                                            )
                                         )
                                     )
                                 )
-                            }
-                        }
-                    }
+                            )
+                        )
+                    )
+
                     assertEquals(expected, actual)
                 },
                 {
                     val sgf = "(;DT[2022-04-20,21,2023-05-06])"
                     val actual = SgfCollection.from(sgf)
-                    val expected = sgf {
-                        tree {
-                            node {
-                                property(
-                                    SgfProperty.GameInfo.DT(
-                                        listOf(
-                                            GameDate.of(2022, 4, 20),
-                                            GameDate.of(2022, 4, 21),
-                                            GameDate.of(2023, 5, 6)
+                    val expected = SgfCollection(
+                        nelOf(
+                            SgfGameTree(
+                                nelOf(
+                                    SgfNode(
+                                        SgfProperty.GameInfo.DT(
+                                            listOf(
+                                                GameDate.of(2022, 4, 20),
+                                                GameDate.of(2022, 4, 21),
+                                                GameDate.of(2023, 5, 6)
+                                            )
                                         )
                                     )
                                 )
-                            }
-                        }
-                    }
+                            )
+                        )
+                    )
+
                     assertEquals(expected, actual)
                 },
                 {
                     val sgf = "(;DT[2022-04-20,05-06,07])"
                     val actual = SgfCollection.from(sgf)
-                    val expected = sgf {
-                        tree {
-                            node {
-                                property(
-                                    SgfProperty.GameInfo.DT(
-                                        listOf(
-                                            GameDate.of(2022, 4, 20),
-                                            GameDate.of(2022, 5, 6),
-                                            GameDate.of(2022, 5, 7)
+                    val expected = SgfCollection(
+                        nelOf(
+                            SgfGameTree(
+                                nelOf(
+                                    SgfNode(
+                                        SgfProperty.GameInfo.DT(
+                                            listOf(
+                                                GameDate.of(2022, 4, 20),
+                                                GameDate.of(2022, 5, 6),
+                                                GameDate.of(2022, 5, 7)
+                                            )
                                         )
                                     )
                                 )
-                            }
-                        }
-                    }
+                            )
+                        )
+                    )
                     assertEquals(expected, actual)
                 },
                 {
                     val sgf = "(;DT[2022-04-06,07,06-01,06])"
                     val actual = SgfCollection.from(sgf)
-                    val expected = sgf {
-                        tree {
-                            node {
-                                property(
-                                    SgfProperty.GameInfo.DT(
-                                        listOf(
-                                            GameDate.of(2022, 4, 6),
-                                            GameDate.of(2022, 4, 7),
-                                            GameDate.of(2022, 6, 1),
-                                            GameDate.of(2022, 6, 6)
+                    val expected = SgfCollection(
+                        nelOf(
+                            SgfGameTree(
+                                nelOf(
+                                    SgfNode(
+                                        SgfProperty.GameInfo.DT(
+                                            listOf(
+                                                GameDate.of(2022, 4, 6),
+                                                GameDate.of(2022, 4, 7),
+                                                GameDate.of(2022, 6, 1),
+                                                GameDate.of(2022, 6, 6)
+                                            )
                                         )
                                     )
                                 )
-                            }
-                        }
-                    }
+                            )
+                        )
+                    )
                     assertEquals(expected, actual)
                 },
             )
@@ -790,8 +892,8 @@ class SgfParserTest {
 
     private fun assertThrowsParseException(marker: Marker, block: () -> Unit) = try {
         block()
-        assertTrue(false, "Expected an SgfParseException")
-    } catch (ex: SgfParseException) {
+        assertTrue(false, "Expected an SgfException.ParseError")
+    } catch (ex: SgfException.ParseError) {
         assertEquals(marker, ex.marker)
     }
 

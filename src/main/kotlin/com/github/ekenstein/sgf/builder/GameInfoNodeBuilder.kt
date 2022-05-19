@@ -5,6 +5,7 @@ import com.github.ekenstein.sgf.GameResult
 import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfProperty
 import com.github.ekenstein.sgf.extensions.plus
+import com.github.ekenstein.sgf.extensions.removeProperty
 
 sealed class Overtime {
     data class ByoYomi(val periods: Int, val seconds: Int) : Overtime()
@@ -52,7 +53,14 @@ private val Rank.asString
 
 @SgfDslMarker
 interface GameInfoNodeBuilder : NodeBuilder {
-    fun handicap(value: Int)
+    /**
+     * Sets the handicap information about the game. Note that this will not add
+     * the initial position for the board. See [SetupBuilder.stones] if you wish
+     * to set up the board in its initial position.
+     *
+     * If the [numberOfStones] is less than 2, the property will not be added to the tree.
+     */
+    fun handicap(numberOfStones: Int)
     fun komi(value: Double)
     fun result(value: GameResult)
     fun event(name: String)
@@ -69,8 +77,12 @@ interface GameInfoNodeBuilder : NodeBuilder {
 }
 
 internal class DefaultGameInfoNodeBuilder(override var node: SgfNode) : GameInfoNodeBuilder, DefaultNodeBuilder() {
-    override fun handicap(value: Int) {
-        node += SgfProperty.GameInfo.HA(value)
+    override fun handicap(numberOfStones: Int) {
+        if (numberOfStones < 2) {
+            node = node.removeProperty<SgfProperty.GameInfo.HA>()
+        } else {
+            node += SgfProperty.GameInfo.HA(numberOfStones)
+        }
     }
 
     override fun komi(value: Double) {

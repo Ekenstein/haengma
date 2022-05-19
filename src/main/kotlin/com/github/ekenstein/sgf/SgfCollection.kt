@@ -1,20 +1,19 @@
 package com.github.ekenstein.sgf
 
+import com.github.ekenstein.sgf.utils.NonEmptyList
 import java.nio.charset.Charset
 import java.time.LocalDate
 import java.time.temporal.ChronoField
 import java.util.Calendar
 import java.util.GregorianCalendar
 
-data class SgfCollection(val trees: List<SgfGameTree>) {
+data class SgfCollection(val trees: NonEmptyList<SgfGameTree>) {
     companion object
 }
 
-data class SgfGameTree(val sequence: List<SgfNode>, val trees: List<SgfGameTree>) {
-    constructor(sequence: List<SgfNode>) : this(sequence, emptyList())
-    companion object {
-        val empty = SgfGameTree(emptyList(), emptyList())
-    }
+data class SgfGameTree(val sequence: NonEmptyList<SgfNode>, val trees: List<SgfGameTree>) {
+    constructor(sequence: NonEmptyList<SgfNode>) : this(sequence, emptyList())
+    companion object
 }
 data class SgfNode(val properties: Set<SgfProperty>) {
     constructor(vararg property: SgfProperty) : this(property.toSet())
@@ -143,11 +142,22 @@ sealed class Move {
     object Pass : Move()
 }
 
+val Move.asPointOrNull: SgfPoint?
+    get() = when (this) {
+        Move.Pass -> null
+        is Move.Stone -> point
+    }
+
 data class SgfPoint(val x: Int, val y: Int)
 
 enum class SgfColor {
     Black,
     White;
+}
+
+fun SgfColor.flip(): SgfColor = when (this) {
+    SgfColor.Black -> SgfColor.White
+    SgfColor.White -> SgfColor.Black
 }
 
 enum class SgfDouble {

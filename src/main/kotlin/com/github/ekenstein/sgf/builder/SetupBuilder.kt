@@ -5,9 +5,14 @@ import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.SgfProperty
 import com.github.ekenstein.sgf.extensions.plus
+import com.github.ekenstein.sgf.extensions.removeProperty
 
 @SgfDslMarker
 interface SetupBuilder {
+    /**
+     * Adds stones of the given [color] at the given [points]
+     * If the given points represents an empty set, the property will not be added to the tree.
+     */
     fun stones(color: SgfColor, points: Set<SgfPoint>)
     fun clear(points: Set<SgfPoint>)
     fun colorToPlay(color: SgfColor)
@@ -20,7 +25,11 @@ internal class DefaultSetupBuilder(override var node: SgfNode) : DefaultNodeBuil
             SgfColor.White -> SgfProperty.Setup.AW(points)
         }
 
-        node += property
+        if (points.isEmpty()) {
+            node.removeProperty(property::class)
+        } else {
+            node += property
+        }
     }
 
     override fun clear(points: Set<SgfPoint>) {

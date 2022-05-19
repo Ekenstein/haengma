@@ -16,6 +16,7 @@ import com.github.ekenstein.sgf.serialization.valueserializers.numberSerializer
 import com.github.ekenstein.sgf.serialization.valueserializers.pointSerializer
 import com.github.ekenstein.sgf.serialization.valueserializers.simpleTextSerializer
 import com.github.ekenstein.sgf.serialization.valueserializers.textSerializer
+import com.github.ekenstein.sgf.utils.nelOf
 import java.io.ByteArrayOutputStream
 import java.io.OutputStream
 import java.io.PrintStream
@@ -25,14 +26,14 @@ fun SgfCollection.encode(outputStream: OutputStream) {
     encode(printStream as Appendable)
 }
 
-fun SgfGameTree.encode(outputStream: OutputStream) = SgfCollection(listOf(this)).encode(outputStream)
+fun SgfGameTree.encode(outputStream: OutputStream) = SgfCollection(nelOf(this)).encode(outputStream)
 
 fun SgfCollection.encodeToString(): String = ByteArrayOutputStream().use {
     encode(it)
     String(it.toByteArray())
 }
 
-fun SgfGameTree.encodeToString(): String = SgfCollection(listOf(this)).encodeToString()
+fun SgfGameTree.encodeToString(): String = SgfCollection(nelOf(this)).encodeToString()
 
 fun SgfCollection.encode(appendable: Appendable) {
     trees.forEach { it.encode(appendable) }

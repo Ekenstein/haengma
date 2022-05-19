@@ -3,6 +3,7 @@ package com.github.ekenstein.sgf.parser
 import com.github.ekenstein.sgf.GameType
 import com.github.ekenstein.sgf.Move
 import com.github.ekenstein.sgf.SgfCollection
+import com.github.ekenstein.sgf.SgfException
 import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfProperty
@@ -20,6 +21,7 @@ import com.github.ekenstein.sgf.parser.valueparsers.pointParser
 import com.github.ekenstein.sgf.parser.valueparsers.realParser
 import com.github.ekenstein.sgf.parser.valueparsers.simpleTextParser
 import com.github.ekenstein.sgf.parser.valueparsers.textParser
+import com.github.ekenstein.sgf.utils.NonEmptyList
 import org.antlr.v4.runtime.BaseErrorListener
 import org.antlr.v4.runtime.CharStream
 import org.antlr.v4.runtime.CharStreams
@@ -41,7 +43,7 @@ private class SgfErrorListener : BaseErrorListener() {
         msg: String?,
         e: RecognitionException?
     ) {
-        throw SgfParseException(msg!!, Marker(line, charPositionInLine, line, charPositionInLine))
+        throw SgfException.ParseError(msg!!, Marker(line, charPositionInLine, line, charPositionInLine))
     }
 }
 
@@ -79,15 +81,22 @@ private fun SgfCollection.Companion.from(
     return parser.collection().extract(config)
 }
 
-private fun SgfParser.CollectionContext.extract(configuration: SgfParserConfiguration) = SgfCollection(
-    gameTree().map { it.extract(configuration) }
-)
+private fun SgfParser.CollectionContext.extract(configuration: SgfParserConfiguration): SgfCollection {
+    val trees = gameTree().map { it.extract(configuration) }
+    return SgfCollection(
+        NonEmptyList.fromListUnsafe(trees)
+    )
+}
 
 private fun SgfParser.GameTreeContext.extract(configuration: SgfParserConfiguration): SgfGameTree {
-    val sequence = sequence().extract(configuration)
+    val sequenceContext = sequence()
+    val sequence = sequenceContext.extract(configuration).takeIf {
+        it.isNotEmpty()
+    } ?: throw SgfException.ParseError("A game tree sequence must not be empty", sequenceContext.toMarker())
+
     val variations = gameTree().map { it.extract(configuration) }
 
-    return SgfGameTree(sequence, variations)
+    return SgfGameTree(NonEmptyList.fromListUnsafe(sequence), variations)
 }
 
 private fun SgfParser.SequenceContext.extract(configuration: SgfParserConfiguration) =
@@ -113,7 +122,7 @@ private fun SgfParser.PropContext.extract(configuration: SgfParserConfiguration)
             true -> privateProp().extract()
             false -> null
         }
-        else -> throw SgfParseException("Unrecognized property", toMarker())
+        else -> throw SgfException.ParseError("Unrecognized property", toMarker())
     }
 
 private fun SgfParser.PrivatePropContext.extract(): SgfProperty = SgfProperty.Private(
@@ -126,7 +135,7 @@ private fun SgfParser.MoveContext.extract(): SgfProperty.Move = when (this) {
     is SgfParser.WhiteMoveContext -> SgfProperty.Move.W(VALUE()?.asMove() ?: Move.Pass)
     is SgfParser.KoContext -> SgfProperty.Move.KO
     is SgfParser.MoveNumberContext -> SgfProperty.Move.MN(VALUE().asNumber())
-    else -> throw SgfParseException("Unrecognized move property $text", toMarker())
+    else -> throw SgfException.ParseError("Unrecognized move property $text", toMarker())
 }
 
 private fun SgfParser.SetupContext.extract(): SgfProperty.Setup = when (this) {
@@ -134,7 +143,7 @@ private fun SgfParser.SetupContext.extract(): SgfProperty.Setup = when (this) {
     is SgfParser.AddBlackContext -> SgfProperty.Setup.AB(VALUE().flatMap { it.asCompressedPoint() }.toSet())
     is SgfParser.AddWhiteContext -> SgfProperty.Setup.AW(VALUE().flatMap { it.asCompressedPoint() }.toSet())
     is SgfParser.PlayerToPlayContext -> SgfProperty.Setup.PL(VALUE().asColor(true))
-    else -> throw SgfParseException("Unrecognized setup property $text", toMarker())
+    else -> throw SgfException.ParseError("Unrecognized setup property $text", toMarker())
 }
 
 private fun SgfParser.NodeAnnotationContext.extract(): SgfProperty.NodeAnnotation = when (this) {
@@ -146,7 +155,7 @@ private fun SgfParser.NodeAnnotationContext.extract(): SgfProperty.NodeAnnotatio
     is SgfParser.NodeNameContext -> SgfProperty.NodeAnnotation.N(VALUE().asSimpleText())
     is SgfParser.UnclearPositionContext -> SgfProperty.NodeAnnotation.UC(VALUE().asDouble())
     is SgfParser.ValueContext -> SgfProperty.NodeAnnotation.V(VALUE().asReal())
-    else -> throw SgfParseException("Unrecognized node annotation property $text", toMarker())
+    else -> throw SgfException.ParseError("Unrecognized node annotation property $text", toMarker())
 }
 
 private fun SgfParser.MoveAnnotationContext.extract(): SgfProperty.MoveAnnotation =
@@ -155,7 +164,7 @@ private fun SgfParser.MoveAnnotationContext.extract(): SgfProperty.MoveAnnotatio
         is SgfParser.DoubtfulContext -> SgfProperty.MoveAnnotation.DO
         is SgfParser.InterestingContext -> SgfProperty.MoveAnnotation.IT
         is SgfParser.TesujiContext -> SgfProperty.MoveAnnotation.TE(VALUE().asDouble())
-        else -> throw SgfParseException("Unrecognized move annotation property $text", toMarker())
+        else -> throw SgfException.ParseError("Unrecognized move annotation property $text", toMarker())
     }
 
 private fun SgfParser.MarkupContext.extract(): SgfProperty.Markup = when (this) {
@@ -170,7 +179,7 @@ private fun SgfParser.MarkupContext.extract(): SgfProperty.Markup = when (this) 
     is SgfParser.DimPointsContext -> SgfProperty.Markup.DD(
         VALUE()?.flatMap { it.asCompressedPoint() }?.toSet().orEmpty()
     )
-    else -> throw SgfParseException("Unrecognized markup property $text", toMarker())
+    else -> throw SgfException.ParseError("Unrecognized markup property $text", toMarker())
 }
 
 private fun SgfParser.RootContext.extract(): SgfProperty.Root = when (this) {
@@ -195,10 +204,10 @@ private fun SgfParser.RootContext.extract(): SgfProperty.Root = when (this) {
         val (width, height) = try {
             val number = numberParser.parse(marker, raw.textStrippedFromBrackets)
             number to number
-        } catch (ex: SgfParseException) {
+        } catch (ex: SgfException.ParseError) {
             try {
                 composed(numberParser, numberParser).parse(marker, raw.textStrippedFromBrackets)
-            } catch (ex: SgfParseException) {
+            } catch (ex: SgfException.ParseError) {
                 marker.throwParseException("Expected a number or a composed value containing numbers, but got $raw")
             }
         }
@@ -206,7 +215,7 @@ private fun SgfParser.RootContext.extract(): SgfProperty.Root = when (this) {
     }
     is SgfParser.CharsetContext -> SgfProperty.Root.CA(VALUE().asCharset())
     is SgfParser.StyleContext -> SgfProperty.Root.ST(VALUE().asNumber(0..3))
-    else -> throw SgfParseException("Unrecognized root property $text", toMarker())
+    else -> throw SgfException.ParseError("Unrecognized root property $text", toMarker())
 }
 
 private fun SgfParser.GameInfoContext.extract(): SgfProperty.GameInfo = when (this) {
@@ -233,7 +242,7 @@ private fun SgfParser.GameInfoContext.extract(): SgfProperty.GameInfo = when (th
     is SgfParser.AnnotationContext -> SgfProperty.GameInfo.AN(VALUE().asSimpleText())
     is SgfParser.CopyrightContext -> SgfProperty.GameInfo.CP(VALUE().asSimpleText())
     is SgfParser.PlaceContext -> SgfProperty.GameInfo.PC(VALUE().asSimpleText())
-    else -> throw SgfParseException("Unrecognized game info property $text", toMarker())
+    else -> throw SgfException.ParseError("Unrecognized game info property $text", toMarker())
 }
 
 private fun SgfParser.TimingContext.extract(): SgfProperty.Timing = when (this) {
@@ -241,14 +250,14 @@ private fun SgfParser.TimingContext.extract(): SgfProperty.Timing = when (this) 
     is SgfParser.WhiteTimeLeftContext -> SgfProperty.Timing.WL(VALUE().asReal())
     is SgfParser.OtStonesBlackContext -> SgfProperty.Timing.OB(VALUE().asNumber())
     is SgfParser.OtStonesWhiteContext -> SgfProperty.Timing.OW(VALUE().asNumber())
-    else -> throw SgfParseException("Unrecognized timing property $text", toMarker())
+    else -> throw SgfException.ParseError("Unrecognized timing property $text", toMarker())
 }
 
 private fun SgfParser.MiscContext.extract(): SgfProperty.Misc = when (this) {
     is SgfParser.FigureContext -> SgfProperty.Misc.FG(VALUE()?.asComposed(numberParser(), simpleTextParser))
     is SgfParser.PrintMoveModeContext -> SgfProperty.Misc.PM(VALUE().asNumber())
     is SgfParser.ViewContext -> SgfProperty.Misc.VW(VALUE().flatMap { it.asCompressedPoint() }.toSet())
-    else -> throw SgfParseException("Unrecognized misc property $text", toMarker())
+    else -> throw SgfException.ParseError("Unrecognized misc property $text", toMarker())
 }
 
 private fun ParserRuleContext.toMarker(): Marker {

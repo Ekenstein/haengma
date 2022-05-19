@@ -3,6 +3,7 @@ package com.github.ekenstein.sgf.builder
 import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.extensions.addProperty
+import com.github.ekenstein.sgf.utils.nelOf
 
 @SgfDslMarker
 interface GameTreeBuilder {
@@ -12,7 +13,7 @@ interface GameTreeBuilder {
 }
 
 internal class DefaultGameTreeBuilder : GameTreeBuilder {
-    var gameTree = SgfGameTree.empty
+    var gameTree = SgfGameTree(nelOf(SgfNode()))
         private set
 
     override fun move(block: MoveBuilder.() -> Unit) {
