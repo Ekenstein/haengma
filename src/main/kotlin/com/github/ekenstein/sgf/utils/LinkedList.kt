@@ -47,6 +47,11 @@ sealed class LinkedList<out T>(open val tail: LinkedList<T>) : AbstractList<T>()
         is Cons -> false
         Nil -> true
     }
+
+    fun removeFirst(): Pair<T?, LinkedList<T>> = when (this) {
+        is Cons -> head to tail
+        Nil -> null to this
+    }
 }
 
 fun <T> linkedListOf(vararg items: T): LinkedList<T> = LinkedList.fromList(items.toList())

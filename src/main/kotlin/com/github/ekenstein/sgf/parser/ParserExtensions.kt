@@ -219,7 +219,7 @@ private fun SgfParser.RootContext.extract(): SgfProperty.Root = when (this) {
 }
 
 private fun SgfParser.GameInfoContext.extract(): SgfProperty.GameInfo = when (this) {
-    is SgfParser.HandicapContext -> SgfProperty.GameInfo.HA(VALUE().asNumber())
+    is SgfParser.HandicapContext -> SgfProperty.GameInfo.HA(VALUE().asNumber(2..9))
     is SgfParser.KomiContext -> SgfProperty.GameInfo.KM(VALUE().asReal())
     is SgfParser.EventContext -> SgfProperty.GameInfo.EV(VALUE().asSimpleText())
     is SgfParser.PlayerBlackContext -> SgfProperty.GameInfo.PB(VALUE().asSimpleText())

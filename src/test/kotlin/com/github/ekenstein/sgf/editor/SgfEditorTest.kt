@@ -1,16 +1,17 @@
-package com.github.ekenstein.sgf.viewer
+package com.github.ekenstein.sgf.editor
 
 import com.github.ekenstein.sgf.SgfColor
 import com.github.ekenstein.sgf.SgfException
 import com.github.ekenstein.sgf.SgfGameTree
+import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.SgfProperty
 import com.github.ekenstein.sgf.builder.sgf
 import com.github.ekenstein.sgf.extensions.addProperty
 import com.github.ekenstein.sgf.extensions.newGame
+import com.github.ekenstein.sgf.utils.nelOf
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import utils.nextList
 import utils.rng
@@ -247,7 +248,10 @@ class SgfEditorTest {
             { it.goToRootNode() },
             { it.goToLastNode() },
             { it.goToPreviousNodeOrStay() },
-            { it.goToNextNodeOrStay() }
+            { it.goToNextNodeOrStay() },
+            { it.goToFirstChildTreeOrStay() },
+            { it.goToNextTreeOrStay() },
+            { it.goToPreviousTreeOrStay() }
         )
 
         val apply = rng.nextList(operations)
@@ -378,7 +382,7 @@ class SgfEditorTest {
     @Test
     fun `branching a sequence with children will preserve the children for the branched out sequence`() {
         val tree = SgfGameTree.newGame(boardSize = 19, komi = 6.5, handicap = 0)
-        val actualTree = SgfEditor(tree)
+        val editor = SgfEditor(tree)
             .placeStone(SgfColor.Black, 4, 4)
             .placeStone(SgfColor.White, 16, 4)
             .goToPreviousNodeOrStay()
@@ -387,6 +391,8 @@ class SgfEditorTest {
             .goToRootNode()
             .placeStone(SgfColor.Black, 3, 3)
             .placeStone(SgfColor.White, 16, 4)
+
+        val actualTree = editor.commit()
 
         val expectedTree = sgf(tree) {
             variation {
@@ -405,7 +411,7 @@ class SgfEditorTest {
             }
         }
 
-        assertEquals(expectedTree, actualTree.commit())
+        assertEquals(expectedTree, actualTree)
     }
 
     @Test
@@ -427,17 +433,151 @@ class SgfEditorTest {
                 assertThrows<SgfException.IllegalMove> { editor.placeStone(SgfColor.Black, 6, 4) }
             },
             {
-                val board = assertDoesNotThrow {
-                    editor
-                        .placeStone(SgfColor.Black, 16, 4)
-                        .placeStone(SgfColor.White, 17, 3)
-                        .placeStone(SgfColor.Black, 6, 4)
-                        .board
-                }
+                val koContinues = editor
+                    .placeStone(SgfColor.Black, 16, 4)
+                    .placeStone(SgfColor.White, 17, 3)
+                    .placeStone(SgfColor.Black, 6, 4)
 
+                val board = koContinues.extractBoard()
                 assertEquals(2, board.blackCaptures)
                 assertEquals(1, board.whiteCaptures)
-                println(board.print())
+
+                assertThrows<SgfException.IllegalMove> {
+                    koContinues.placeStone(SgfColor.White, 5, 4)
+                }
+            }
+        )
+    }
+
+    @Test
+    fun `adding a move property to a node that has root properties will add the property to the next node`() {
+        val tree = SgfGameTree(nelOf(SgfNode(SgfProperty.Root.SZ(19))))
+        assertAll(
+            {
+                val editor = SgfEditor(tree)
+                    .goToLastNode()
+                    .placeStone(SgfColor.Black, 3, 3)
+                val actualTree = editor.commit()
+                val expectedTree = tree.copy(
+                    sequence = tree.sequence + SgfNode(SgfProperty.Move.B(3, 3))
+                )
+
+                assertEquals(expectedTree, actualTree)
+            },
+            {
+                val editor = SgfEditor(tree)
+                    .goToLastNode()
+                    .placeStone(SgfColor.Black, 3, 3)
+                    .goToPreviousNodeOrStay()
+                    .placeStone(SgfColor.Black, 3, 3)
+
+                val actualTree = editor.commit()
+                val expectedTree = tree.copy(
+                    sequence = tree.sequence + SgfNode(SgfProperty.Move.B(3, 3))
+                )
+
+                assertEquals(expectedTree, actualTree)
+            },
+            {
+                val editor = SgfEditor(tree)
+                    .goToLastNode()
+                    .placeStone(SgfColor.Black, 3, 3)
+                    .goToPreviousNodeOrStay()
+                    .placeStone(SgfColor.Black, 10, 10)
+
+                val actualTree = editor.commit()
+                val expectedTree = tree.copy(
+                    trees = listOf(
+                        SgfGameTree(nelOf(SgfNode(SgfProperty.Move.B(10, 10)))),
+                        SgfGameTree(nelOf(SgfNode(SgfProperty.Move.B(3, 3))))
+                    )
+                )
+
+                assertEquals(expectedTree, actualTree)
+            }
+        )
+    }
+
+    @Test
+    fun `adding a move property to a node that has setup properties will add the property to the next node`() {
+        val tree = SgfGameTree.newGame(19, 6.5, 0)
+        val treeWithSetupProperty = tree.copy(
+            sequence = tree.sequence + SgfNode(SgfProperty.Setup.PL(SgfColor.White))
+        )
+        assertAll(
+            {
+                val editor = SgfEditor(treeWithSetupProperty)
+                    .goToLastNode()
+                    .placeStone(SgfColor.White, 3, 3)
+                val actualTree = editor.commit()
+                val expectedTree = tree.copy(
+                    sequence = treeWithSetupProperty.sequence + SgfNode(SgfProperty.Move.W(3, 3))
+                )
+
+                assertEquals(expectedTree, actualTree)
+            },
+            {
+                val editor = SgfEditor(treeWithSetupProperty)
+                    .goToLastNode()
+                    .placeStone(SgfColor.White, 3, 3)
+                    .goToPreviousNodeOrStay()
+                    .placeStone(SgfColor.White, 3, 3)
+
+                val actualTree = editor.commit()
+                val expectedTree = tree.copy(
+                    sequence = treeWithSetupProperty.sequence + SgfNode(SgfProperty.Move.W(3, 3))
+                )
+
+                assertEquals(expectedTree, actualTree)
+            },
+            {
+                val editor = SgfEditor(treeWithSetupProperty)
+                    .goToLastNode()
+                    .placeStone(SgfColor.White, 3, 3)
+                    .goToPreviousNodeOrStay()
+                    .placeStone(SgfColor.White, 10, 10)
+
+                val actualTree = editor.commit()
+                val expectedTree = treeWithSetupProperty.copy(
+                    trees = listOf(
+                        SgfGameTree(nelOf(SgfNode(SgfProperty.Move.W(10, 10)))),
+                        SgfGameTree(nelOf(SgfNode(SgfProperty.Move.W(3, 3))))
+                    )
+                )
+
+                assertEquals(expectedTree, actualTree)
+            }
+        )
+    }
+
+    @Test
+    fun `can always retrieve game info from the editor`() {
+        assertAll(
+            {
+                val editor = SgfEditor(GameInfo.default)
+                val actualGameInfo = editor.getGameInfo()
+                assertEquals(GameInfo.default, actualGameInfo)
+            },
+            {
+                val gameTree = SgfGameTree(nelOf(SgfNode(SgfProperty.Setup.PL(SgfColor.Black))))
+                val editor = SgfEditor(gameTree)
+                val actualGameInfo = editor.getGameInfo()
+                assertEquals(GameInfo.default, actualGameInfo)
+            },
+            {
+                val gameInfo = GameInfo.default.apply {
+                    rules.komi = 6.5
+                    rules.boardSize = 9
+                }
+
+                val editor = SgfEditor(gameInfo)
+                val actualGameInfo = editor.getGameInfo()
+                assertEquals(gameInfo, actualGameInfo)
+            },
+            {
+                val editor = SgfEditor(GameInfo.default).placeStone(SgfColor.Black, 1, 1)
+                val actualGameInfo = editor.getGameInfo()
+                assertEquals(GameInfo.default, actualGameInfo)
             }
         )
     }

@@ -160,7 +160,7 @@ private val SgfProperty.valueSerializer: ValueSerializer
         is SgfProperty.GameInfo.RO -> valueSerializer(simpleTextSerializer(round, false))
         is SgfProperty.GameInfo.RU -> valueSerializer(simpleTextSerializer(rules, false))
         is SgfProperty.GameInfo.SO -> valueSerializer(simpleTextSerializer(source, false))
-        is SgfProperty.GameInfo.TM -> valueSerializer(numberSerializer(timeLimit))
+        is SgfProperty.GameInfo.TM -> valueSerializer(numberSerializer(timeLimitInSeconds))
         is SgfProperty.GameInfo.US -> valueSerializer(simpleTextSerializer(user, false))
         is SgfProperty.GameInfo.WR -> valueSerializer(simpleTextSerializer(rank, false))
         is SgfProperty.GameInfo.WT -> valueSerializer(simpleTextSerializer(team, false))

@@ -1,4 +1,4 @@
-package com.github.ekenstein.sgf.viewer
+package com.github.ekenstein.sgf.editor
 
 import com.github.ekenstein.sgf.SgfColor
 import com.github.ekenstein.sgf.SgfPoint

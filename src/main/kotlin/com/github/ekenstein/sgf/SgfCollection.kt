@@ -86,7 +86,20 @@ sealed class SgfProperty {
     }
 
     sealed class GameInfo : SgfProperty() {
-        data class HA(val numberOfStones: Int) : GameInfo()
+        /**
+         * Defines the number of handicap stones (>=2).
+         * If there is a handicap, the position should be set up with
+         * AB within the same node.
+         * HA itself doesn't add any stones to the board, nor does
+         * it imply any particular way of placing the handicap stones.
+         */
+        data class HA(val numberOfStones: Int) : GameInfo() {
+            init {
+                require(numberOfStones >= 2) {
+                    "Handicap must be larger or equal to 2"
+                }
+            }
+        }
         data class KM(val komi: Double) : GameInfo()
         data class EV(val event: String) : GameInfo()
         data class PB(val name: String) : GameInfo()
@@ -103,7 +116,12 @@ sealed class SgfProperty {
                 }
             }
         }
-        data class TM(val timeLimit: Double) : GameInfo()
+
+        /**
+         * Provides the time limits of the game.
+         * The time limit is given in seconds.
+         */
+        data class TM(val timeLimitInSeconds: Double) : GameInfo()
         data class SO(val source: String) : GameInfo()
         data class GC(val comment: String) : GameInfo()
         data class ON(val opening: String) : GameInfo()
