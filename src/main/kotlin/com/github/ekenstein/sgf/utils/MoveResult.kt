@@ -35,3 +35,8 @@ fun <T> MoveResult<T>.orElse(block: (T) -> MoveResult<T>) = when (this) {
 }
 
 fun <T> MoveResult<T>.get(): T = orNull() ?: error("The move result was a failure")
+
+fun <T> MoveResult<T>.withOrigin(origin: T): MoveResult<T> = when (this) {
+    is MoveResult.Failure -> copy(origin = origin)
+    is MoveResult.Success -> copy(origin = origin)
+}

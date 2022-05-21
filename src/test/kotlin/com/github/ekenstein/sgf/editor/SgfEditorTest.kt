@@ -249,9 +249,10 @@ class SgfEditorTest {
             { it.goToLastNode() },
             { it.goToPreviousNodeOrStay() },
             { it.goToNextNodeOrStay() },
-            { it.goToFirstChildTreeOrStay() },
+            { it.goToLeftMostChildTreeOrStay() },
             { it.goToNextTreeOrStay() },
-            { it.goToPreviousTreeOrStay() }
+            { it.goToPreviousTreeOrStay() },
+            { it.goToParentTreeOrStay() }
         )
 
         val apply = rng.nextList(operations)

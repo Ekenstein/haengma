@@ -19,20 +19,13 @@ import com.github.ekenstein.sgf.utils.Zipper
 import com.github.ekenstein.sgf.utils.commit
 import com.github.ekenstein.sgf.utils.commitAtCurrentPosition
 import com.github.ekenstein.sgf.utils.flatMap
-import com.github.ekenstein.sgf.utils.goDownLeft
-import com.github.ekenstein.sgf.utils.goLeft
-import com.github.ekenstein.sgf.utils.goRight
 import com.github.ekenstein.sgf.utils.goRightUnsafe
-import com.github.ekenstein.sgf.utils.goToLast
 import com.github.ekenstein.sgf.utils.goUp
 import com.github.ekenstein.sgf.utils.insertDownLeft
 import com.github.ekenstein.sgf.utils.insertRight
 import com.github.ekenstein.sgf.utils.linkedListOf
-import com.github.ekenstein.sgf.utils.map
 import com.github.ekenstein.sgf.utils.nelOf
-import com.github.ekenstein.sgf.utils.orElse
 import com.github.ekenstein.sgf.utils.orNull
-import com.github.ekenstein.sgf.utils.orStay
 import com.github.ekenstein.sgf.utils.toLinkedList
 import com.github.ekenstein.sgf.utils.toZipper
 import com.github.ekenstein.sgf.utils.update
@@ -75,33 +68,6 @@ fun SgfEditor.getGameInfo(): GameInfo = goToRootNode().currentNode.getGameInfo()
  * Saves the state of the editor to a [SgfGameTree]
  */
 fun SgfEditor.commit() = currentTree.commit()
-
-fun SgfEditor.goToFirstChildTree() = currentTree.goDownLeft().map(this) {
-    copy(
-        currentSequence = it.focus.sequence.toZipper(),
-        currentTree = it,
-    )
-}
-
-fun SgfEditor.goToFirstChildTreeOrStay(): SgfEditor = goToFirstChildTree().orStay()
-
-fun SgfEditor.goToNextTree(): MoveResult<SgfEditor> = currentTree.goRight().map(this) {
-    copy(
-        currentSequence = it.focus.sequence.toZipper(),
-        currentTree = it
-    )
-}
-
-fun SgfEditor.goToNextTreeOrStay() = goToNextTree().orStay()
-
-fun SgfEditor.goToPreviousTree() = currentTree.goLeft().map(this) {
-    copy(
-        currentSequence = it.focus.sequence.toZipper(),
-        currentTree = it
-    )
-}
-
-fun SgfEditor.goToPreviousTreeOrStay() = goToPreviousTree().orStay()
 
 private fun SgfEditor.updateCurrentNode(block: (SgfNode) -> SgfNode): SgfEditor {
     val newSequence = currentSequence.update(block)
@@ -171,62 +137,6 @@ fun SgfEditor.extractBoard(): Board {
     }
 }
 
-/**
- * Goes to the next node. If there are no more nodes in the current sequence,
- * the next node will be the first node in the left-most child tree.
- * If we are at the end of the tree, the current position will be returned.
- */
-fun SgfEditor.goToNextNodeOrStay(): SgfEditor = goToNextNode().orStay()
-
-/**
- * Goes to the next node. If there are no more nodes in the current sequence,
- * the next node will be the first node in the left-most child tree.
- */
-fun SgfEditor.goToNextNode(): MoveResult<SgfEditor> = currentSequence.goRight().map(this) {
-    copy(currentSequence = it)
-}.orElse {
-    currentTree.goDownLeft().map(this) {
-        copy(currentSequence = it.focus.sequence.toZipper(), currentTree = it)
-    }
-}
-
-/**
- * Goes to the last node of the tree. This includes traversing all the left-most child trees.
- */
-tailrec fun SgfEditor.goToLastNode(): SgfEditor = when (val next = goToNextNode()) {
-    is MoveResult.Failure -> this
-    is MoveResult.Success -> next.value.goToLastNode()
-}
-
-/**
- * Goes to the previous node of the tree. If there is no previous node, the current position
- * will be returned.
- */
-fun SgfEditor.goToPreviousNodeOrStay(): SgfEditor = goToPreviousNode().orStay()
-
-/**
- * Goes to the previous node of the tree. If there is no previous node, null will be returned.
- */
-fun SgfEditor.goToPreviousNode(): MoveResult<SgfEditor> = currentSequence.goLeft().map(this) {
-    copy(currentSequence = it)
-}.orElse {
-    currentTree.goUp().map(this) {
-        copy(
-            currentSequence = it.focus.sequence.toZipper().goToLast(),
-            currentTree = it
-        )
-    }
-}
-
-/**
- * Returns an editor that is stationed at the root node. If the editor is already stationed
- * at the root node, this editor will be returned.
- */
-tailrec fun SgfEditor.goToRootNode(): SgfEditor = when (val previous = goToPreviousNode()) {
-    is MoveResult.Failure -> this
-    is MoveResult.Success -> previous.value.goToRootNode()
-}
-
 private fun Board.isOccupied(stone: Stone): Boolean = stones.any { it.point == stone.point }
 
 private fun SgfEditor.isBoardRepeating(currentBoard: Board, stone: Stone): Boolean {
@@ -234,6 +144,12 @@ private fun SgfEditor.isBoardRepeating(currentBoard: Board, stone: Stone): Boole
     val nextPosition = currentBoard.placeStone(stone)
 
     return previousPosition?.stones?.toSet() == nextPosition.stones.toSet()
+}
+
+private fun SgfEditor.startingColor(): SgfColor = if (getGameInfo().rules.handicap >= 2) {
+    SgfColor.White
+} else {
+    SgfColor.Black
 }
 
 /**
@@ -253,8 +169,6 @@ fun SgfEditor.nextToPlay(): SgfColor {
         null -> goToPreviousNode().orNull()?.nextToPlay()
         else -> color
     }
-
-    fun SgfEditor.startingColor(): SgfColor = if (getGameInfo().rules.handicap >= 2) SgfColor.White else SgfColor.Black
 
     return nextToPlay() ?: startingColor()
 }
@@ -315,7 +229,7 @@ private fun SgfEditor.insertMove(property: SgfProperty.Move): SgfEditor {
             property -> copy(currentSequence = currentSequence.goRightUnsafe())
             else -> {
                 // check if there are any children that starts with this move
-                when (val childTree = goToFirstChildTree().flatMap { it.goToTreeThatStartsWithProperty(property) }) {
+                when (val childTree = goToLeftMostChildTree().flatMap { it.goToTreeThatStartsWithProperty(property) }) {
                     is MoveResult.Failure -> {
                         val node = SgfNode(property)
                         val mainTree = SgfGameTree(nelOf(node))
@@ -342,7 +256,7 @@ private fun SgfEditor.insertMove(property: SgfProperty.Move): SgfEditor {
         }
         LinkedList.Nil -> {
             // check if there are any children that starts with this move
-            when (val childTree = goToFirstChildTree().flatMap { it.goToTreeThatStartsWithProperty(property) }) {
+            when (val childTree = goToLeftMostChildTree().flatMap { it.goToTreeThatStartsWithProperty(property) }) {
                 is MoveResult.Failure -> {
                     val node = SgfNode(property)
                     val sequence = currentSequence.insertRight(node).goRightUnsafe()
