@@ -40,3 +40,5 @@ fun <T> MoveResult<T>.withOrigin(origin: T): MoveResult<T> = when (this) {
     is MoveResult.Failure -> copy(origin = origin)
     is MoveResult.Success -> copy(origin = origin)
 }
+
+fun <T> MoveResult<T>.orError(message: () -> String) = orNull() ?: error(message)

@@ -26,10 +26,12 @@ fun SgfEditor.goToNextNodeOrStay(): SgfEditor = goToNextNode().orStay()
  * child tree. If there are no more nodes in the current sequence and no child trees, a [MoveResult.Failure]
  * will be returned, otherwise [MoveResult.Success]
  */
-fun SgfEditor.goToNextNode(): MoveResult<SgfEditor> = currentSequence.goRight().map(this) {
-    copy(currentSequence = it)
-}.orElse {
+fun SgfEditor.goToNextNode(): MoveResult<SgfEditor> = goToNextNodeInSequence().orElse {
     goToLeftMostChildTree()
+}
+
+fun SgfEditor.goToNextNodeInSequence(): MoveResult<SgfEditor> = currentSequence.goRight().map(this) {
+    copy(currentSequence = it)
 }
 
 /**
@@ -54,10 +56,12 @@ fun SgfEditor.goToPreviousNodeOrStay(): SgfEditor = goToPreviousNode().orStay()
  * If there is no node to the left of the current node or no parent, a [MoveResult.Failure] will be returned,
  * otherwise [MoveResult.Success]
  */
-fun SgfEditor.goToPreviousNode(): MoveResult<SgfEditor> = currentSequence.goLeft().map(this) {
-    copy(currentSequence = it)
-}.orElse {
+fun SgfEditor.goToPreviousNode(): MoveResult<SgfEditor> = goToPreviousNodeInSequence().orElse {
     goToParentTree()
+}
+
+fun SgfEditor.goToPreviousNodeInSequence(): MoveResult<SgfEditor> = currentSequence.goLeft().map(this) {
+    copy(currentSequence = it)
 }
 
 /**

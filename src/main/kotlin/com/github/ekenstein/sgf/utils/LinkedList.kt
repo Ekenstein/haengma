@@ -54,6 +54,7 @@ sealed class LinkedList<out T>(open val tail: LinkedList<T>) : AbstractList<T>()
     }
 }
 
+fun <T> linkedListOfNotNull(vararg items: T?): LinkedList<T> = LinkedList.fromList(items.filterNotNull())
 fun <T> linkedListOf(vararg items: T): LinkedList<T> = LinkedList.fromList(items.toList())
 fun <T> emptyLinkedList(): LinkedList<T> = LinkedList.Nil
 

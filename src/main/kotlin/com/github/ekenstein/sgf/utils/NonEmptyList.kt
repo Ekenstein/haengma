@@ -35,3 +35,9 @@ fun <T> nelOf(head: T, vararg tail: T): NonEmptyList<T> = nelOf(head, tail.toLis
 
 fun <T> List<T>.toNel(): NonEmptyList<T>? = NonEmptyList.fromList(this)
 fun <T> List<T>.toNelUnsafe(): NonEmptyList<T> = NonEmptyList.fromListUnsafe(this)
+
+fun <T> LinkedList<T>.toNel(): NonEmptyList<T>? = when (this) {
+    is LinkedList.Cons -> nelOf(head, tail)
+    LinkedList.Nil -> null
+}
+fun <T> LinkedList<T>.toNelUnsafe(): NonEmptyList<T> = toNel() ?: error("The list is empty")

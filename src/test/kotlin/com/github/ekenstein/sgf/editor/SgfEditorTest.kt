@@ -552,6 +552,255 @@ class SgfEditorTest {
     }
 
     @Test
+    fun `stones added to the position must not be on the same node as move properties`() {
+        assertAll(
+            {
+                val tree = GameInfo.default.toGameTree()
+                val actualTree = SgfEditor(tree)
+                    .placeStone(SgfColor.Black, 4, 4)
+                    .addStones(SgfColor.Black, SgfPoint(4, 4), SgfPoint(5, 5))
+                    .commit()
+
+                val expectedTree = tree.copy(
+                    sequence = tree.sequence + nelOf(
+                        SgfNode(SgfProperty.Move.B(4, 4)),
+                        SgfNode(SgfProperty.Setup.AB(setOf(SgfPoint(4, 4), SgfPoint(5, 5))))
+                    )
+                )
+
+                assertEquals(expectedTree, actualTree)
+            },
+            {
+                val gameInfo = GameInfo.default
+                val actualTree = SgfEditor(gameInfo)
+                    .placeStone(SgfColor.Black, 4, 4)
+                    .placeStone(SgfColor.White, 5, 5)
+                    .goToPreviousNodeOrStay()
+                    .addStones(SgfColor.Black, SgfPoint(5, 5))
+                    .goToPreviousNodeOrStay()
+                    .addStones(SgfColor.White, SgfPoint(6, 6))
+                    .commit()
+
+                val expectedTree = SgfGameTree(
+                    nelOf(
+                        SgfNode(gameInfo.toSgfProperties()),
+                        SgfNode(SgfProperty.Move.B(4, 4))
+                    ),
+                    listOf(
+                        SgfGameTree(
+                            nelOf(SgfNode(SgfProperty.Setup.AW(setOf(SgfPoint(6, 6)))))
+                        ),
+                        SgfGameTree(
+                            nelOf(SgfNode(SgfProperty.Setup.AB(setOf(SgfPoint(5, 5)))))
+                        ),
+                        SgfGameTree(
+                            nelOf(SgfNode(SgfProperty.Move.W(5, 5)))
+                        )
+                    )
+                )
+
+                assertEquals(expectedTree, actualTree)
+            },
+            {
+                val gameInfo = GameInfo.default
+                val actualTree = SgfEditor(gameInfo)
+                    .placeStone(SgfColor.Black, 4, 4)
+                    .addStones(SgfColor.White, SgfPoint(7, 3))
+                    .placeStone(SgfColor.White, 5, 5)
+                    .commit()
+
+                val expectedTree = SgfGameTree(
+                    nelOf(
+                        SgfNode(gameInfo.toSgfProperties()),
+                        SgfNode(SgfProperty.Move.B(4, 4)),
+                        SgfNode(SgfProperty.Setup.AW(setOf(SgfPoint(7, 3)))),
+                        SgfNode(SgfProperty.Move.W(5, 5))
+                    )
+                )
+
+                assertEquals(expectedTree, actualTree)
+            },
+            {
+                val gameInfo = GameInfo.default
+                val actualTree = SgfEditor(gameInfo)
+                    .placeStone(SgfColor.Black, 4, 4)
+                    .addStones(SgfColor.Black, SgfPoint(7, 3))
+                    .placeStone(SgfColor.White, 5, 5)
+                    .commit()
+
+                val expectedTree = SgfGameTree(
+                    nelOf(
+                        SgfNode(gameInfo.toSgfProperties()),
+                        SgfNode(SgfProperty.Move.B(4, 4)),
+                        SgfNode(SgfProperty.Setup.AB(setOf(SgfPoint(7, 3)))),
+                        SgfNode(SgfProperty.Move.W(5, 5))
+                    )
+                )
+
+                assertEquals(expectedTree, actualTree)
+            }
+        )
+    }
+
+    @Test
+    fun `setup properties will merge their points`() {
+        assertAll(
+            {
+                val gameInfo = GameInfo.default
+                val actualTree = SgfEditor(gameInfo)
+                    .addStones(SgfColor.Black, SgfPoint(4, 4))
+                    .addStones(SgfColor.Black, SgfPoint(5, 5))
+                    .commit()
+
+                val properties = gameInfo.toSgfProperties() + SgfProperty.Setup.AB(
+                    setOf(
+                        SgfPoint(4, 4),
+                        SgfPoint(5, 5)
+                    )
+                )
+                val expectedTree = SgfGameTree(nelOf(SgfNode(properties)))
+
+                assertEquals(expectedTree, actualTree)
+            },
+            {
+                val actualTree = SgfEditor()
+                    .placeStone(SgfColor.Black, 4, 4)
+                    .addStones(SgfColor.White, SgfPoint(4, 4))
+                    .addStones(SgfColor.Black, SgfPoint(5, 5))
+                    .addStones(SgfColor.White, SgfPoint(6, 6))
+                    .commit()
+
+                val expectedTree = SgfGameTree(
+                    nelOf(
+                        SgfNode(GameInfo.default.toSgfProperties()),
+                        SgfNode(SgfProperty.Move.B(4, 4)),
+                        SgfNode(
+                            SgfProperty.Setup.AB(setOf(SgfPoint(5, 5))),
+                            SgfProperty.Setup.AW(setOf(SgfPoint(4, 4), SgfPoint(6, 6)))
+                        )
+                    )
+                )
+
+                assertEquals(expectedTree, actualTree)
+            },
+            {
+                val actualTree = SgfEditor()
+                    .placeStone(SgfColor.Black, 4, 4)
+                    .removeStones(SgfPoint(4, 4))
+                    .addStones(SgfColor.Black, SgfPoint(5, 5))
+                    .removeStones(SgfPoint(6, 6))
+                    .commit()
+
+                val expectedTree = SgfGameTree(
+                    nelOf(
+                        SgfNode(GameInfo.default.toSgfProperties()),
+                        SgfNode(SgfProperty.Move.B(4, 4)),
+                        SgfNode(
+                            SgfProperty.Setup.AB(setOf(SgfPoint(5, 5))),
+                            SgfProperty.Setup.AE(setOf(SgfPoint(4, 4), SgfPoint(6, 6)))
+                        )
+                    )
+                )
+
+                assertEquals(expectedTree, actualTree)
+            }
+        )
+    }
+
+    @Test
+    fun `can place a stone on a point that has been cleared`() {
+        val actualTree = SgfEditor(GameInfo.default)
+            .placeStone(SgfColor.Black, 4, 4)
+            .removeStones(SgfPoint(4, 4))
+            .placeStone(SgfColor.White, 4, 4)
+            .commit()
+
+        val expectedTree = SgfGameTree(
+            nelOf(
+                SgfNode(GameInfo.default.toSgfProperties()),
+                SgfNode(SgfProperty.Move.B(4, 4)),
+                SgfNode(SgfProperty.Setup.AE(setOf(SgfPoint(4, 4)))),
+                SgfNode(SgfProperty.Move.W(4, 4))
+            )
+        )
+
+        assertEquals(expectedTree, actualTree)
+    }
+
+    @Test
+    fun `can't place a stone on an added stone`() {
+        val editor = SgfEditor()
+            .placeStone(SgfColor.Black, 4, 4)
+            .addStones(SgfColor.Black, SgfPoint(5, 5), SgfPoint(6, 6))
+            .removeStones(SgfPoint(5, 5))
+
+        assertThrows<SgfException.IllegalMove> { editor.placeStone(SgfColor.White, 6, 6) }
+    }
+
+    @Test
+    fun `setup properties can be mixed on the same node`() {
+        val actualTree = SgfEditor()
+            .placeStone(SgfColor.Black, 4, 4)
+            .addStones(SgfColor.Black, SgfPoint(5, 5))
+            .addStones(SgfColor.White, SgfPoint(6, 6))
+            .removeStones(SgfPoint(7, 7))
+            .commit()
+
+        val expectedTree = SgfGameTree(
+            nelOf(
+                SgfNode(GameInfo.default.toSgfProperties()),
+                SgfNode(SgfProperty.Move.B(4, 4)),
+                SgfNode(
+                    SgfProperty.Setup.AB(setOf(SgfPoint(5, 5))),
+                    SgfProperty.Setup.AW(setOf(SgfPoint(6, 6))),
+                    SgfProperty.Setup.AE(setOf(SgfPoint(7, 7)))
+                )
+            )
+        )
+
+        assertEquals(expectedTree, actualTree)
+    }
+
+    @Test
+    fun `can set whose turn it is to play`() {
+        val editor = SgfEditor()
+            .placeStone(SgfColor.Black, 4, 4)
+            .setNextToPlay(SgfColor.Black)
+            .placeStone(SgfColor.Black, 5, 5)
+            .placeStone(SgfColor.White, 6, 6)
+            .goToPreviousNodeOrStay()
+            .setNextToPlay(SgfColor.Black)
+            .placeStone(SgfColor.Black, 6, 6)
+
+        val expectedTree = SgfGameTree(
+            nelOf(
+                SgfNode(GameInfo.default.toSgfProperties()),
+                SgfNode(SgfProperty.Move.B(4, 4)),
+                SgfNode(SgfProperty.Setup.PL(SgfColor.Black)),
+                SgfNode(SgfProperty.Move.B(5, 5)),
+            ),
+            listOf(
+                SgfGameTree(
+                    nelOf(
+                        SgfNode(SgfProperty.Setup.PL(SgfColor.Black)),
+                        SgfNode(SgfProperty.Move.B(6, 6))
+                    )
+                ),
+                SgfGameTree(
+                    nelOf(
+                        SgfNode(SgfProperty.Move.W(6, 6))
+                    )
+                )
+            )
+        )
+
+        assertEquals(expectedTree, editor.commit())
+        assertThrows<SgfException.IllegalMove> {
+            editor.goToPreviousNodeOrStay().placeStone(SgfColor.White, 9, 9)
+        }
+    }
+
+    @Test
     fun `can always retrieve game info from the editor`() {
         assertAll(
             {
