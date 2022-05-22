@@ -1,14 +1,11 @@
 package com.github.ekenstein.sgf.extensions
 
-import com.github.ekenstein.sgf.GameType
 import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfNode
-import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.SgfProperty
 import com.github.ekenstein.sgf.utils.NonEmptyList
 import com.github.ekenstein.sgf.utils.nelOf
 import com.github.ekenstein.sgf.utils.replace
-import kotlin.math.ceil
 import kotlin.reflect.KClass
 
 operator fun SgfNode.plus(other: SgfNode): SgfNode {
@@ -182,68 +179,4 @@ fun SgfGameTree.addProperty(property: SgfProperty) = when (property) {
     is SgfProperty.Markup,
     is SgfProperty.Misc,
     is SgfProperty.Private -> addPropertyToLastNode(property)
-}
-
-fun SgfGameTree.Companion.newGame(boardSize: Int, komi: Double, handicap: Int): SgfGameTree {
-    val maxHandicap = maxHandicapForBoardSize(boardSize)
-    require(handicap == 0 || handicap in 2..maxHandicap) {
-        "Invalid handicap $handicap. The handicap must be 0 or between 2..$maxHandicap"
-    }
-
-    val handicapPoints = handicapPoints(handicap, boardSize)
-
-    val rootNode = SgfNode(
-        SgfProperty.Root.SZ(boardSize),
-        SgfProperty.GameInfo.KM(komi),
-        SgfProperty.Root.FF(4),
-        SgfProperty.Root.GM(GameType.Go)
-    )
-
-    val node = handicapPoints.takeIf { it.isNotEmpty() }?.let {
-        rootNode.addProperty(SgfProperty.GameInfo.HA(handicap)).addProperty(SgfProperty.Setup.AB(handicapPoints))
-    } ?: rootNode
-
-    return SgfGameTree(nelOf(node))
-}
-
-private fun maxHandicapForBoardSize(boardSize: Int) = when {
-    boardSize < 7 -> 0
-    boardSize == 7 -> 4
-    boardSize % 2 == 0 -> 4
-    else -> 9
-}
-
-private fun handicapPoints(handicap: Int, boardSize: Int): Set<SgfPoint> {
-    val edgeDistance = edgeDistance(boardSize) ?: return emptySet()
-    val middle = ceil(boardSize / 2.0).toInt()
-    val tengen = SgfPoint(middle, middle)
-
-    fun points(handicap: Int): Set<SgfPoint> = when (handicap) {
-        2 -> setOf(
-            SgfPoint(x = edgeDistance, y = boardSize - edgeDistance + 1),
-            SgfPoint(x = boardSize - edgeDistance + 1, y = edgeDistance)
-        )
-        3 -> setOf(SgfPoint(x = boardSize - edgeDistance + 1, y = boardSize - edgeDistance + 1)) + points(2)
-        4 -> setOf(SgfPoint(x = edgeDistance, y = edgeDistance)) + points(3)
-        5 -> setOf(tengen) + points(4)
-        6 -> setOf(
-            SgfPoint(x = edgeDistance, y = middle),
-            SgfPoint(x = boardSize - edgeDistance + 1, y = middle)
-        ) + points(4)
-        7 -> setOf(tengen) + points(6)
-        8 -> setOf(
-            SgfPoint(middle, edgeDistance),
-            SgfPoint(middle, boardSize - edgeDistance + 1)
-        ) + points(6)
-        9 -> setOf(tengen) + points(8)
-        else -> emptySet()
-    }
-
-    return points(handicap)
-}
-
-private fun edgeDistance(boardSize: Int) = when {
-    boardSize < 7 -> null
-    boardSize < 13 -> 3
-    else -> 4
 }

@@ -13,7 +13,6 @@ data class SgfCollection(val trees: NonEmptyList<SgfGameTree>) {
 
 data class SgfGameTree(val sequence: NonEmptyList<SgfNode>, val trees: List<SgfGameTree>) {
     constructor(sequence: NonEmptyList<SgfNode>) : this(sequence, emptyList())
-    companion object
 }
 data class SgfNode(val properties: Set<SgfProperty>) {
     constructor(vararg property: SgfProperty) : this(property.toSet())
