@@ -96,3 +96,7 @@ private fun Board.countLibertiesForGroup(group: Set<Stone>): Int = group.sumOf {
 
     totalPossibleLiberties - enemies - deadLiberties
 }
+
+fun Board.isOccupied(point: SgfPoint) = stones.any { it.point == point }
+fun Board.isOccupied(x: Int, y: Int) = isOccupied(SgfPoint(x, y))
+fun Board.isSuicide(stone: Stone) = !placeStone(stone).stones.contains(stone)

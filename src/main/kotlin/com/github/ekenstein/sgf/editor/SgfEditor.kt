@@ -57,12 +57,45 @@ data class SgfEditor(
 
 fun SgfEditor.getGameInfo(): GameInfo = goToRootNode().currentNode.getGameInfo()
 
-/**
- * Saves the state of the editor to a [SgfGameTree]
- */
-fun SgfEditor.commit() = currentTree.commit()
+private fun SgfEditor.insertBranch(node: SgfNode): SgfEditor {
+    val mainVariation = SgfGameTree(nelOf(node))
+    val restOfSequence = currentSequence.right.toNel()?.let {
+        SgfGameTree(
+            sequence = it,
+            trees = currentTree.focus.trees
+        )
+    }
+    val newTree = currentTree.update {
+        it.copy(
+            sequence = currentSequence.commitAtCurrentPosition(),
+            trees = if (restOfSequence == null) {
+                it.trees
+            } else {
+                emptyList()
+            }
+        )
+    }
 
-private fun SgfEditor.updateCurrentNode(block: (SgfNode) -> SgfNode): SgfEditor {
+    return copy(
+        currentSequence = mainVariation.sequence.toZipper(),
+        currentTree = newTree.insertDownLeft(linkedListOfNotNull(mainVariation, restOfSequence))
+    )
+}
+
+private fun SgfEditor.insertNodeToTheRight(node: SgfNode): SgfEditor {
+    val sequence = currentSequence.insertRight(node).goRight().orError {
+        "Expected there to be a node to the right"
+    }
+
+    return copy(
+        currentSequence = sequence,
+        currentTree = currentTree.update {
+            it.copy(sequence = sequence.commit())
+        }
+    )
+}
+
+fun SgfEditor.updateCurrentNode(block: (SgfNode) -> SgfNode): SgfEditor {
     val newSequence = currentSequence.update(block)
     return copy(
         currentSequence = newSequence,
@@ -72,15 +105,17 @@ private fun SgfEditor.updateCurrentNode(block: (SgfNode) -> SgfNode): SgfEditor 
     )
 }
 
+/**
+ * Saves the state of the editor to a [SgfGameTree]
+ */
+fun SgfEditor.commit() = currentTree.commit()
+
 private inline fun <reified T : SgfProperty> SgfNode.hasProperty() = properties.filterIsInstance<T>().any()
 private fun SgfNode.hasSetupProperties() = hasProperty<SgfProperty.Setup>()
 private fun SgfNode.hasRootProperties() = hasProperty<SgfProperty.Root>()
 private fun SgfNode.hasMoveProperties() = hasProperty<SgfProperty.Move>()
 
-/**
- * Returns the full sequence from this node up to the root.
- */
-fun SgfEditor.getFullSequence(): NonEmptyList<SgfNode> {
+private fun SgfEditor.getFullSequence(): NonEmptyList<SgfNode> {
     fun TreeZipper<SgfGameTree>.nodes(): NonEmptyList<SgfNode> = when (val parent = goUp()) {
         is MoveResult.Failure -> focus.sequence
         is MoveResult.Success -> parent.value.nodes() + focus.sequence
@@ -129,9 +164,7 @@ fun SgfEditor.extractBoard(): Board {
     }
 }
 
-private fun Board.isOccupied(stone: Stone): Boolean = stones.any { it.point == stone.point }
-
-private fun SgfEditor.isBoardRepeating(currentBoard: Board, stone: Stone): Boolean {
+private fun SgfEditor.isPositionRepeating(currentBoard: Board, stone: Stone): Boolean {
     val previousPosition = goToPreviousNode().orNull()?.extractBoard()
     val nextPosition = currentBoard.placeStone(stone)
 
@@ -165,13 +198,101 @@ fun SgfEditor.nextToPlay(): SgfColor {
     return nextToPlay() ?: startingColor()
 }
 
-fun SgfEditor.removeStones(vararg point: SgfPoint) = addSetupProperty(SgfProperty.Setup.AE(point.toSet()))
+/**
+ * Clears the given [points] from stones in the current position.
+ */
+fun SgfEditor.removeStones(vararg points: SgfPoint) = addSetupProperty(SgfProperty.Setup.AE(points.toSet()))
+
+/**
+ * Adds the given stones to the position regardless of what was at the position before.
+ */
 fun SgfEditor.addStones(color: SgfColor, vararg point: SgfPoint) = when (color) {
     SgfColor.Black -> addSetupProperty(SgfProperty.Setup.AB(point.toSet()))
     SgfColor.White -> addSetupProperty(SgfProperty.Setup.AW(point.toSet()))
 }
 
+/**
+ * Sets whose turn it is to play at the current position.
+ */
 fun SgfEditor.setNextToPlay(color: SgfColor) = addSetupProperty(SgfProperty.Setup.PL(color))
+
+/**
+ * Places a stone at the given point at the current position.
+ *
+ * Will throw [SgfException.IllegalMove] if:
+ *  - It's not the [color]'s turn to play.
+ *  - The stone is placed outside the board.
+ *  - The point is occupied by another stone.
+ *  - The placed stone results in repetition of the position (ko).
+ *  - The stone immediately dies when placed on the board (suicide).
+ *
+ *  If you wish to place a stone without checking rules, look at [addStones].
+ */
+fun SgfEditor.placeStone(color: SgfColor, x: Int, y: Int): SgfEditor {
+    val currentBoard = extractBoard()
+    checkMove(x in 1..currentBoard.boardSize.first && x in 1..currentBoard.boardSize.second) {
+        "The stone is placed outside of the board"
+    }
+
+    checkMove(nextToPlay() == color) {
+        "It's not ${color.asString}'s turn to play"
+    }
+
+    checkMove(!currentBoard.isOccupied(x, y)) {
+        "The point is occupied"
+    }
+
+    val stone = Stone(color, SgfPoint(x, y))
+    checkMove(!isPositionRepeating(currentBoard, stone)) {
+        "The position is repeating"
+    }
+
+    checkMove(!currentBoard.isSuicide(stone)) {
+        "It is suicide to play at the point $x, $y"
+    }
+
+    return when (color) {
+        SgfColor.Black -> addMoveProperty(SgfProperty.Move.B(Move.Stone(stone.point)))
+        SgfColor.White -> addMoveProperty(SgfProperty.Move.W(Move.Stone(stone.point)))
+    }
+}
+
+/**
+ * The player of [color] passes at the current position.
+ *
+ * Will throw [SgfException.IllegalMove] if it's not [color]'s turn to play.
+ */
+fun SgfEditor.pass(color: SgfColor): SgfEditor {
+    checkMove(nextToPlay() == color) {
+        "It's not ${color.asString}'s turn to play"
+    }
+
+    return when (color) {
+        SgfColor.Black -> addMoveProperty(SgfProperty.Move.B(Move.Pass))
+        SgfColor.White -> addMoveProperty(SgfProperty.Move.W(Move.Pass))
+    }
+}
+
+private val SgfNode.move: SgfProperty?
+    get() = properties.mapNotNull {
+        when (it) {
+            is SgfProperty.Move.B,
+            is SgfProperty.Move.W -> it
+            else -> null
+        }
+    }.singleOrNull()
+
+private val SgfColor.asString
+    get() = when (this) {
+        SgfColor.Black -> "black"
+        SgfColor.White -> "white"
+    }
+
+private fun checkMove(value: Boolean, reason: () -> String) {
+    if (!value) {
+        throw SgfException.IllegalMove(reason())
+    }
+}
 
 private fun SgfEditor.addSetupProperty(property: SgfProperty.Setup): SgfEditor {
     return if (!currentNode.hasMoveProperties()) {
@@ -201,85 +322,6 @@ private fun SgfEditor.addSetupProperty(property: SgfProperty.Setup): SgfEditor {
                 insertBranch(node)
             }
         }
-    }
-}
-
-private fun SgfEditor.insertBranch(node: SgfNode): SgfEditor {
-    val mainVariation = SgfGameTree(nelOf(node))
-    val restOfSequence = currentSequence.right.toNel()?.let {
-        SgfGameTree(
-            sequence = it,
-            trees = currentTree.focus.trees
-        )
-    }
-    val newTree = currentTree.update {
-        it.copy(
-            sequence = currentSequence.commitAtCurrentPosition(),
-            trees = if (restOfSequence == null) {
-                it.trees
-            } else {
-                emptyList()
-            }
-        )
-    }
-
-    return copy(
-        currentSequence = mainVariation.sequence.toZipper(),
-        currentTree = newTree.insertDownLeft(linkedListOfNotNull(mainVariation, restOfSequence))
-    )
-}
-
-private fun SgfEditor.insertNodeToTheRight(node: SgfNode): SgfEditor {
-    val sequence = currentSequence.insertRight(node).goRight().orError {
-        "Expected there to be a node to the right"
-    }
-
-    return copy(
-        currentSequence = sequence,
-        currentTree = currentTree.update {
-            it.copy(sequence = sequence.commit())
-        }
-    )
-}
-
-fun SgfEditor.placeStone(color: SgfColor, x: Int, y: Int): SgfEditor {
-    val currentBoard = extractBoard()
-    checkMove(x in 1..currentBoard.boardSize.first && x in 1..currentBoard.boardSize.second) {
-        "The stone is placed outside of the board"
-    }
-
-    checkMove(nextToPlay() == color) {
-        "It's not ${color.asString}'s turn to play"
-    }
-
-    val stone = Stone(color, SgfPoint(x, y))
-    checkMove(!currentBoard.isOccupied(stone)) {
-        "The point is occupied"
-    }
-
-    checkMove(!isBoardRepeating(currentBoard, stone)) {
-        "The position is repeating"
-    }
-
-    val updatedBoard = currentBoard.placeStone(stone)
-    checkMove(updatedBoard.stones.contains(stone)) {
-        "It is suicide to play at the point $x, $y"
-    }
-
-    return when (color) {
-        SgfColor.Black -> addMoveProperty(SgfProperty.Move.B(Move.Stone(stone.point)))
-        SgfColor.White -> addMoveProperty(SgfProperty.Move.W(Move.Stone(stone.point)))
-    }
-}
-
-fun SgfEditor.pass(color: SgfColor): SgfEditor {
-    checkMove(nextToPlay() == color) {
-        "It's not ${color.asString}'s turn to play"
-    }
-
-    return when (color) {
-        SgfColor.Black -> addMoveProperty(SgfProperty.Move.B(Move.Pass))
-        SgfColor.White -> addMoveProperty(SgfProperty.Move.W(Move.Pass))
     }
 }
 
@@ -321,26 +363,5 @@ private fun SgfEditor.addMoveProperty(property: SgfProperty.Move): SgfEditor {
             null -> updateCurrentNode { it.addProperty(property) }
             else -> insertInNextNodeOrBranchOut()
         }
-    }
-}
-
-private val SgfNode.move: SgfProperty?
-    get() = properties.mapNotNull {
-        when (it) {
-            is SgfProperty.Move.B,
-            is SgfProperty.Move.W -> it
-            else -> null
-        }
-    }.singleOrNull()
-
-private val SgfColor.asString
-    get() = when (this) {
-        SgfColor.Black -> "black"
-        SgfColor.White -> "white"
-    }
-
-private fun checkMove(value: Boolean, reason: () -> String) {
-    if (!value) {
-        throw SgfException.IllegalMove(reason())
     }
 }
