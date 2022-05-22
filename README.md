@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.Ekenstein:haengma:1.0.0")
+    implementation("com.github.Ekenstein:haengma:2.0.1")
 }
 ```
 
