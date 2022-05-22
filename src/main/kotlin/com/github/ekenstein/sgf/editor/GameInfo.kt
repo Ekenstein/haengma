@@ -1,6 +1,7 @@
 package com.github.ekenstein.sgf.editor
 
 import com.github.ekenstein.sgf.GameDate
+import com.github.ekenstein.sgf.GameType
 import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfPoint
@@ -28,7 +29,8 @@ data class Rules(
     }
 
     companion object {
-        val default = Rules(DEFAULT_SIZE, DEFAULT_KOMI, DEFAULT_HANDICAP)
+        val default
+            get() = Rules(DEFAULT_SIZE, DEFAULT_KOMI, DEFAULT_HANDICAP)
     }
 }
 
@@ -93,12 +95,16 @@ data class GameInfo(
     var gameComment: String,
     var gameDate: List<GameDate>,
 ) {
+    val gameType = GameType.Go
+    val fileFormat = 4
+
     companion object {
-        val default: GameInfo = GameInfo(
-            rules = Rules.default,
-            gameComment = DEFAULT_GAME_COMMENT,
-            gameDate = emptyList()
-        )
+        val default: GameInfo
+            get() = GameInfo(
+                rules = Rules.default,
+                gameComment = DEFAULT_GAME_COMMENT,
+                gameDate = emptyList()
+            )
     }
 }
 
@@ -106,7 +112,9 @@ internal fun GameInfo.toSgfProperties(): Set<SgfProperty> {
     val ruleProperties = rules.toSgfProperties()
     return setOfNotNull(
         gameComment.takeIf { it.isNotBlank() }?.let { SgfProperty.GameInfo.GC(it) },
-        gameDate.takeIf { it.isNotEmpty() }?.let { SgfProperty.GameInfo.DT(it) }
+        gameDate.takeIf { it.isNotEmpty() }?.let { SgfProperty.GameInfo.DT(it) },
+        SgfProperty.Root.GM(gameType),
+        SgfProperty.Root.FF(fileFormat)
     ) + ruleProperties
 }
 

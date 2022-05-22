@@ -9,6 +9,7 @@ import com.github.ekenstein.sgf.SgfProperty
 import com.github.ekenstein.sgf.builder.sgf
 import com.github.ekenstein.sgf.extensions.addProperty
 import com.github.ekenstein.sgf.extensions.newGame
+import com.github.ekenstein.sgf.serialization.encodeToString
 import com.github.ekenstein.sgf.utils.nelOf
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
@@ -830,5 +831,56 @@ class SgfEditorTest {
                 assertEquals(GameInfo.default, actualGameInfo)
             }
         )
+    }
+
+    @Test
+    fun `always branch out a move if there are no moves to the right and the children is not empty`() {
+        // you can create your own tree
+        val editor = SgfEditor { rules.handicap = 2 }
+        val actualTree = editor
+            .placeStone(SgfColor.White, 17, 3)
+            .placeStone(SgfColor.Black, 16, 3)
+            .placeStone(SgfColor.White, 17, 4)
+            .placeStone(SgfColor.Black, 17, 5)
+            .goToPreviousNodeOrStay()
+            .placeStone(SgfColor.Black, 16, 5)
+            .goToPreviousNodeOrStay()
+            .placeStone(SgfColor.Black, 4, 4)
+            .goToRootNode()
+            .placeStone(SgfColor.White, 16, 16)
+            .commit()
+
+        val expectedTree = SgfGameTree(
+            nelOf(SgfNode(editor.getGameInfo().toSgfProperties())),
+            listOf(
+                SgfGameTree(nelOf(SgfNode(SgfProperty.Move.W(16, 16)))),
+                SgfGameTree(
+                    nelOf(
+                        SgfNode(SgfProperty.Move.W(17, 3)),
+                        SgfNode(SgfProperty.Move.B(16, 3)),
+                        SgfNode(SgfProperty.Move.W(17, 4))
+                    ),
+                    listOf(
+                        SgfGameTree(
+                            nelOf(
+                                SgfNode(SgfProperty.Move.B(4, 4))
+                            )
+                        ),
+                        SgfGameTree(
+                            nelOf(
+                                SgfNode(SgfProperty.Move.B(16, 5))
+                            )
+                        ),
+                        SgfGameTree(
+                            nelOf(
+                                SgfNode(SgfProperty.Move.B(17, 5))
+                            )
+                        )
+                    )
+                )
+            )
+        )
+
+        assertEquals(expectedTree, actualTree, actualTree.encodeToString())
     }
 }

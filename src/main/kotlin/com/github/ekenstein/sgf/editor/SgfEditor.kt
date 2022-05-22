@@ -19,6 +19,7 @@ import com.github.ekenstein.sgf.utils.Zipper
 import com.github.ekenstein.sgf.utils.commit
 import com.github.ekenstein.sgf.utils.commitAtCurrentPosition
 import com.github.ekenstein.sgf.utils.flatMap
+import com.github.ekenstein.sgf.utils.get
 import com.github.ekenstein.sgf.utils.goRight
 import com.github.ekenstein.sgf.utils.goRightUnsafe
 import com.github.ekenstein.sgf.utils.goUp
@@ -26,18 +27,20 @@ import com.github.ekenstein.sgf.utils.insertDownLeft
 import com.github.ekenstein.sgf.utils.insertRight
 import com.github.ekenstein.sgf.utils.linkedListOfNotNull
 import com.github.ekenstein.sgf.utils.nelOf
+import com.github.ekenstein.sgf.utils.orElse
 import com.github.ekenstein.sgf.utils.orError
 import com.github.ekenstein.sgf.utils.orNull
 import com.github.ekenstein.sgf.utils.toLinkedList
 import com.github.ekenstein.sgf.utils.toNel
 import com.github.ekenstein.sgf.utils.toZipper
 import com.github.ekenstein.sgf.utils.update
+import com.github.ekenstein.sgf.utils.withOrigin
 
 private object GameTreeUnzip : Unzip<SgfGameTree> {
     override fun unzip(node: SgfGameTree): LinkedList<SgfGameTree> = node.trees.toLinkedList()
 
     override fun zip(node: SgfGameTree, children: LinkedList<SgfGameTree>): SgfGameTree = node.copy(
-        trees = children
+        trees = children.toList()
     )
 }
 
@@ -239,7 +242,7 @@ fun SgfEditor.placeStone(color: SgfColor, x: Int, y: Int): SgfEditor {
     }
 
     checkMove(!currentBoard.isOccupied(x, y)) {
-        "The point is occupied"
+        "The point $x, $y is occupied"
     }
 
     val stone = Stone(color, SgfPoint(x, y))
@@ -251,10 +254,12 @@ fun SgfEditor.placeStone(color: SgfColor, x: Int, y: Int): SgfEditor {
         "It is suicide to play at the point $x, $y"
     }
 
-    return when (color) {
-        SgfColor.Black -> addMoveProperty(SgfProperty.Move.B(Move.Stone(stone.point)))
-        SgfColor.White -> addMoveProperty(SgfProperty.Move.W(Move.Stone(stone.point)))
+    val property = when (color) {
+        SgfColor.Black -> SgfProperty.Move.B(Move.Stone(stone.point))
+        SgfColor.White -> SgfProperty.Move.W(Move.Stone(stone.point))
     }
+
+    return addMoveProperty(property).get()
 }
 
 /**
@@ -267,10 +272,12 @@ fun SgfEditor.pass(color: SgfColor): SgfEditor {
         "It's not ${color.asString}'s turn to play"
     }
 
-    return when (color) {
-        SgfColor.Black -> addMoveProperty(SgfProperty.Move.B(Move.Pass))
-        SgfColor.White -> addMoveProperty(SgfProperty.Move.W(Move.Pass))
+    val property = when (color) {
+        SgfColor.Black -> SgfProperty.Move.B(Move.Pass)
+        SgfColor.White -> SgfProperty.Move.W(Move.Pass)
     }
+
+    return addMoveProperty(property).get()
 }
 
 private val SgfNode.move: SgfProperty?
@@ -334,34 +341,46 @@ private tailrec fun SgfEditor.goToTreeThatStartsWithProperty(property: SgfProper
         }
     }
 
-private fun SgfEditor.addMoveProperty(property: SgfProperty.Move): SgfEditor {
-    fun insertInNextNodeOrBranchOut() = when (val right = currentSequence.right) {
-        is LinkedList.Cons -> when (right.head.move) {
-            property -> copy(currentSequence = currentSequence.goRightUnsafe())
-            else -> {
-                // check if there are any children that starts with this move
-                when (val childTree = goToLeftMostChildTree().flatMap { it.goToTreeThatStartsWithProperty(property) }) {
-                    is MoveResult.Failure -> insertBranch(SgfNode(property))
-                    is MoveResult.Success -> childTree.value
-                }
+private fun SgfEditor.insertInNextNodeOrBranchOut(
+    property: SgfProperty.Move
+) = when (val right = currentSequence.right) {
+    is LinkedList.Cons -> when (right.head.move) {
+        property -> copy(currentSequence = currentSequence.goRightUnsafe()).stay()
+        else -> goToLeftMostChildTree()
+            .flatMap {
+                it.goToTreeThatStartsWithProperty(property)
+            }
+            .withOrigin(this)
+            .orElse {
+                val node = SgfNode(property)
+                it.insertBranch(node).stay()
+            }
+    }
+    LinkedList.Nil -> goToLeftMostChildTree()
+        .flatMap {
+            it.goToTreeThatStartsWithProperty(property)
+        }
+        .withOrigin(this)
+        .orElse {
+            val node = SgfNode(property)
+            if (it.currentTree.focus.trees.isEmpty()) {
+                it.insertNodeToTheRight(node).stay()
+            } else {
+                it.insertBranch(node).stay()
             }
         }
-        LinkedList.Nil -> {
-            // check if there are any children that starts with this move
-            when (val childTree = goToLeftMostChildTree().flatMap { it.goToTreeThatStartsWithProperty(property) }) {
-                is MoveResult.Failure -> insertNodeToTheRight(SgfNode(property))
-                is MoveResult.Success -> childTree.value
-            }
+}
+
+private fun SgfEditor.addMoveProperty(property: SgfProperty.Move): MoveResult<SgfEditor> {
+    val result = if (currentNode.hasRootProperties() || currentNode.hasSetupProperties()) {
+        insertInNextNodeOrBranchOut(property)
+    } else {
+        when (currentSequence.focus.move) {
+            property -> stay() // no-op
+            null -> updateCurrentNode { it.addProperty(property) }.stay()
+            else -> insertInNextNodeOrBranchOut(property)
         }
     }
 
-    return if (currentNode.hasRootProperties() || currentNode.hasSetupProperties()) {
-        insertInNextNodeOrBranchOut()
-    } else {
-        when (currentSequence.focus.move) {
-            property -> this // no-op
-            null -> updateCurrentNode { it.addProperty(property) }
-            else -> insertInNextNodeOrBranchOut()
-        }
-    }
+    return result.withOrigin(this)
 }
