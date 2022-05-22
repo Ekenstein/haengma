@@ -11,8 +11,10 @@ import com.github.ekenstein.sgf.utils.nelOf
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
+import utils.nextGameInfo
 import utils.nextList
 import utils.rng
+import utils.run
 import kotlin.test.assertEquals
 
 class SgfEditorTest {
@@ -800,6 +802,16 @@ class SgfEditorTest {
 
     @Test
     fun `can always retrieve game info from the editor`() {
+        rng.run(100) {
+            val gameInfo = nextGameInfo()
+            val editor = SgfEditor(gameInfo)
+            val actualGameInfo = editor.getGameInfo()
+            assertEquals(gameInfo, actualGameInfo)
+
+            val expectedTree = SgfGameTree(nelOf(SgfNode(gameInfo.toSgfProperties())))
+            val actualTree = editor.commit()
+            assertEquals(expectedTree, actualTree)
+        }
         assertAll(
             {
                 val editor = SgfEditor(GameInfo.default)

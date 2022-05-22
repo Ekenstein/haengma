@@ -1,8 +1,10 @@
 package com.github.ekenstein.sgf.editor
 
 import com.github.ekenstein.sgf.GameDate
+import com.github.ekenstein.sgf.GameResult
 import com.github.ekenstein.sgf.GameType
 import com.github.ekenstein.sgf.PropertySet
+import com.github.ekenstein.sgf.SgfColor
 import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfPoint
@@ -92,10 +94,39 @@ private fun edgeDistance(boardSize: Int) = when {
     else -> 4
 }
 
+data class Player(
+    var name: String?,
+    var rank: String?,
+    var team: String?
+) {
+    companion object {
+        val default: Player
+            get() = Player(null, null, null)
+    }
+}
+
+private fun Player.toSgfProperties(color: SgfColor) = when (color) {
+    SgfColor.Black -> propertySetOfNotNull(
+        name?.let { SgfProperty.GameInfo.PB(it) },
+        rank?.let { SgfProperty.GameInfo.BR(it) },
+        team?.let { SgfProperty.GameInfo.BT(it) }
+    )
+    SgfColor.White -> propertySetOfNotNull(
+        name?.let { SgfProperty.GameInfo.PW(it) },
+        rank?.let { SgfProperty.GameInfo.WR(it) },
+        team?.let { SgfProperty.GameInfo.WT(it) }
+    )
+}
+
 data class GameInfo(
     val rules: Rules,
-    var gameComment: String,
+    val blackPlayer: Player,
+    val whitePlayer: Player,
+    var result: GameResult?,
+    var gameComment: String?,
     var gameDate: List<GameDate>,
+    var gameName: String?,
+    var gamePlace: String?
 ) {
     val gameType = GameType.Go
     val fileFormat = 4
@@ -104,20 +135,31 @@ data class GameInfo(
         val default: GameInfo
             get() = GameInfo(
                 rules = Rules.default,
-                gameComment = DEFAULT_GAME_COMMENT,
-                gameDate = emptyList()
+                blackPlayer = Player.default,
+                whitePlayer = Player.default,
+                result = null,
+                gameComment = null,
+                gameDate = emptyList(),
+                gameName = null,
+                gamePlace = null
             )
     }
 }
 
 internal fun GameInfo.toSgfProperties(): PropertySet {
     val ruleProperties = rules.toSgfProperties()
+    val blackPlayerProperties = blackPlayer.toSgfProperties(SgfColor.Black)
+    val whitePlayerProperties = whitePlayer.toSgfProperties(SgfColor.White)
+
     return propertySetOfNotNull(
-        gameComment.takeIf { it.isNotBlank() }?.let { SgfProperty.GameInfo.GC(it) },
+        gameComment?.let { SgfProperty.GameInfo.GC(it) },
         gameDate.takeIf { it.isNotEmpty() }?.let { SgfProperty.GameInfo.DT(it) },
         SgfProperty.Root.GM(gameType),
-        SgfProperty.Root.FF(fileFormat)
-    ) + ruleProperties
+        SgfProperty.Root.FF(fileFormat),
+        gamePlace?.let { SgfProperty.GameInfo.PC(it) },
+        gameName?.let { SgfProperty.GameInfo.GN(it) },
+        result?.let { SgfProperty.GameInfo.RE(it) }
+    ) + ruleProperties + blackPlayerProperties + whitePlayerProperties
 }
 
 internal fun SgfNode.getGameInfo() = GameInfo(
@@ -129,10 +171,22 @@ internal fun SgfNode.getGameInfo() = GameInfo(
         handicap = property<SgfProperty.GameInfo.HA>()?.numberOfStones
             ?: DEFAULT_HANDICAP
     ),
-    gameComment = property<SgfProperty.GameInfo.GC>()?.comment
-        ?: DEFAULT_GAME_COMMENT,
+    gameComment = property<SgfProperty.GameInfo.GC>()?.comment,
     gameDate = property<SgfProperty.GameInfo.DT>()?.dates
-        ?: emptyList()
+        ?: emptyList(),
+    blackPlayer = Player(
+        name = property<SgfProperty.GameInfo.PB>()?.name,
+        rank = property<SgfProperty.GameInfo.BR>()?.rank,
+        team = property<SgfProperty.GameInfo.BT>()?.team
+    ),
+    whitePlayer = Player(
+        name = property<SgfProperty.GameInfo.PW>()?.name,
+        rank = property<SgfProperty.GameInfo.WR>()?.rank,
+        team = property<SgfProperty.GameInfo.WT>()?.team
+    ),
+    gameName = property<SgfProperty.GameInfo.GN>()?.name,
+    gamePlace = property<SgfProperty.GameInfo.PC>()?.place,
+    result = property<SgfProperty.GameInfo.RE>()?.result
 )
 
 internal fun GameInfo.toGameTree(): SgfGameTree = SgfGameTree(nelOf(SgfNode(toSgfProperties())))
