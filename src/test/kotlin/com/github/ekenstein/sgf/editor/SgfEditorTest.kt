@@ -101,22 +101,6 @@ class SgfEditorTest {
             )
         )
 
-//        val expectedTree = sgf(tree) {
-//            variation {
-//                move { stone(SgfColor.Black, 4, 4) }
-//                variation {
-//                    move { stone(SgfColor.White, 6, 6) }
-//                    move { stone(SgfColor.Black, 7, 7) }
-//                }
-//                variation {
-//                    move { stone(SgfColor.White, 5, 5) }
-//                }
-//            }
-//            variation {
-//                move { stone(SgfColor.Black, 3, 3) }
-//            }
-//        }
-
         assertEquals(expectedTree, actualTree)
     }
 

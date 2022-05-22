@@ -2,12 +2,14 @@ package com.github.ekenstein.sgf.editor
 
 import com.github.ekenstein.sgf.GameDate
 import com.github.ekenstein.sgf.GameType
+import com.github.ekenstein.sgf.PropertySet
 import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.SgfProperty
-import com.github.ekenstein.sgf.extensions.addProperty
-import com.github.ekenstein.sgf.extensions.property
+import com.github.ekenstein.sgf.emptyPropertySet
+import com.github.ekenstein.sgf.propertySetOf
+import com.github.ekenstein.sgf.propertySetOfNotNull
 import com.github.ekenstein.sgf.utils.nelOf
 import kotlin.math.ceil
 
@@ -34,15 +36,15 @@ data class Rules(
     }
 }
 
-private fun Rules.toSgfProperties(): Set<SgfProperty> {
+private fun Rules.toSgfProperties(): PropertySet {
     val handicapProperties = handicap.takeIf { it >= 2 }?.let {
-        setOf(
+        propertySetOf(
             SgfProperty.GameInfo.HA(it),
             SgfProperty.Setup.AB(handicapPoints(it, boardSize))
         )
-    } ?: emptySet()
+    } ?: emptyPropertySet()
 
-    return setOf(
+    return propertySetOf(
         SgfProperty.Root.SZ(boardSize),
         SgfProperty.GameInfo.KM(komi)
     ) + handicapProperties
@@ -108,32 +110,14 @@ data class GameInfo(
     }
 }
 
-internal fun GameInfo.toSgfProperties(): Set<SgfProperty> {
+internal fun GameInfo.toSgfProperties(): PropertySet {
     val ruleProperties = rules.toSgfProperties()
-    return setOfNotNull(
+    return propertySetOfNotNull(
         gameComment.takeIf { it.isNotBlank() }?.let { SgfProperty.GameInfo.GC(it) },
         gameDate.takeIf { it.isNotEmpty() }?.let { SgfProperty.GameInfo.DT(it) },
         SgfProperty.Root.GM(gameType),
         SgfProperty.Root.FF(fileFormat)
     ) + ruleProperties
-}
-
-internal fun SgfNode.updateGameInfo(gameInfo: GameInfo): SgfNode {
-    val properties = gameInfo.toSgfProperties()
-    val cleanNode = copy(
-        properties = properties.filter {
-            when (it) {
-                is SgfProperty.GameInfo.HA,
-                is SgfProperty.GameInfo.DT,
-                is SgfProperty.GameInfo.KM,
-                is SgfProperty.GameInfo.GC,
-                is SgfProperty.Root.SZ -> false
-                else -> true
-            }
-        }.toSet()
-    )
-
-    return properties.fold(cleanNode) { n, p -> n.addProperty(p) }
 }
 
 internal fun SgfNode.getGameInfo() = GameInfo(

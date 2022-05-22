@@ -22,6 +22,7 @@ import com.github.ekenstein.sgf.parser.valueparsers.realParser
 import com.github.ekenstein.sgf.parser.valueparsers.simpleTextParser
 import com.github.ekenstein.sgf.parser.valueparsers.sizeParser
 import com.github.ekenstein.sgf.parser.valueparsers.textParser
+import com.github.ekenstein.sgf.toPropertySet
 import com.github.ekenstein.sgf.utils.NonEmptyList
 import org.antlr.v4.runtime.BaseErrorListener
 import org.antlr.v4.runtime.CharStream
@@ -104,8 +105,8 @@ private fun SgfParser.SequenceContext.extract(configuration: SgfParserConfigurat
     node().map { it.extract(configuration) }
 
 private fun SgfParser.NodeContext.extract(configuration: SgfParserConfiguration): SgfNode {
-    val props = prop().mapNotNull { it.extract(configuration) }.toSet()
-    return SgfNode(props)
+    val props = prop().mapNotNull { it.extract(configuration) }
+    return SgfNode(props.toPropertySet())
 }
 
 private fun SgfParser.PropContext.extract(configuration: SgfParserConfiguration) =

@@ -40,4 +40,3 @@ fun <T> LinkedList<T>.toNel(): NonEmptyList<T>? = when (this) {
     is LinkedList.Cons -> nelOf(head, tail)
     LinkedList.Nil -> null
 }
-fun <T> LinkedList<T>.toNelUnsafe(): NonEmptyList<T> = toNel() ?: error("The list is empty")

@@ -14,74 +14,151 @@ data class SgfCollection(val trees: NonEmptyList<SgfGameTree>) {
 data class SgfGameTree(val sequence: NonEmptyList<SgfNode>, val trees: List<SgfGameTree>) {
     constructor(sequence: NonEmptyList<SgfNode>) : this(sequence, emptyList())
 }
-data class SgfNode(val properties: Set<SgfProperty>) {
-    constructor(vararg property: SgfProperty) : this(property.toSet())
+data class SgfNode(val properties: PropertySet) {
+    constructor(vararg property: SgfProperty) : this(propertySetOf(*property))
+
+    /**
+     * Returns the property corresponding to the given type [T] or null if there is no such property
+     * on this node.
+     */
+    inline fun <reified T : SgfProperty> property() = properties.filterIsInstance<T>().singleOrNull()
 }
 
 sealed class SgfProperty {
+    abstract val identifier: String
     sealed class Move : SgfProperty() {
         data class B(val move: com.github.ekenstein.sgf.Move) : Move() {
             constructor(x: Int, y: Int) : this(com.github.ekenstein.sgf.Move.Stone(SgfPoint(x, y)))
             companion object {
                 fun pass() = B(com.github.ekenstein.sgf.Move.Pass)
             }
+
+            override val identifier: String = "B"
         }
         data class W(val move: com.github.ekenstein.sgf.Move) : Move() {
             constructor(x: Int, y: Int) : this(com.github.ekenstein.sgf.Move.Stone(SgfPoint(x, y)))
             companion object {
                 fun pass() = B(com.github.ekenstein.sgf.Move.Pass)
             }
+
+            override val identifier: String = "W"
         }
-        object KO : Move()
-        data class MN(val number: Int) : Move()
+        object KO : Move() {
+            override val identifier: String = "KO"
+        }
+        data class MN(val number: Int) : Move() {
+            override val identifier: String = "MN"
+        }
     }
 
     sealed class Setup : SgfProperty() {
-        data class AB(val points: Set<SgfPoint>) : Setup()
-        data class AW(val points: Set<SgfPoint>) : Setup()
-        data class AE(val points: Set<SgfPoint>) : Setup()
-        data class PL(val color: SgfColor) : Setup()
+        data class AB(val points: Set<SgfPoint>) : Setup() {
+            override val identifier: String = "AB"
+        }
+
+        data class AW(val points: Set<SgfPoint>) : Setup() {
+            override val identifier: String = "AW"
+        }
+        data class AE(val points: Set<SgfPoint>) : Setup() {
+            override val identifier: String = "AE"
+        }
+        data class PL(val color: SgfColor) : Setup() {
+            override val identifier: String = "PL"
+        }
     }
 
     sealed class NodeAnnotation : SgfProperty() {
-        data class C(val comment: String) : NodeAnnotation()
-        data class DM(val value: SgfDouble) : NodeAnnotation()
-        data class GB(val value: SgfDouble) : NodeAnnotation()
-        data class GW(val value: SgfDouble) : NodeAnnotation()
-        data class HO(val value: SgfDouble) : NodeAnnotation()
-        data class N(val name: String) : NodeAnnotation()
-        data class UC(val value: SgfDouble) : NodeAnnotation()
-        data class V(val value: Double) : NodeAnnotation()
+        data class C(val comment: String) : NodeAnnotation() {
+            override val identifier: String = "C"
+        }
+        data class DM(val value: SgfDouble) : NodeAnnotation() {
+            override val identifier: String = "DM"
+        }
+        data class GB(val value: SgfDouble) : NodeAnnotation() {
+            override val identifier: String = "GB"
+        }
+        data class GW(val value: SgfDouble) : NodeAnnotation() {
+            override val identifier: String = "GW"
+        }
+        data class HO(val value: SgfDouble) : NodeAnnotation() {
+            override val identifier: String = "HO"
+        }
+        data class N(val name: String) : NodeAnnotation() {
+            override val identifier: String = "N"
+        }
+        data class UC(val value: SgfDouble) : NodeAnnotation() {
+            override val identifier: String = "UC"
+        }
+        data class V(val value: Double) : NodeAnnotation() {
+            override val identifier: String = "V"
+        }
     }
 
     sealed class MoveAnnotation : SgfProperty() {
-        data class BM(val value: SgfDouble) : MoveAnnotation()
-        object DO : MoveAnnotation()
-        object IT : MoveAnnotation()
-        data class TE(val value: SgfDouble) : MoveAnnotation()
+        data class BM(val value: SgfDouble) : MoveAnnotation() {
+            override val identifier: String = "BM"
+        }
+        object DO : MoveAnnotation() {
+            override val identifier: String = "DO"
+        }
+        object IT : MoveAnnotation() {
+            override val identifier: String = "IT"
+        }
+        data class TE(val value: SgfDouble) : MoveAnnotation() {
+            override val identifier: String = "TE"
+        }
     }
 
     sealed class Markup : SgfProperty() {
-        data class AR(val points: List<Pair<SgfPoint, SgfPoint>>) : Markup()
-        data class CR(val points: Set<SgfPoint>) : Markup()
-        data class LB(val label: List<Pair<SgfPoint, String>>) : Markup()
-        data class LN(val line: List<Pair<SgfPoint, SgfPoint>>) : Markup()
-        data class MA(val points: Set<SgfPoint>) : Markup()
-        data class SL(val selected: Set<SgfPoint>) : Markup()
-        data class SQ(val points: Set<SgfPoint>) : Markup()
-        data class TR(val points: Set<SgfPoint>) : Markup()
-        data class DD(val points: Set<SgfPoint>) : Markup()
+        data class AR(val points: List<Pair<SgfPoint, SgfPoint>>) : Markup() {
+            override val identifier: String = "AR"
+        }
+        data class CR(val points: Set<SgfPoint>) : Markup() {
+            override val identifier: String = "CR"
+        }
+        data class LB(val label: List<Pair<SgfPoint, String>>) : Markup() {
+            override val identifier: String = "LB"
+        }
+        data class LN(val line: List<Pair<SgfPoint, SgfPoint>>) : Markup() {
+            override val identifier: String = "LN"
+        }
+        data class MA(val points: Set<SgfPoint>) : Markup() {
+            override val identifier: String = "MA"
+        }
+        data class SL(val selected: Set<SgfPoint>) : Markup() {
+            override val identifier: String = "SL"
+        }
+        data class SQ(val points: Set<SgfPoint>) : Markup() {
+            override val identifier: String = "SQ"
+        }
+        data class TR(val points: Set<SgfPoint>) : Markup() {
+            override val identifier: String = "TR"
+        }
+        data class DD(val points: Set<SgfPoint>) : Markup() {
+            override val identifier: String = "DD"
+        }
     }
 
     sealed class Root : SgfProperty() {
-        data class AP(val name: String, val version: String) : Root()
-        data class FF(val format: Int) : Root()
+        data class AP(val name: String, val version: String) : Root() {
+            override val identifier: String = "AP"
+        }
+        data class FF(val format: Int) : Root() {
+            override val identifier: String = "FF"
+        }
         data class SZ(val width: Int, val height: Int) : Root() {
+            override val identifier: String = "SZ"
             constructor(size: Int) : this(size, size)
         }
-        data class CA(val charset: Charset) : Root()
-        data class GM(val game: GameType) : Root()
-        data class ST(val style: Int) : Root()
+        data class CA(val charset: Charset) : Root() {
+            override val identifier: String = "CA"
+        }
+        data class GM(val game: GameType) : Root() {
+            override val identifier: String = "GM"
+        }
+        data class ST(val style: Int) : Root() {
+            override val identifier: String = "ST"
+        }
     }
 
     sealed class GameInfo : SgfProperty() {
@@ -93,21 +170,39 @@ sealed class SgfProperty {
          * it imply any particular way of placing the handicap stones.
          */
         data class HA(val numberOfStones: Int) : GameInfo() {
+            override val identifier: String = "HA"
             init {
                 require(numberOfStones >= 2) {
                     "Handicap must be larger or equal to 2"
                 }
             }
         }
-        data class KM(val komi: Double) : GameInfo()
-        data class EV(val event: String) : GameInfo()
-        data class PB(val name: String) : GameInfo()
-        data class PW(val name: String) : GameInfo()
-        data class RE(val result: GameResult) : GameInfo()
-        data class BR(val rank: String) : GameInfo()
-        data class WR(val rank: String) : GameInfo()
-        data class GN(val name: String) : GameInfo()
+        data class KM(val komi: Double) : GameInfo() {
+            override val identifier: String = "KM"
+        }
+        data class EV(val event: String) : GameInfo() {
+            override val identifier: String = "EV"
+        }
+        data class PB(val name: String) : GameInfo() {
+            override val identifier: String = "PB"
+        }
+        data class PW(val name: String) : GameInfo() {
+            override val identifier: String = "PW"
+        }
+        data class RE(val result: GameResult) : GameInfo() {
+            override val identifier: String = "RE"
+        }
+        data class BR(val rank: String) : GameInfo() {
+            override val identifier: String = "BR"
+        }
+        data class WR(val rank: String) : GameInfo() {
+            override val identifier: String = "WR"
+        }
+        data class GN(val name: String) : GameInfo() {
+            override val identifier: String = "GN"
+        }
         data class DT(val dates: List<GameDate>) : GameInfo() {
+            override val identifier: String = "DT"
             constructor(vararg date: GameDate) : this(date.toList())
             init {
                 require(dates.isNotEmpty()) {
@@ -120,38 +215,77 @@ sealed class SgfProperty {
          * Provides the time limits of the game.
          * The time limit is given in seconds.
          */
-        data class TM(val timeLimitInSeconds: Double) : GameInfo()
-        data class SO(val source: String) : GameInfo()
-        data class GC(val comment: String) : GameInfo()
-        data class ON(val opening: String) : GameInfo()
-        data class OT(val overtime: String) : GameInfo()
-        data class RO(val round: String) : GameInfo()
-        data class RU(val rules: String) : GameInfo()
-        data class US(val user: String) : GameInfo()
-        data class WT(val team: String) : GameInfo()
-        data class BT(val team: String) : GameInfo()
-        data class AN(val annotation: String) : GameInfo()
-        data class CP(val copyright: String) : GameInfo()
-        data class PC(val place: String) : GameInfo()
+        data class TM(val timeLimitInSeconds: Double) : GameInfo() {
+            override val identifier: String = "TM"
+        }
+        data class SO(val source: String) : GameInfo() {
+            override val identifier: String = "SO"
+        }
+        data class GC(val comment: String) : GameInfo() {
+            override val identifier: String = "GC"
+        }
+        data class ON(val opening: String) : GameInfo() {
+            override val identifier: String = "ON"
+        }
+        data class OT(val overtime: String) : GameInfo() {
+            override val identifier: String = "OT"
+        }
+        data class RO(val round: String) : GameInfo() {
+            override val identifier: String = "RO"
+        }
+        data class RU(val rules: String) : GameInfo() {
+            override val identifier: String = "RU"
+        }
+        data class US(val user: String) : GameInfo() {
+            override val identifier: String = "US"
+        }
+        data class WT(val team: String) : GameInfo() {
+            override val identifier: String = "WT"
+        }
+        data class BT(val team: String) : GameInfo() {
+            override val identifier: String = "BT"
+        }
+        data class AN(val annotation: String) : GameInfo() {
+            override val identifier: String = "AN"
+        }
+        data class CP(val copyright: String) : GameInfo() {
+            override val identifier: String = "CP"
+        }
+        data class PC(val place: String) : GameInfo() {
+            override val identifier: String = "PC"
+        }
     }
 
     sealed class Timing : SgfProperty() {
-        data class BL(val timeLeft: Double) : Timing()
-        data class WL(val timeLeft: Double) : Timing()
-        data class OB(val overtimeStones: Int) : Timing()
-        data class OW(val overtimeStones: Int) : Timing()
+        data class BL(val timeLeft: Double) : Timing() {
+            override val identifier: String = "BL"
+        }
+        data class WL(val timeLeft: Double) : Timing() {
+            override val identifier: String = "WL"
+        }
+        data class OB(val overtimeStones: Int) : Timing() {
+            override val identifier: String = "OB"
+        }
+        data class OW(val overtimeStones: Int) : Timing() {
+            override val identifier: String = "OW"
+        }
     }
 
     sealed class Misc : SgfProperty() {
         data class FG(val value: Pair<Int, String>?) : Misc() {
+            override val identifier: String = "FG"
             constructor() : this(null)
             constructor(diagramName: String, flag: Int) : this(flag to diagramName)
         }
-        data class PM(val printMoveMode: Int) : Misc()
-        data class VW(val points: Set<SgfPoint>) : Misc()
+        data class PM(val printMoveMode: Int) : Misc() {
+            override val identifier: String = "PM"
+        }
+        data class VW(val points: Set<SgfPoint>) : Misc() {
+            override val identifier: String = "VW"
+        }
     }
 
-    data class Private(val identifier: String, val values: List<String>) : SgfProperty()
+    data class Private(override val identifier: String, val values: List<String>) : SgfProperty()
 }
 
 sealed class Move {

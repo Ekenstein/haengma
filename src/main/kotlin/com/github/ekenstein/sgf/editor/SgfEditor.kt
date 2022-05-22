@@ -8,8 +8,6 @@ import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.SgfProperty
 import com.github.ekenstein.sgf.asPointOrNull
-import com.github.ekenstein.sgf.extensions.addProperty
-import com.github.ekenstein.sgf.extensions.property
 import com.github.ekenstein.sgf.utils.LinkedList
 import com.github.ekenstein.sgf.utils.MoveResult
 import com.github.ekenstein.sgf.utils.NonEmptyList
@@ -317,7 +315,9 @@ private fun SgfEditor.addSetupProperty(property: SgfProperty.Setup): SgfEditor {
                 is SgfProperty.Setup.PL -> property
             }
 
-            node.addProperty(updatedProperty)
+            node.copy(
+                properties = node.properties + updatedProperty
+            )
         }
     } else {
         val node = SgfNode(property)
@@ -347,9 +347,7 @@ private fun SgfEditor.insertInNextNodeOrBranchOut(
     is LinkedList.Cons -> when (right.head.move) {
         property -> copy(currentSequence = currentSequence.goRightUnsafe()).stay()
         else -> goToLeftMostChildTree()
-            .flatMap {
-                it.goToTreeThatStartsWithProperty(property)
-            }
+            .flatMap { it.goToTreeThatStartsWithProperty(property) }
             .withOrigin(this)
             .orElse {
                 val node = SgfNode(property)
@@ -357,9 +355,7 @@ private fun SgfEditor.insertInNextNodeOrBranchOut(
             }
     }
     LinkedList.Nil -> goToLeftMostChildTree()
-        .flatMap {
-            it.goToTreeThatStartsWithProperty(property)
-        }
+        .flatMap { it.goToTreeThatStartsWithProperty(property) }
         .withOrigin(this)
         .orElse {
             val node = SgfNode(property)
@@ -377,7 +373,11 @@ private fun SgfEditor.addMoveProperty(property: SgfProperty.Move): MoveResult<Sg
     } else {
         when (currentSequence.focus.move) {
             property -> stay() // no-op
-            null -> updateCurrentNode { it.addProperty(property) }.stay()
+            null -> updateCurrentNode {
+                it.copy(
+                    properties = it.properties + property
+                )
+            }.stay()
             else -> insertInNextNodeOrBranchOut(property)
         }
     }
