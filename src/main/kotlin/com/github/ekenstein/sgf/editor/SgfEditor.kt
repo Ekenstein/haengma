@@ -38,7 +38,7 @@ private object GameTreeUnzip : Unzip<SgfGameTree> {
     override fun unzip(node: SgfGameTree): LinkedList<SgfGameTree> = node.trees.toLinkedList()
 
     override fun zip(node: SgfGameTree, children: LinkedList<SgfGameTree>): SgfGameTree = node.copy(
-        trees = children.toList()
+        trees = children
     )
 }
 
@@ -111,7 +111,6 @@ fun SgfEditor.updateCurrentNode(block: (SgfNode) -> SgfNode): SgfEditor {
  */
 fun SgfEditor.commit() = currentTree.commit()
 
-private inline fun <reified T : SgfProperty> SgfNode.hasProperty() = properties.filterIsInstance<T>().any()
 private fun SgfNode.hasSetupProperties() = hasProperty<SgfProperty.Setup>()
 private fun SgfNode.hasRootProperties() = hasProperty<SgfProperty.Root>()
 private fun SgfNode.hasMoveProperties() = hasProperty<SgfProperty.Move>()
@@ -332,14 +331,12 @@ private fun SgfEditor.addSetupProperty(property: SgfProperty.Setup): SgfEditor {
     }
 }
 
-private tailrec fun SgfEditor.goToTreeThatStartsWithProperty(property: SgfProperty): MoveResult<SgfEditor> =
-    when (currentSequence.focus.move) {
-        property -> MoveResult.Success(this, this)
-        else -> when (val result = goToNextTree()) {
-            is MoveResult.Failure -> result
-            is MoveResult.Success -> result.value.goToTreeThatStartsWithProperty(property)
-        }
+private fun SgfEditor.goToTreeThatStartsWithProperty(property: SgfProperty): MoveResult<SgfEditor> {
+    fun sequenceStartsWith(editor: SgfEditor) = editor.currentSequence.focus.move == property
+    return tryRepeatWhileNot(::sequenceStartsWith) {
+        it.goToNextTree()
     }
+}
 
 private fun SgfEditor.insertInNextNodeOrBranchOut(
     property: SgfProperty.Move

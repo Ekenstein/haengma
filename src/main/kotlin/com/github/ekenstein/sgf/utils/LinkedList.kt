@@ -1,6 +1,7 @@
 package com.github.ekenstein.sgf.utils
 
-sealed class LinkedList<out T>(open val tail: LinkedList<T>) : AbstractList<T>() {
+sealed class LinkedList<out T> : AbstractList<T>() {
+    abstract val tail: LinkedList<T>
     override val size: Int
         get() = when (this) {
             is Cons -> 1 + tail.size
@@ -15,8 +16,10 @@ sealed class LinkedList<out T>(open val tail: LinkedList<T>) : AbstractList<T>()
         else -> tail[index - 1]
     }
 
-    object Nil : LinkedList<Nothing>(Nil)
-    data class Cons<T>(val head: T, override val tail: LinkedList<T>) : LinkedList<T>(tail)
+    object Nil : LinkedList<Nothing>() {
+        override val tail = Nil
+    }
+    data class Cons<T>(val head: T, override val tail: LinkedList<T>) : LinkedList<T>()
 
     companion object {
         fun <T> fromList(list: List<T>): LinkedList<T> {
@@ -29,6 +32,9 @@ sealed class LinkedList<out T>(open val tail: LinkedList<T>) : AbstractList<T>()
         }
     }
 
+    /**
+     * Reverses the current list and appends the [result] at the end of the reversed list.
+     */
     fun reverse(result: LinkedList<@UnsafeVariance T> = emptyLinkedList()): LinkedList<T> = when (this) {
         is Cons -> {
             tail.reverse(linkedListOf(head) + result)
@@ -36,8 +42,14 @@ sealed class LinkedList<out T>(open val tail: LinkedList<T>) : AbstractList<T>()
         Nil -> result
     }
 
+    /**
+     * Returns a [LinkedList] where the given [item] is appended to the current list at the end.
+     */
     operator fun plus(item: @UnsafeVariance T): LinkedList<T> = plus(linkedListOf(item))
 
+    /**
+     * Returns a [LinkedList] where the given list is appended to the current list at the end.
+     */
     operator fun plus(other: LinkedList<@UnsafeVariance T>): LinkedList<T> = when (this) {
         is Cons -> Cons(head, tail + other)
         Nil -> other
@@ -50,12 +62,43 @@ sealed class LinkedList<out T>(open val tail: LinkedList<T>) : AbstractList<T>()
 
     fun removeFirst(): Pair<T?, LinkedList<T>> = when (this) {
         is Cons -> head to tail
-        Nil -> null to this
+        Nil -> null to Nil
+    }
+
+    override fun iterator(): Iterator<T> = LinkedListIterator(this)
+
+    private class LinkedListIterator<T>(private var head: LinkedList<T>) : Iterator<T> {
+        override fun hasNext(): Boolean = when (head) {
+            is Cons -> true
+            Nil -> false
+        }
+
+        override fun next(): T {
+            val (first, tail) = head.removeFirst()
+            head = tail
+            return first ?: throw NoSuchElementException()
+        }
     }
 }
 
+/**
+ * Converts the non-null items of the given collection to a [LinkedList]. If the given collection
+ * is empty or that it doesn't contain any non-null items, [LinkedList.Nil] will be returned, otherwise
+ * [LinkedList.Cons] where the first non-null item will be the head of the [LinkedList].
+ */
 fun <T> linkedListOfNotNull(vararg items: T?): LinkedList<T> = LinkedList.fromList(items.filterNotNull())
+
+/**
+ * Converts the given [items] to a [LinkedList] where the first item will be the head of the [LinkedList]
+ * and the rest of the items are the tail of the first item.
+ *
+ * If the given [items] are empty, [LinkedList.Nil] will be returned, otherwise [LinkedList.Cons]
+ */
 fun <T> linkedListOf(vararg items: T): LinkedList<T> = LinkedList.fromList(items.toList())
+
+/**
+ * Returns [LinkedList.Nil].
+ */
 fun <T> emptyLinkedList(): LinkedList<T> = LinkedList.Nil
 
 fun <T> List<T>.toLinkedList(): LinkedList<T> = when (this) {

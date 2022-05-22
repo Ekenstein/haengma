@@ -169,7 +169,7 @@ fun SgfEditor.repeat(n: Int, move: (SgfEditor) -> MoveResult<SgfEditor>): SgfEdi
 /**
  * Repeats a move while the condition returns true.
  */
-fun SgfEditor.repeatWhile(
+fun SgfEditor.tryRepeatWhile(
     condition: (SgfEditor) -> Boolean,
     move: (SgfEditor) -> MoveResult<SgfEditor>
 ): MoveResult<SgfEditor> {
@@ -183,6 +183,14 @@ fun SgfEditor.repeatWhile(
     }
 
     return inner(this).withOrigin(this)
+}
+
+fun SgfEditor.tryRepeatWhileNot(
+    condition: (SgfEditor) -> Boolean,
+    move: (SgfEditor) -> MoveResult<SgfEditor>
+): MoveResult<SgfEditor> {
+    fun not(focus: SgfEditor) = !condition(focus)
+    return tryRepeatWhile(::not, move)
 }
 
 fun SgfEditor.stay(): MoveResult<SgfEditor> = MoveResult.Success(this, this)

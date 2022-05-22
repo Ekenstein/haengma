@@ -7,13 +7,26 @@ import java.time.temporal.ChronoField
 import java.util.Calendar
 import java.util.GregorianCalendar
 
+/**
+ * Represents a collection of [SgfGameTree]. It is mandatory to have at least one [SgfGameTree]
+ * in a [SgfCollection].
+ */
 data class SgfCollection(val trees: NonEmptyList<SgfGameTree>) {
     companion object
 }
 
+/**
+ * Represents an SGF tree. A [SgfGameTree] has 1 or more [SgfNode] and 0 or more [trees] at the end
+ * of the [sequence].
+ */
 data class SgfGameTree(val sequence: NonEmptyList<SgfNode>, val trees: List<SgfGameTree>) {
     constructor(sequence: NonEmptyList<SgfNode>) : this(sequence, emptyList())
 }
+
+/**
+ * Represents a node in a [SgfGameTree]. A node contains 0 or more unique [SgfProperty].
+ * E.g. a node can't contain two or more properties of the same type, such as [SgfProperty.Move.B]
+ */
 data class SgfNode(val properties: PropertySet) {
     constructor(vararg property: SgfProperty) : this(propertySetOf(*property))
 
@@ -22,10 +35,17 @@ data class SgfNode(val properties: PropertySet) {
      * on this node.
      */
     inline fun <reified T : SgfProperty> property() = properties.filterIsInstance<T>().singleOrNull()
+
+    /**
+     * Checks whether this node has a property of type [T] or not. True if it has a property of that type,
+     * otherwise false.
+     */
+    inline fun <reified T : SgfProperty> hasProperty() = properties.filterIsInstance<T>().any()
 }
 
 sealed class SgfProperty {
-    abstract val identifier: String
+    internal abstract val identifier: String
+
     sealed class Move : SgfProperty() {
         data class B(val move: com.github.ekenstein.sgf.Move) : Move() {
             constructor(x: Int, y: Int) : this(com.github.ekenstein.sgf.Move.Stone(SgfPoint(x, y)))
