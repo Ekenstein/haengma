@@ -1,6 +1,5 @@
 package com.github.ekenstein.sgf.parser
 
-import com.github.ekenstein.sgf.GameType
 import com.github.ekenstein.sgf.Move
 import com.github.ekenstein.sgf.SgfCollection
 import com.github.ekenstein.sgf.SgfException
@@ -15,11 +14,13 @@ import com.github.ekenstein.sgf.parser.valueparsers.compressedPointParser
 import com.github.ekenstein.sgf.parser.valueparsers.dateParser
 import com.github.ekenstein.sgf.parser.valueparsers.doubleParser
 import com.github.ekenstein.sgf.parser.valueparsers.gameResultParser
+import com.github.ekenstein.sgf.parser.valueparsers.gameTypeParser
 import com.github.ekenstein.sgf.parser.valueparsers.moveParser
 import com.github.ekenstein.sgf.parser.valueparsers.numberParser
 import com.github.ekenstein.sgf.parser.valueparsers.pointParser
 import com.github.ekenstein.sgf.parser.valueparsers.realParser
 import com.github.ekenstein.sgf.parser.valueparsers.simpleTextParser
+import com.github.ekenstein.sgf.parser.valueparsers.sizeParser
 import com.github.ekenstein.sgf.parser.valueparsers.textParser
 import com.github.ekenstein.sgf.utils.NonEmptyList
 import org.antlr.v4.runtime.BaseErrorListener
@@ -188,29 +189,9 @@ private fun SgfParser.RootContext.extract(): SgfProperty.Root = when (this) {
         SgfProperty.Root.AP(name, version)
     }
     is SgfParser.FileFormatContext -> SgfProperty.Root.FF(VALUE().asNumber(1..4))
-    is SgfParser.GameContext -> {
-        val raw = VALUE()
-        val number = raw.asNumber()
-        val allGameTypes = GameType.values()
-        val gameType = allGameTypes.singleOrNull { it.value == number }
-            ?: raw.symbol.toMarker().throwParseException("Expected a game type, but got $number")
-        SgfProperty.Root.GM(gameType)
-    }
+    is SgfParser.GameContext -> SgfProperty.Root.GM(VALUE().asGameType())
     is SgfParser.SizeContext -> {
-        val raw = VALUE()
-        val numberParser = numberParser(1..52)
-        val marker = raw.symbol.toMarker()
-
-        val (width, height) = try {
-            val number = numberParser.parse(marker, raw.textStrippedFromBrackets)
-            number to number
-        } catch (ex: SgfException.ParseError) {
-            try {
-                composed(numberParser, numberParser).parse(marker, raw.textStrippedFromBrackets)
-            } catch (ex: SgfException.ParseError) {
-                marker.throwParseException("Expected a number or a composed value containing numbers, but got $raw")
-            }
-        }
+        val (width, height) = VALUE().asSize()
         SgfProperty.Root.SZ(width, height)
     }
     is SgfParser.CharsetContext -> SgfProperty.Root.CA(VALUE().asCharset())
@@ -292,6 +273,8 @@ private fun TerminalNode.asCompressedPoint() = compressedPointParser.parse(symbo
 private fun TerminalNode.asGameResult() = gameResultParser.parse(symbol.toMarker(), textStrippedFromBrackets)
 private fun TerminalNode.asGameDates() = dateParser.parse(symbol.toMarker(), textStrippedFromBrackets)
 private fun TerminalNode.asCharset() = charsetParser.parse(symbol.toMarker(), textStrippedFromBrackets)
+private fun TerminalNode.asGameType() = gameTypeParser.parse(symbol.toMarker(), textStrippedFromBrackets)
+private fun TerminalNode.asSize() = sizeParser.parse(symbol.toMarker(), textStrippedFromBrackets)
 
 private val TerminalNode.textStrippedFromBrackets
     get() = stripBrackets(text)

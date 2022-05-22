@@ -149,3 +149,51 @@ fun main() {
     println(sgf)
 }
 ```
+
+### Displaying a game
+```kotlin
+import com.github.ekenstein.sgf.SgfCollection
+import com.github.ekenstein.sgf.editor.SgfEditor
+import com.github.ekenstein.sgf.editor.extractBoard
+import com.github.ekenstein.sgf.editor.goToNextNode
+import com.github.ekenstein.sgf.editor.print
+import com.github.ekenstein.sgf.editor.repeat
+import com.github.ekenstein.sgf.parser.from
+import java.nio.file.Path
+
+fun main() {
+    val collection = SgfCollection.from(Path.of("Kamakura-Jubango-Game-5.sgf"))
+    val tree = collection.trees.head
+
+    // ... Load the game you wish to display. In this case we wish to see the position of
+    // the Kamakura Jubango game 5 at the 10th move.
+    val editor = SgfEditor(tree).repeat(10) { it.goToNextNode() }
+
+    // ... extract the board from the current position
+    val board = editor.extractBoard()
+
+    // ... and print it
+    println(board.print())
+
+    // ... which prints to
+    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //    .  .  .  O  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  #  .  #  .  .
+    //    .  .  O  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  #  .  .
+    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //    .  .  .  #  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //    .  .  #  .  .  .  .  .  .  .  .  .  .  .  O  .  O  .  .
+    //    .  .  .  .  O  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+}
+```

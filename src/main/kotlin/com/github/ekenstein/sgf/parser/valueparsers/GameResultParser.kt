@@ -5,7 +5,7 @@ import com.github.ekenstein.sgf.SgfColor
 import com.github.ekenstein.sgf.parser.throwParseException
 
 internal val gameResultParser = ValueParser { marker, value ->
-    val parts = value.split("+")
+    val parts = value.split("+").map { it.trim() }
     when (parts.size) {
         1 -> {
             when (parts[0].lowercase()) {

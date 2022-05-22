@@ -1,6 +1,7 @@
 package com.github.ekenstein.sgf.editor
 
 import com.github.ekenstein.sgf.utils.MoveResult
+import com.github.ekenstein.sgf.utils.get
 import com.github.ekenstein.sgf.utils.goDownLeft
 import com.github.ekenstein.sgf.utils.goLeft
 import com.github.ekenstein.sgf.utils.goRight
@@ -142,6 +143,28 @@ fun SgfEditor.goToParentTree(): MoveResult<SgfEditor> = currentTree.goUp().map(t
         currentTree = it
     )
 }
+
+/**
+ * Repeats a move [n] number of times.
+ */
+fun SgfEditor.tryRepeat(n: Int, move: (SgfEditor) -> MoveResult<SgfEditor>): MoveResult<SgfEditor> {
+    tailrec fun inner(n: Int, acc: SgfEditor): MoveResult<SgfEditor> = if (n < 1) {
+        acc.stay()
+    } else {
+        when (val result = move(acc)) {
+            is MoveResult.Failure -> result
+            is MoveResult.Success -> inner(n - 1, result.value)
+        }
+    }
+
+    return inner(n, this).withOrigin(this)
+}
+
+/**
+ * Repeats a move [n] number of times or throw if impossible.
+ */
+fun SgfEditor.repeat(n: Int, move: (SgfEditor) -> MoveResult<SgfEditor>): SgfEditor =
+    tryRepeat(n, move).get()
 
 /**
  * Repeats a move while the condition returns true.

@@ -18,7 +18,7 @@ private sealed class PartialDate {
 
 internal val dateParser = ValueParser { marker, value ->
     val partialDates = value.split(",").fold(emptyList<PartialDate>()) { parsedDates, string ->
-        parsedDates + toPartialDate(parsedDates, string, marker)
+        parsedDates + toPartialDate(parsedDates, string.trim(), marker)
     }
 
     partialDates.fold(emptyList<GameDate>()) { dates, partialDate ->
@@ -82,7 +82,7 @@ private fun toPartialDate(parsedDates: List<PartialDate>, string: String, marker
         }
         5 -> {
             val lastDate = parsedDates.lastOrNull()
-                ?: marker.throwParseException("YYYY-MM-DD, YYYY-MM, MM-DD, MM or DD")
+                ?: marker.throwParseException("Expected YYYY-MM-DD, YYYY-MM, MM-DD, MM or DD but got $string")
 
             val partials = string.split("-").takeIf { it.size == 2 }
                 ?: marker.throwParseException("Expected MM-DD but got $string")
