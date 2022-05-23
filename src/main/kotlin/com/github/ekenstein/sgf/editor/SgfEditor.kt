@@ -125,27 +125,30 @@ private fun SgfEditor.getFullSequence(): NonEmptyList<SgfNode> {
     return currentTree.nodes(currentSequence.commitAtCurrentPosition())
 }
 
-private fun Board.applyNodePropertiesToBoard(node: SgfNode): Board = node.properties.fold(this) { board, property ->
+private fun applyNodePropertiesToBoard(
+    board: Board,
+    node: SgfNode
+): Board = node.properties.fold(board) { b, property ->
     val newBoard = when (property) {
         is SgfProperty.Move.B -> property.move.asPointOrNull?.let {
-            board.placeStone(Stone(SgfColor.Black, it))
+            b.placeStone(Stone(SgfColor.Black, it))
         }
         is SgfProperty.Move.W -> property.move.asPointOrNull?.let {
-            board.placeStone(Stone(SgfColor.White, it))
+            b.placeStone(Stone(SgfColor.White, it))
         }
-        is SgfProperty.Setup.AB -> board.copy(
-            stones = board.stones + property.points.map { Stone(SgfColor.Black, it) }
+        is SgfProperty.Setup.AB -> b.copy(
+            stones = b.stones + property.points.map { Stone(SgfColor.Black, it) }
         )
-        is SgfProperty.Setup.AW -> board.copy(
-            stones = board.stones + property.points.map { Stone(SgfColor.White, it) }
+        is SgfProperty.Setup.AW -> b.copy(
+            stones = b.stones + property.points.map { Stone(SgfColor.White, it) }
         )
-        is SgfProperty.Setup.AE -> board.copy(
-            stones = board.stones.filter { !property.points.contains(it.point) }
+        is SgfProperty.Setup.AE -> b.copy(
+            stones = b.stones.filter { !property.points.contains(it.point) }
         )
-        else -> board
+        else -> b
     }
 
-    newBoard ?: board
+    newBoard ?: b
 }
 
 /**
@@ -158,9 +161,7 @@ fun SgfEditor.extractBoard(): Board {
         else -> size.width to size.height
     }
 
-    return sequence.fold(Board.empty(boardSize)) { board, node ->
-        board.applyNodePropertiesToBoard(node)
-    }
+    return sequence.fold(Board.empty(boardSize), ::applyNodePropertiesToBoard)
 }
 
 private fun SgfEditor.isPositionRepeating(currentBoard: Board, stone: Stone): Boolean {
