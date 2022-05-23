@@ -14,7 +14,7 @@ class NonEmptyList<out T>(
         fun <T> fromList(list: List<T>): NonEmptyList<T>? = if (list.isEmpty()) {
             null
         } else {
-            nelOf(list.head, list.tail)
+            nelOf(list.first(), list.drop(1))
         }
 
         fun <T> fromListUnsafe(list: List<T>) = checkNotNull(fromList(list)) {

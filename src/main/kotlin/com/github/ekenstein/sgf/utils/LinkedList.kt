@@ -1,33 +1,39 @@
 package com.github.ekenstein.sgf.utils
 
 sealed class LinkedList<out T> : AbstractList<T>() {
-    abstract val tail: LinkedList<T>
     override val size: Int
         get() = when (this) {
             is Cons -> 1 + tail.size
             Nil -> 0
         }
 
-    override fun get(index: Int): T = when (index) {
-        0 -> when (this) {
-            is Cons -> head
-            Nil -> throw IndexOutOfBoundsException(index)
+    override fun get(index: Int): T {
+        tailrec fun inner(n: Int, acc: LinkedList<T>): T {
+            if (n < 0) {
+                throw IndexOutOfBoundsException(index)
+            }
+
+            return when (acc) {
+                is Cons -> when (n) {
+                    0 -> acc.head
+                    else -> inner(n - 1, acc.tail)
+                }
+                Nil -> throw IndexOutOfBoundsException(index)
+            }
         }
-        else -> tail[index - 1]
+
+        return inner(index, this)
     }
 
-    object Nil : LinkedList<Nothing>() {
-        override val tail = Nil
-    }
-    data class Cons<T>(val head: T, override val tail: LinkedList<T>) : LinkedList<T>()
+    object Nil : LinkedList<Nothing>()
+    data class Cons<T>(val head: T, val tail: LinkedList<T>) : LinkedList<T>()
 
     companion object {
         fun <T> fromList(list: List<T>): LinkedList<T> {
             return if (list.isEmpty()) {
                 Nil
             } else {
-                val (head, tail) = list.headAndTail()
-                Cons(head, fromList(tail))
+                Cons(list.first(), fromList(list.drop(1)))
             }
         }
     }

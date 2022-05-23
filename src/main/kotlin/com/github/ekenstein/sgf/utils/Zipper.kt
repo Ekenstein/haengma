@@ -59,14 +59,14 @@ fun <T> Zipper<T>.insertRight(item: T) = copy(
     right = linkedListOf(item) + right
 )
 
-fun <T> Zipper<T>.commit(): NonEmptyList<T> {
-    val reversed = left.reverse(linkedListOf(focus) + right)
-    return nelOf(reversed.head, reversed.tail)
+fun <T> Zipper<T>.commit() = when (val reversed = left.reverse(linkedListOf(focus) + right)) {
+    is LinkedList.Cons -> nelOf(reversed.head, reversed.tail)
+    LinkedList.Nil -> error("A zipper can never be empty.")
 }
 
-fun <T> Zipper<T>.commitAtCurrentPosition(): NonEmptyList<T> {
-    val reversed = left.reverse(linkedListOf(focus))
-    return nelOf(reversed.head, reversed.tail)
+fun <T> Zipper<T>.commitAtCurrentPosition() = when (val reversed = left.reverse(linkedListOf(focus))) {
+    is LinkedList.Cons -> nelOf(reversed.head, reversed.tail)
+    LinkedList.Nil -> error("A zipper can never be empty.")
 }
 
 fun <T> Zipper<T>.update(f: (T) -> T) = copy(

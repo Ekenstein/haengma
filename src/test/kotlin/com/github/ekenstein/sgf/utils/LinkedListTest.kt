@@ -13,13 +13,6 @@ class LinkedListTest {
     }
 
     @Test
-    fun `empty linked list has a nil tail`() {
-        val list = emptyLinkedList<Int>()
-
-        assertEquals(LinkedList.Nil, list.tail)
-    }
-
-    @Test
     fun `empty linked list has size 0`() {
         assertEquals(0, emptyLinkedList<Int>().size)
     }
