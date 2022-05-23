@@ -1,5 +1,19 @@
-# haengma
-SGF parser and serializer written in Kotlin.
+# Haengma
+[![Release](https://jitpack.io/v/Ekenstein/haengma.svg)](https://jitpack.io/#Ekenstein/haengma)
+[![License](https://img.shields.io/github/license/ekenstein/haengma)](https://github.com/ekenstein/haengma/blob/main/LICENSE)
+
+A small, stand-alone, easy to use SGF parser library for Kotlin.
+
+Haengma supports type-safe deserialization of SGF files and serialization of SGF trees. 
+It also comes with an easy-to-use SGF editor that supports navigation and editing of an SGF tree.  
+
+[Haengma](https://senseis.xmp.net/?Haengma) is a Korean word which means roughly the way the stones move, or forward 
+momentum (literally it means moving horse). 
+
+The term is used to 
+1. describe various basic combinations of stones and their implications 
+2. discuss more intricate moves that have a sense of tesuji 
+3. describe a player's style.
 
 # Usage
 ### Add a dependency on haengma
@@ -13,7 +27,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.Ekenstein:haengma:2.0.1")
+    implementation("com.github.Ekenstein:haengma:2.0.2")
 }
 ```
 
