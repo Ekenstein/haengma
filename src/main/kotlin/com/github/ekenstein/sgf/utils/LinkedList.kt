@@ -2,9 +2,12 @@ package com.github.ekenstein.sgf.utils
 
 sealed class LinkedList<out T> : AbstractList<T>() {
     override val size: Int
-        get() = when (this) {
-            is Cons -> 1 + tail.size
-            Nil -> 0
+        get() {
+            tailrec fun inner(result: Int, acc: LinkedList<T>): Int = when (acc) {
+                is Cons -> inner(result + 1, acc.tail)
+                Nil -> result
+            }
+            return inner(0, this)
         }
 
     override fun get(index: Int): T {
