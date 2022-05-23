@@ -5,7 +5,7 @@ import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.flip
 
 data class Board(
-    val stones: List<Stone>,
+    val stones: Map<SgfPoint, SgfColor>,
     val boardSize: Pair<Int, Int>,
     val blackCaptures: Int,
     val whiteCaptures: Int
@@ -14,20 +14,10 @@ data class Board(
         fun empty(boardSize: Int) = empty(boardSize to boardSize)
 
         fun empty(boardSize: Pair<Int, Int>) = Board(
-            stones = emptyList(),
+            stones = emptyMap(),
             boardSize = boardSize,
             blackCaptures = 0,
             whiteCaptures = 0
-        )
-    }
-}
-data class Stone(val color: SgfColor, val point: SgfPoint) {
-    val adjacentPoints by lazy {
-        setOf(
-            SgfPoint(point.x, point.y - 1),
-            SgfPoint(point.x, point.y + 1),
-            SgfPoint(point.x - 1, point.y),
-            SgfPoint(point.x + 1, point.y),
         )
     }
 }
@@ -38,10 +28,10 @@ fun Board.print(): String {
     (1..height).forEach { y ->
         (1..width).forEach { x ->
             val point = SgfPoint(x, y)
-            when (stones.filter { it.point == point }.map { it.color }.singleOrNull()) {
-                null -> sb.append(" . ")
+            when (stones[point]) {
                 SgfColor.Black -> sb.append(" # ")
                 SgfColor.White -> sb.append(" O ")
+                null -> sb.append(" . ")
             }
         }
         sb.appendLine()
@@ -50,26 +40,24 @@ fun Board.print(): String {
     return sb.toString()
 }
 
-private fun Stone.adjacentPoints(boardSize: Pair<Int, Int>): Set<SgfPoint> = adjacentPoints.filter { (x, y) ->
-    x in 1..boardSize.first && y in 1..boardSize.second
-}.toSet()
-
-fun Board.placeStone(stone: Stone): Board {
-    val board = copy(stones = stones + stone)
-    val adjacentStones = board.stones.filter {
-        it.point in stone.adjacentPoints(boardSize) && it.color != stone.color
+fun Board.placeStone(color: SgfColor, point: SgfPoint): Board {
+    val updatedBoard = copy(stones = stones + (point to color))
+    val enemyColor = color.flip()
+    val enemyAdjacentPoints = point.adjacentPoints(boardSize).filter {
+        updatedBoard.stones[it] == enemyColor
     }
 
-    return adjacentStones.fold(board) { b, s -> b.removeConnectedStonesIfTheyAreDead(s) }
-        .removeConnectedStonesIfTheyAreDead(stone)
+    return enemyAdjacentPoints.fold(updatedBoard) { board, enemyPoint ->
+        board.removeConnectedStonesIfTheyAreDead(enemyColor, enemyPoint)
+    }.removeConnectedStonesIfTheyAreDead(color, point)
 }
 
-private fun Board.removeConnectedStonesIfTheyAreDead(stone: Stone): Board {
-    val group = getGroupContainingStone(stone)
-    val liberties = countLibertiesForGroup(group)
+private fun Board.removeConnectedStonesIfTheyAreDead(color: SgfColor, point: SgfPoint): Board {
+    val group = getGroupContainingStone(color, point)
+    val liberties = countLibertiesForGroup(color, group)
 
     return if (liberties <= 0) {
-        copy(stones = stones - group).increaseCaptureCount(stone.color.flip(), group.size)
+        copy(stones = stones - group).increaseCaptureCount(color.flip(), group.size)
     } else {
         this
     }
@@ -80,29 +68,50 @@ private fun Board.increaseCaptureCount(color: SgfColor, numberOfCaptures: Int) =
     SgfColor.White -> copy(whiteCaptures = whiteCaptures + numberOfCaptures)
 }
 
-private fun Board.getGroupContainingStone(stone: Stone): Set<Stone> {
-    fun buildGroup(group: Set<Stone>, stone: Stone): Set<Stone> {
-        val adjacentStones = stones.filter {
-            it.point in stone.adjacentPoints(boardSize) && it !in group && it.color == stone.color
-        }
+private fun Board.getGroupContainingStone(color: SgfColor, point: SgfPoint): Set<SgfPoint> {
+    val currentBoard = stones.toMutableMap()
+    val currentGroup = mutableSetOf(point)
 
-        return adjacentStones.fold(group + adjacentStones, ::buildGroup)
+    fun buildGroup(point: SgfPoint) {
+        val adjacentPoints = point.adjacentPoints(boardSize)
+        adjacentPoints.forEach { adjacentPoint ->
+            if (currentBoard[adjacentPoint] == color) {
+                currentBoard.remove(adjacentPoint)
+                currentGroup.add(adjacentPoint)
+                buildGroup(adjacentPoint)
+            }
+        }
     }
 
-    return buildGroup(setOf(stone), stone)
+    buildGroup(point)
+    return currentGroup
 }
 
-private fun Board.countLibertiesForGroup(group: Set<Stone>): Int = group.sumOf { stone ->
-    val adjacentPoints = stone.adjacentPoints(boardSize)
-    val totalPossibleLiberties = adjacentPoints.size
-    val enemies = stones.count {
-        it.point in adjacentPoints && it.color != stone.color
-    }
-    val deadLiberties = group.count { it.point in adjacentPoints }
+private fun SgfPoint.adjacentPoints(boardSize: Pair<Int, Int>): Set<SgfPoint> {
+    val adjacentPoints = setOf(
+        SgfPoint(x, y - 1),
+        SgfPoint(x, y + 1),
+        SgfPoint(x - 1, y),
+        SgfPoint(x + 1, y),
+    )
+    val (width, height) = boardSize
 
+    return adjacentPoints.filter { (x, y) ->
+        x in 1..width && y in 1..height
+    }.toSet()
+}
+
+private fun Board.countLibertiesForGroup(color: SgfColor, group: Set<SgfPoint>): Int = group.sumOf { point ->
+    val adjacentPoints = point.adjacentPoints(boardSize)
+    val totalPossibleLiberties = adjacentPoints.size
+    val enemies = adjacentPoints.count {
+        val stone = stones[it]
+        stone != null && stone != color
+    }
+
+    val deadLiberties = adjacentPoints.count { it in group }
     totalPossibleLiberties - enemies - deadLiberties
 }
 
-fun Board.isOccupied(point: SgfPoint) = stones.any { it.point == point }
+fun Board.isOccupied(point: SgfPoint) = stones.containsKey(point)
 fun Board.isOccupied(x: Int, y: Int) = isOccupied(SgfPoint(x, y))
-fun Board.isSuicide(stone: Stone) = !placeStone(stone).stones.contains(stone)

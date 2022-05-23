@@ -38,8 +38,9 @@ fun <T> Zipper<T>.goRight(): MoveResult<Zipper<T>> = when (right) {
     }
 }
 
-fun <T> Zipper<T>.goRightUnsafe(): Zipper<T> = goRight().orNull()
-    ?: error("The right-most item has already been reached")
+fun <T> Zipper<T>.goRightUnsafe(): Zipper<T> = goRight().orError {
+    "The right-most item has already been reached"
+}
 
 tailrec fun <T> Zipper<T>.goToLast(): Zipper<T> = when (val next = goRight()) {
     is MoveResult.Failure -> this

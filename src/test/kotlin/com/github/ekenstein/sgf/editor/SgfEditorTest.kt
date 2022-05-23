@@ -1,11 +1,13 @@
 package com.github.ekenstein.sgf.editor
 
+import com.github.ekenstein.sgf.SgfCollection
 import com.github.ekenstein.sgf.SgfColor
 import com.github.ekenstein.sgf.SgfException
 import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.SgfProperty
+import com.github.ekenstein.sgf.parser.from
 import com.github.ekenstein.sgf.serialization.encodeToString
 import com.github.ekenstein.sgf.utils.nelOf
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -891,5 +893,33 @@ class SgfEditorTest {
         )
 
         assertEquals(expectedTree, actualTree, actualTree.encodeToString())
+    }
+
+    @Test
+    fun `capturing a group increases the capture count`() {
+        val sgf = "(;AW[cn][bo][ap][bp][aq][cq][dq][ar][dr][er][as][ds]" +
+            "AB[cp][dp][ep][bq][eq][fq][gq][br][cr][fr][bs][es][fs])"
+
+        val collection = SgfCollection.from(sgf)
+        val tree = collection.trees.head
+        val editor = SgfEditor(tree).goToLastNode()
+        assertAll(
+            {
+                val board = editor
+                    .setNextToPlay(SgfColor.Black)
+                    .placeStone(SgfColor.Black, 3, 19)
+                    .extractBoard()
+
+                assertEquals(5, board.blackCaptures)
+            },
+            {
+                val board = editor
+                    .setNextToPlay(SgfColor.White)
+                    .placeStone(SgfColor.White, 3, 19)
+                    .extractBoard()
+
+                assertEquals(4, board.whiteCaptures)
+            }
+        )
     }
 }

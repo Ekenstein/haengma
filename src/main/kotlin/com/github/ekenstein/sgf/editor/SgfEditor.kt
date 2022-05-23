@@ -131,19 +131,19 @@ private fun applyNodePropertiesToBoard(
 ): Board = node.properties.fold(board) { b, property ->
     val newBoard = when (property) {
         is SgfProperty.Move.B -> property.move.asPointOrNull?.let {
-            b.placeStone(Stone(SgfColor.Black, it))
+            b.placeStone(SgfColor.Black, it)
         }
         is SgfProperty.Move.W -> property.move.asPointOrNull?.let {
-            b.placeStone(Stone(SgfColor.White, it))
+            b.placeStone(SgfColor.White, it)
         }
         is SgfProperty.Setup.AB -> b.copy(
-            stones = b.stones + property.points.map { Stone(SgfColor.Black, it) }
+            stones = b.stones + property.points.map { it to SgfColor.Black }
         )
         is SgfProperty.Setup.AW -> b.copy(
-            stones = b.stones + property.points.map { Stone(SgfColor.White, it) }
+            stones = b.stones + property.points.map { it to SgfColor.White }
         )
         is SgfProperty.Setup.AE -> b.copy(
-            stones = b.stones.filter { !property.points.contains(it.point) }
+            stones = b.stones - property.points
         )
         else -> b
     }
@@ -162,13 +162,6 @@ fun SgfEditor.extractBoard(): Board {
     }
 
     return sequence.fold(Board.empty(boardSize), ::applyNodePropertiesToBoard)
-}
-
-private fun SgfEditor.isPositionRepeating(currentBoard: Board, stone: Stone): Boolean {
-    val previousPosition = goToPreviousNode().orNull()?.extractBoard()
-    val nextPosition = currentBoard.placeStone(stone)
-
-    return previousPosition?.stones?.toSet() == nextPosition.stones.toSet()
 }
 
 private fun SgfEditor.startingColor(): SgfColor = if (getGameInfo().rules.handicap >= 2) {
@@ -230,7 +223,8 @@ fun SgfEditor.setNextToPlay(color: SgfColor) = addSetupProperty(SgfProperty.Setu
  */
 fun SgfEditor.placeStone(color: SgfColor, x: Int, y: Int): SgfEditor {
     val currentBoard = extractBoard()
-    checkMove(x in 1..currentBoard.boardSize.first && x in 1..currentBoard.boardSize.second) {
+    val (width, height) = currentBoard.boardSize
+    checkMove(x in 1..width && x in 1..height) {
         "The stone is placed outside of the board"
     }
 
@@ -242,18 +236,21 @@ fun SgfEditor.placeStone(color: SgfColor, x: Int, y: Int): SgfEditor {
         "The point $x, $y is occupied"
     }
 
-    val stone = Stone(color, SgfPoint(x, y))
-    checkMove(!isPositionRepeating(currentBoard, stone)) {
+    val point = SgfPoint(x, y)
+    val previousBoard = goToPreviousNode().orNull()?.extractBoard()
+    val nextBoard = currentBoard.placeStone(color, point)
+
+    checkMove(nextBoard.stones != previousBoard?.stones) {
         "The position is repeating"
     }
 
-    checkMove(!currentBoard.isSuicide(stone)) {
+    checkMove(nextBoard.stones.containsKey(point)) {
         "It is suicide to play at the point $x, $y"
     }
 
     val property = when (color) {
-        SgfColor.Black -> SgfProperty.Move.B(Move.Stone(stone.point))
-        SgfColor.White -> SgfProperty.Move.W(Move.Stone(stone.point))
+        SgfColor.Black -> SgfProperty.Move.B(Move.Stone(point))
+        SgfColor.White -> SgfProperty.Move.W(Move.Stone(point))
     }
 
     return addMoveProperty(property).get()
