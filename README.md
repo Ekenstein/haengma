@@ -1,6 +1,7 @@
 # Haengma
 [![Release](https://jitpack.io/v/Ekenstein/haengma.svg)](https://jitpack.io/#Ekenstein/haengma)
 [![License](https://img.shields.io/github/license/ekenstein/haengma)](https://github.com/ekenstein/haengma/blob/main/LICENSE)
+![Build Status](https://github.com/ekenstein/haengma/workflows/CI/badge.svg)
 
 A small, stand-alone, easy to use SGF parser library for Kotlin.
 
