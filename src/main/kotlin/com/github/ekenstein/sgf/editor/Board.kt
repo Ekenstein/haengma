@@ -21,7 +21,16 @@ data class Board(
         )
     }
 }
-data class Stone(val color: SgfColor, val point: SgfPoint)
+data class Stone(val color: SgfColor, val point: SgfPoint) {
+    val adjacentPoints by lazy {
+        setOf(
+            SgfPoint(point.x, point.y - 1),
+            SgfPoint(point.x, point.y + 1),
+            SgfPoint(point.x - 1, point.y),
+            SgfPoint(point.x + 1, point.y),
+        )
+    }
+}
 
 fun Board.print(): String {
     val sb = StringBuilder()
@@ -41,12 +50,9 @@ fun Board.print(): String {
     return sb.toString()
 }
 
-private fun Stone.adjacentPoints(boardSize: Pair<Int, Int>): Set<SgfPoint> = setOf(
-    SgfPoint(point.x, point.y - 1),
-    SgfPoint(point.x, point.y + 1),
-    SgfPoint(point.x - 1, point.y),
-    SgfPoint(point.x + 1, point.y),
-).filter { (x, y) -> x in 1..boardSize.first && y in 1..boardSize.second }.toSet()
+private fun Stone.adjacentPoints(boardSize: Pair<Int, Int>): Set<SgfPoint> = adjacentPoints.filter { (x, y) ->
+    x in 1..boardSize.first && y in 1..boardSize.second
+}.toSet()
 
 fun Board.placeStone(stone: Stone): Board {
     val board = copy(stones = stones + stone)

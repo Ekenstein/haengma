@@ -8,6 +8,7 @@ import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.SgfProperty
 import com.github.ekenstein.sgf.serialization.encodeToString
 import com.github.ekenstein.sgf.utils.nelOf
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
@@ -15,7 +16,6 @@ import utils.nextGameInfo
 import utils.nextList
 import utils.rng
 import utils.run
-import kotlin.test.assertEquals
 
 class SgfEditorTest {
     @Test
