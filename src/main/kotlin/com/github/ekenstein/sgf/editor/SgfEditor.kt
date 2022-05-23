@@ -116,14 +116,13 @@ private fun SgfNode.hasRootProperties() = hasProperty<SgfProperty.Root>()
 private fun SgfNode.hasMoveProperties() = hasProperty<SgfProperty.Move>()
 
 private fun SgfEditor.getFullSequence(): NonEmptyList<SgfNode> {
-    fun TreeZipper<SgfGameTree>.nodes(): NonEmptyList<SgfNode> = when (val parent = goUp()) {
-        is MoveResult.Failure -> focus.sequence
-        is MoveResult.Success -> parent.value.nodes() + focus.sequence
-    }
+    tailrec fun TreeZipper<SgfGameTree>.nodes(result: NonEmptyList<SgfNode>): NonEmptyList<SgfNode> =
+        when (val parent = goUp()) {
+            is MoveResult.Failure -> result
+            is MoveResult.Success -> parent.value.nodes(focus.sequence + result)
+        }
 
-    return currentTree.update {
-        it.copy(sequence = currentSequence.commitAtCurrentPosition())
-    }.nodes()
+    return currentTree.nodes(currentSequence.commitAtCurrentPosition())
 }
 
 private fun Board.applyNodePropertiesToBoard(node: SgfNode): Board = node.properties.fold(this) { board, property ->
