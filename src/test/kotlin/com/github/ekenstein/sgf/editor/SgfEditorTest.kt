@@ -1,5 +1,6 @@
 package com.github.ekenstein.sgf.editor
 
+import com.github.ekenstein.sgf.Move
 import com.github.ekenstein.sgf.SgfCollection
 import com.github.ekenstein.sgf.SgfColor
 import com.github.ekenstein.sgf.SgfException
@@ -8,6 +9,7 @@ import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.SgfProperty
 import com.github.ekenstein.sgf.parser.from
+import com.github.ekenstein.sgf.propertySetOf
 import com.github.ekenstein.sgf.serialization.encodeToString
 import com.github.ekenstein.sgf.utils.nelOf
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -919,6 +921,192 @@ class SgfEditorTest {
                     .extractBoard()
 
                 assertEquals(4, board.whiteCaptures)
+            }
+        )
+    }
+
+    @Test
+    fun `if placing a stone has force set to true, the move will be executed even if it's suicide`() {
+        val editor = SgfEditor()
+            .addStones(SgfColor.Black, SgfPoint(1, 1), SgfPoint(2, 2), SgfPoint(3, 1))
+            .setNextToPlay(SgfColor.White)
+
+        assertThrows<SgfException.IllegalMove> { editor.placeStone(SgfColor.White, 2, 1) }
+
+        val nextPosition = editor.placeStone(SgfColor.White, 2, 1, true)
+
+        val board = nextPosition.extractBoard()
+        val expectedStones = mapOf(
+            SgfPoint(1, 1) to SgfColor.Black,
+            SgfPoint(2, 2) to SgfColor.Black,
+            SgfPoint(3, 1) to SgfColor.Black,
+        )
+
+        assertEquals(expectedStones, board.stones)
+
+        val rootProperties = GameInfo.default.toSgfProperties() + propertySetOf(
+            SgfProperty.Setup.AB(setOf(SgfPoint(1, 1), SgfPoint(2, 2), SgfPoint(3, 1))),
+            SgfProperty.Setup.PL(SgfColor.White)
+        )
+
+        val actualTree = nextPosition.commit()
+        val expectedTree = SgfGameTree(
+            nelOf(
+                SgfNode(rootProperties),
+                SgfNode(
+                    SgfProperty.Move.W(2, 1),
+                    SgfProperty.Move.KO
+                )
+            )
+        )
+        assertEquals(expectedTree, actualTree)
+    }
+
+    @Test
+    fun `if placing a stone has force set to true, the move will be executed even if the position is repeating`() {
+        val blackStones = setOf(
+            2 to 1,
+            1 to 2,
+            3 to 2,
+            2 to 3
+        ).map { (x, y) -> SgfPoint(x, y) }.toSet()
+
+        val whiteStones = setOf(
+            3 to 1,
+            4 to 2,
+            3 to 3
+        ).map { (x, y) -> SgfPoint(x, y) }.toSet()
+
+        val koPosition = SgfEditor()
+            .addStones(SgfColor.Black, blackStones)
+            .addStones(SgfColor.White, whiteStones)
+            .placeStone(SgfColor.Black, 16, 4)
+            .placeStone(SgfColor.White, 2, 2)
+
+        assertThrows<SgfException.IllegalMove> {
+            koPosition.placeStone(SgfColor.Black, 3, 2)
+        }
+
+        val nextPosition = koPosition.placeStone(SgfColor.Black, 3, 2, true)
+        val rootProperties = GameInfo.default.toSgfProperties() + propertySetOf(
+            SgfProperty.Setup.AB(blackStones),
+            SgfProperty.Setup.AW(whiteStones)
+        )
+
+        val expectedGameTree = SgfGameTree(
+            nelOf(
+                SgfNode(rootProperties),
+                SgfNode(SgfProperty.Move.B(16, 4)),
+                SgfNode(SgfProperty.Move.W(2, 2)),
+                SgfNode(SgfProperty.Move.B(3, 2), SgfProperty.Move.KO)
+            )
+        )
+
+        val actualGameTree = nextPosition.commit()
+        assertEquals(expectedGameTree, actualGameTree)
+
+        val expectedStones = mapOf(
+            SgfPoint(16, 4) to SgfColor.Black,
+            SgfPoint(3, 2) to SgfColor.Black
+        ) + blackStones.map { it to SgfColor.Black } + whiteStones.map { it to SgfColor.White }
+
+        val actualStones = nextPosition.extractBoard().stones
+        assertEquals(expectedStones, actualStones)
+        assertEquals(SgfColor.White, nextPosition.nextToPlay())
+    }
+
+    @Test
+    fun `if placing a stone has force set to true, the move will be executed even if the point is occupied`() {
+        val editor = SgfEditor()
+            .placeStone(SgfColor.Black, 3, 3)
+
+        assertThrows<SgfException.IllegalMove> { editor.placeStone(SgfColor.White, 3, 3) }
+        val nextPosition = editor.placeStone(SgfColor.White, 3, 3, true)
+        val expectedGameTree = SgfGameTree(
+            nelOf(
+                SgfNode(GameInfo.default.toSgfProperties()),
+                SgfNode(SgfProperty.Move.B(3, 3)),
+                SgfNode(SgfProperty.Move.W(3, 3), SgfProperty.Move.KO)
+            )
+        )
+        val actualGameTree = nextPosition.commit()
+        assertEquals(expectedGameTree, actualGameTree)
+
+        val expectedStones = mapOf(SgfPoint(3, 3) to SgfColor.White)
+        val actualStones = nextPosition.extractBoard().stones
+
+        assertEquals(expectedStones, actualStones)
+        assertEquals(SgfColor.Black, nextPosition.nextToPlay())
+    }
+
+    @Test
+    fun `if placing a stone has force set to true, the move will be executed even if it's not the player's turn`() {
+        assertAll(
+            {
+                val editor = SgfEditor()
+                assertThrows<SgfException.IllegalMove> { editor.placeStone(SgfColor.White, 3, 3) }
+                val nextPosition = editor.placeStone(SgfColor.White, 3, 3, true)
+                val expectedGameTree = SgfGameTree(
+                    nelOf(
+                        SgfNode(GameInfo.default.toSgfProperties()),
+                        SgfNode(SgfProperty.Move.W(3, 3), SgfProperty.Move.KO)
+                    )
+                )
+
+                val actualGameTree = nextPosition.commit()
+                assertEquals(expectedGameTree, actualGameTree)
+                assertEquals(SgfColor.Black, nextPosition.nextToPlay())
+            },
+            {
+                val editor = SgfEditor().placeStone(SgfColor.Black, 3, 3).setNextToPlay(SgfColor.Black)
+                assertThrows<SgfException.IllegalMove> { editor.placeStone(SgfColor.White, 4, 4) }
+                val nextPosition = editor.placeStone(SgfColor.White, 4, 4, true)
+                val expectedGameTree = SgfGameTree(
+                    nelOf(
+                        SgfNode(GameInfo.default.toSgfProperties()),
+                        SgfNode(SgfProperty.Move.B(3, 3)),
+                        SgfNode(SgfProperty.Setup.PL(SgfColor.Black)),
+                        SgfNode(SgfProperty.Move.W(4, 4), SgfProperty.Move.KO)
+                    )
+                )
+                val actualGameTree = nextPosition.commit()
+                assertEquals(expectedGameTree, actualGameTree)
+                assertEquals(SgfColor.Black, nextPosition.nextToPlay())
+            }
+        )
+    }
+
+    @Test
+    fun `if passing with force flag set to true, the pass will be executed even if it's not the player's turn`() {
+        assertAll(
+            {
+                val editor = SgfEditor()
+                assertThrows<SgfException.IllegalMove> { editor.pass(SgfColor.White) }
+                val nextPosition = editor.pass(SgfColor.White, true)
+                val expectedGameTree = SgfGameTree(
+                    nelOf(
+                        SgfNode(GameInfo.default.toSgfProperties()),
+                        SgfNode(SgfProperty.Move.W(Move.Pass), SgfProperty.Move.KO)
+                    )
+                )
+                val actualGameTree = nextPosition.commit()
+                assertEquals(expectedGameTree, actualGameTree)
+            },
+            {
+                val editor = SgfEditor().setNextToPlay(SgfColor.White)
+                assertThrows<SgfException.IllegalMove> { editor.pass(SgfColor.Black) }
+                val nextPosition = editor.pass(SgfColor.Black, true)
+                val expectedGameTree = SgfGameTree(
+                    nelOf(
+                        SgfNode(GameInfo.default.toSgfProperties() + SgfProperty.Setup.PL(SgfColor.White)),
+                        SgfNode(SgfProperty.Move.B(Move.Pass), SgfProperty.Move.KO)
+                    )
+                )
+
+                val actualGameTree = nextPosition.commit()
+                assertEquals(expectedGameTree, actualGameTree)
+
+                assertEquals(SgfColor.White, nextPosition.nextToPlay())
             }
         )
     }
