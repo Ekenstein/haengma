@@ -128,7 +128,7 @@ private fun SgfEditor.getFullSequence(): NonEmptyList<SgfNode> {
 private fun applyNodePropertiesToBoard(
     board: Board,
     node: SgfNode
-): Board = node.properties.fold(board) { b, property ->
+) = node.properties.fold(board) { b, property ->
     val newBoard = when (property) {
         is SgfProperty.Move.B -> property.move.asPointOrNull?.let {
             b.placeStone(SgfColor.Black, it)
@@ -194,14 +194,24 @@ fun SgfEditor.nextToPlay(): SgfColor {
 /**
  * Clears the given [points] from stones in the current position.
  */
-fun SgfEditor.removeStones(vararg points: SgfPoint) = addSetupProperty(SgfProperty.Setup.AE(points.toSet()))
+fun SgfEditor.removeStones(vararg points: SgfPoint) = removeStones(points.toSet())
+
+/**
+ * Clears the given set of [points] from stones in the current position.
+ */
+fun SgfEditor.removeStones(points: Set<SgfPoint>) = addSetupProperty(SgfProperty.Setup.AE(points.toSet()))
 
 /**
  * Adds the given stones to the position regardless of what was at the position before.
  */
-fun SgfEditor.addStones(color: SgfColor, vararg point: SgfPoint) = when (color) {
-    SgfColor.Black -> addSetupProperty(SgfProperty.Setup.AB(point.toSet()))
-    SgfColor.White -> addSetupProperty(SgfProperty.Setup.AW(point.toSet()))
+fun SgfEditor.addStones(color: SgfColor, vararg points: SgfPoint) = addStones(color, points.toSet())
+
+/**
+ * Adds the given set of stones to the position regardless of what was at the position before.
+ */
+fun SgfEditor.addStones(color: SgfColor, points: Set<SgfPoint>) = when (color) {
+    SgfColor.Black -> addSetupProperty(SgfProperty.Setup.AB(points))
+    SgfColor.White -> addSetupProperty(SgfProperty.Setup.AW(points))
 }
 
 /**
@@ -212,16 +222,35 @@ fun SgfEditor.setNextToPlay(color: SgfColor) = addSetupProperty(SgfProperty.Setu
 /**
  * Places a stone at the given point at the current position.
  *
- * Will throw [SgfException.IllegalMove] if:
+ * Will throw [SgfException.IllegalMove] iff:
+ *  - [force] is false and ...
  *  - It's not the [color]'s turn to play.
  *  - The stone is placed outside the board.
  *  - The point is occupied by another stone.
  *  - The placed stone results in repetition of the position (ko).
  *  - The stone immediately dies when placed on the board (suicide).
- *
- *  If you wish to place a stone without checking rules, look at [addStones].
  */
-fun SgfEditor.placeStone(color: SgfColor, x: Int, y: Int): SgfEditor {
+fun SgfEditor.placeStone(color: SgfColor, x: Int, y: Int, force: Boolean = false): SgfEditor {
+    val property = when (color) {
+        SgfColor.Black -> SgfProperty.Move.B(x, y)
+        SgfColor.White -> SgfProperty.Move.W(x, y)
+    }
+
+    val result = if (force) {
+        addMoveProperty(property).flatMap {
+            it.updateCurrentNode { node ->
+                node.copy(properties = node.properties + SgfProperty.Move.KO)
+            }.stay()
+        }
+    } else {
+        checkIfMoveIsValid(color, x, y)
+        addMoveProperty(property)
+    }
+
+    return result.get()
+}
+
+private fun SgfEditor.checkIfMoveIsValid(color: SgfColor, x: Int, y: Int) {
     val currentBoard = extractBoard()
     val (width, height) = currentBoard.boardSize
     checkMove(x in 1..width && x in 1..height) {
@@ -247,31 +276,34 @@ fun SgfEditor.placeStone(color: SgfColor, x: Int, y: Int): SgfEditor {
     checkMove(nextBoard.stones.containsKey(point)) {
         "It is suicide to play at the point $x, $y"
     }
-
-    val property = when (color) {
-        SgfColor.Black -> SgfProperty.Move.B(Move.Stone(point))
-        SgfColor.White -> SgfProperty.Move.W(Move.Stone(point))
-    }
-
-    return addMoveProperty(property).get()
 }
 
 /**
  * The player of [color] passes at the current position.
  *
- * Will throw [SgfException.IllegalMove] if it's not [color]'s turn to play.
+ * Will throw [SgfException.IllegalMove] iff [force] is false and if it's not [color]'s turn to play.
  */
-fun SgfEditor.pass(color: SgfColor): SgfEditor {
-    checkMove(nextToPlay() == color) {
-        "It's not ${color.asString}'s turn to play"
-    }
-
+fun SgfEditor.pass(color: SgfColor, force: Boolean = false): SgfEditor {
     val property = when (color) {
         SgfColor.Black -> SgfProperty.Move.B(Move.Pass)
         SgfColor.White -> SgfProperty.Move.W(Move.Pass)
     }
 
-    return addMoveProperty(property).get()
+    val result = if (force) {
+        addMoveProperty(property).flatMap {
+            it.updateCurrentNode { node ->
+                node.copy(properties = node.properties + SgfProperty.Move.KO)
+            }.stay()
+        }
+    } else {
+        checkMove(nextToPlay() == color) {
+            "It's not ${color.asString}'s turn to play"
+        }
+
+        addMoveProperty(property)
+    }
+
+    return result.get()
 }
 
 private val SgfNode.move: SgfProperty?
