@@ -7,6 +7,7 @@ import com.github.ekenstein.sgf.editor.GameInfo
 import com.github.ekenstein.sgf.editor.Player
 import com.github.ekenstein.sgf.editor.Rules
 import java.util.Random
+import kotlin.math.max
 
 val rng = Random(42)
 
@@ -34,6 +35,13 @@ fun <T> Random.nextList(from: List<T>): List<T> {
     return (1..numberOfItems).fold(emptyList()) { list, _ ->
         list + nextItem(from)
     }
+}
+
+fun <T> Random.nextList(range: IntRange = 1..100, gen: (Random) -> T): List<T> {
+    val random = nextInt(range.last)
+
+    val numberOfItems = max(range.first, random)
+    return (1..numberOfItems).map { gen(this) }
 }
 
 const val DIGITS = "0123456789"

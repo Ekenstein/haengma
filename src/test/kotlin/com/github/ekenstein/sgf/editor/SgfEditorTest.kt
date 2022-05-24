@@ -13,6 +13,7 @@ import com.github.ekenstein.sgf.propertySetOf
 import com.github.ekenstein.sgf.serialization.encodeToString
 import com.github.ekenstein.sgf.utils.nelOf
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
@@ -1107,6 +1108,20 @@ class SgfEditorTest {
                 assertEquals(expectedGameTree, actualGameTree)
 
                 assertEquals(SgfColor.White, nextPosition.nextToPlay())
+            }
+        )
+    }
+
+    @Test
+    fun `passed moves does not get included onto the extracted board`() {
+        assertAll(
+            {
+                val board = SgfEditor().pass(SgfColor.Black).extractBoard()
+                assertTrue(board.stones.isEmpty())
+            },
+            {
+                val board = SgfEditor().pass(SgfColor.Black).pass(SgfColor.White).extractBoard()
+                assertTrue(board.stones.isEmpty())
             }
         )
     }

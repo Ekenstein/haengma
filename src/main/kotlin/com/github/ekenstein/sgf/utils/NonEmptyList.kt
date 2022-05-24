@@ -2,6 +2,8 @@ package com.github.ekenstein.sgf.utils
 
 /**
  * Represents a non-empty list containing a [head] and a possibly empty [tail].
+ *
+ * To create a non-empty list, use either [nelOf], [List.toNel] or [List.toNelUnsafe].
  * @param head the first item in the list
  * @param tail the possibly empty tail.
  */

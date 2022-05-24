@@ -149,4 +149,42 @@ class LinkedListTest {
         val arrayList = listOf(1, 2)
         assertIterableEquals(linkedList, arrayList)
     }
+
+    @Test
+    fun `get throws IndexOutOfBoundsException if the index was negative`() {
+        val linkedList = linkedListOf(1, 2)
+        assertThrows<IndexOutOfBoundsException> { linkedList[-1] }
+    }
+
+    @Test
+    fun `get throws IndexOutOfBoundsException if the list is empty`() {
+        assertThrows<IndexOutOfBoundsException> { emptyLinkedList<Int>()[0] }
+    }
+
+    @Test
+    fun `get throws IndexOutOfBoundsException if the index is equal to the size of the list or larger`() {
+        val list = linkedListOf(1, 2)
+        assertThrows<IndexOutOfBoundsException> { list[list.size] }
+    }
+
+    @Test
+    fun `NoSuchElementException if trying to retrieve the next item in the iterator and it has no next item`() {
+        assertAll(
+            {
+                val list = emptyLinkedList<Int>()
+                val iterator = list.iterator()
+                assertFalse(iterator.hasNext())
+                assertThrows<NoSuchElementException> { iterator.next() }
+            },
+            {
+                val list = linkedListOf(1)
+                val iterator = list.iterator()
+                assertTrue(iterator.hasNext())
+                assertEquals(1, iterator.next())
+
+                assertFalse(iterator.hasNext())
+                assertThrows<NoSuchElementException> { iterator.next() }
+            }
+        )
+    }
 }
