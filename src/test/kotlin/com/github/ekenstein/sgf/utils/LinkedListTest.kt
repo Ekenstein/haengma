@@ -3,6 +3,7 @@ package com.github.ekenstein.sgf.utils
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertIterableEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -140,5 +141,12 @@ class LinkedListTest {
                 assertEquals(expectedList, list)
             }
         )
+    }
+
+    @Test
+    fun `linked list can be compared with an ordinary array list`() {
+        val linkedList = linkedListOf(1, 2)
+        val arrayList = listOf(1, 2)
+        assertIterableEquals(linkedList, arrayList)
     }
 }

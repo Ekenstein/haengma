@@ -23,7 +23,7 @@ import com.github.ekenstein.sgf.parser.valueparsers.simpleTextParser
 import com.github.ekenstein.sgf.parser.valueparsers.sizeParser
 import com.github.ekenstein.sgf.parser.valueparsers.textParser
 import com.github.ekenstein.sgf.toPropertySet
-import com.github.ekenstein.sgf.utils.NonEmptyList
+import com.github.ekenstein.sgf.utils.toNelUnsafe
 import org.antlr.v4.runtime.BaseErrorListener
 import org.antlr.v4.runtime.CharStream
 import org.antlr.v4.runtime.CharStreams
@@ -86,7 +86,7 @@ private fun SgfCollection.Companion.from(
 private fun SgfParser.CollectionContext.extract(configuration: SgfParserConfiguration): SgfCollection {
     val trees = gameTree().map { it.extract(configuration) }
     return SgfCollection(
-        NonEmptyList.fromListUnsafe(trees)
+        trees.toNelUnsafe()
     )
 }
 
@@ -98,7 +98,7 @@ private fun SgfParser.GameTreeContext.extract(configuration: SgfParserConfigurat
 
     val variations = gameTree().map { it.extract(configuration) }
 
-    return SgfGameTree(NonEmptyList.fromListUnsafe(sequence), variations)
+    return SgfGameTree(sequence.toNelUnsafe(), variations)
 }
 
 private fun SgfParser.SequenceContext.extract(configuration: SgfParserConfiguration) =
