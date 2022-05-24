@@ -27,7 +27,7 @@ fun <T> TreeZipper<T>.goLeft() = when (left) {
     is LinkedList.Cons -> {
         val (head, tail) = left
         MoveResult.Success(
-            value = copy(
+            position = copy(
                 left = tail,
                 focus = head,
                 right = linkedListOf(focus) + right
@@ -42,7 +42,7 @@ fun <T> TreeZipper<T>.goRight() = when (right) {
     is LinkedList.Cons -> {
         val (head, tail) = right
         MoveResult.Success(
-            value = copy(
+            position = copy(
                 left = linkedListOf(focus) + left,
                 focus = head,
                 right = tail
@@ -57,7 +57,7 @@ fun <T> TreeZipper<T>.goDownLeft() = when (val children = unzip.unzip(focus)) {
     is LinkedList.Cons -> {
         val (head, tail) = children
         MoveResult.Success(
-            value = copy(
+            position = copy(
                 left = emptyLinkedList(),
                 focus = head,
                 right = tail,
@@ -84,7 +84,7 @@ fun <T> TreeZipper<T>.goUp() = when (top) {
 
 tailrec fun <T> TreeZipper<T>.goToRoot(): TreeZipper<T> = when (val parent = goUp()) {
     is MoveResult.Failure -> this
-    is MoveResult.Success -> parent.value.goToRoot()
+    is MoveResult.Success -> parent.position.goToRoot()
 }
 
 fun <T> TreeZipper<T>.set(value: T) = copy(

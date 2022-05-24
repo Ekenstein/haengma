@@ -119,7 +119,7 @@ private fun SgfEditor.getFullSequence(): NonEmptyList<SgfNode> {
     tailrec fun TreeZipper<SgfGameTree>.nodes(result: NonEmptyList<SgfNode>): NonEmptyList<SgfNode> =
         when (val parent = goUp()) {
             is MoveResult.Failure -> result
-            is MoveResult.Success -> parent.value.nodes(focus.sequence + result)
+            is MoveResult.Success -> parent.position.nodes(focus.sequence + result)
         }
 
     return currentTree.nodes(currentSequence.commitAtCurrentPosition())

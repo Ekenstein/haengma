@@ -1,10 +1,12 @@
 package com.github.ekenstein.sgf.utils
 
+import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import kotlin.test.assertNull
 
 class LinkedListTest {
     @Test
@@ -101,5 +103,42 @@ class LinkedListTest {
         val actual = list + linkedListOf(4, 5, 6)
         val expected = linkedListOf(1, 2, 3, 4, 5, 6)
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `removing the first item will return a pair of the head of the list and the tail`() {
+        val list = linkedListOf(1, 2, 3)
+        val (head, tail) = list.removeFirst()
+        assertEquals(1, head)
+        assertEquals(linkedListOf(2, 3), tail)
+    }
+
+    @Test
+    fun `removing the first item of an empty linked list returns a pair of null to nil`() {
+        val list = emptyLinkedList<Int>()
+        val (head, tail) = list.removeFirst()
+        assertNull(head)
+        assertEquals(emptyLinkedList<Int>(), tail)
+    }
+
+    @Test
+    fun `linkedListOfNotNull filters out all null values and returns a linked list`() {
+        assertAll(
+            {
+                val list = linkedListOfNotNull(1, null, 3)
+                val expectedList = linkedListOf(1, 3)
+                assertEquals(expectedList, list)
+            },
+            {
+                val list = linkedListOfNotNull<Int>()
+                val expectedList = emptyLinkedList<Int>()
+                assertEquals(expectedList, list)
+            },
+            {
+                val list = linkedListOfNotNull<Int>(null, null)
+                val expectedList = emptyLinkedList<Int>()
+                assertEquals(expectedList, list)
+            }
+        )
     }
 }

@@ -17,7 +17,7 @@ fun <T> Zipper<T>.goLeft(): MoveResult<Zipper<T>> = when (left) {
     is LinkedList.Cons -> {
         val (head, tail) = left
         MoveResult.Success(
-            value = copy(tail, head, linkedListOf(focus) + right),
+            position = copy(tail, head, linkedListOf(focus) + right),
             origin = this
         )
     }
@@ -28,7 +28,7 @@ fun <T> Zipper<T>.goRight(): MoveResult<Zipper<T>> = when (right) {
     is LinkedList.Cons -> {
         val (head, tail) = right
         MoveResult.Success(
-            value = copy(
+            position = copy(
                 left = linkedListOf(focus) + left,
                 focus = head,
                 right = tail
@@ -44,12 +44,12 @@ fun <T> Zipper<T>.goRightUnsafe(): Zipper<T> = goRight().orError {
 
 tailrec fun <T> Zipper<T>.goToLast(): Zipper<T> = when (val next = goRight()) {
     is MoveResult.Failure -> this
-    is MoveResult.Success -> next.value.goToLast()
+    is MoveResult.Success -> next.position.goToLast()
 }
 
 tailrec fun <T> Zipper<T>.goToFirst(): Zipper<T> = when (val prev = goLeft()) {
     is MoveResult.Failure -> this
-    is MoveResult.Success -> prev.value.goToFirst()
+    is MoveResult.Success -> prev.position.goToFirst()
 }
 
 fun <T> Zipper<T>.insertLeft(item: T) = copy(
