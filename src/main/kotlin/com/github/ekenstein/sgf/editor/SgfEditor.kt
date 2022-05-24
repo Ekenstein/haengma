@@ -283,9 +283,9 @@ fun SgfEditor.pass(color: SgfColor, force: Boolean = false): SgfEditor {
  * Places a stone at the given point at the current position.
  *
  * Will throw [SgfException.IllegalMove] iff:
+ *  - The stone is placed outside the board or ...
  *  - [force] is false and ...
  *  - It's not the [color]'s turn to play.
- *  - The stone is placed outside the board.
  *  - The point is occupied by another stone.
  *  - The placed stone results in repetition of the position (ko).
  *  - The stone immediately dies when placed on the board (suicide).
@@ -294,9 +294,14 @@ fun SgfEditor.pass(color: SgfColor, force: Boolean = false): SgfEditor {
  *  @param y The y-coordinate for the stone.
  *  @param force Whether the execution of the move should be forced or not. If true, no validation will occur,
  *               otherwise the move must be a valid move at the current position.
- *  @throws [SgfException.IllegalMove] If the move was invalid at the current position and the [force] flag was false.
+ *  @throws [SgfException.IllegalMove] If the move would result in placing the stone outside the board, or if the move
+ *  was invalid at the current position and the [force] flag was false.
  */
 fun SgfEditor.placeStone(color: SgfColor, x: Int, y: Int, force: Boolean = false): SgfEditor {
+    val currentBoard = extractBoard()
+    checkMove(x in 1..currentBoard.width && y in 1..currentBoard.height) {
+        "The stone is placed outside of the board"
+    }
     val property = when (color) {
         SgfColor.Black -> SgfProperty.Move.B(x, y)
         SgfColor.White -> SgfProperty.Move.W(x, y)
@@ -309,20 +314,14 @@ fun SgfEditor.placeStone(color: SgfColor, x: Int, y: Int, force: Boolean = false
             }.stay()
         }
     } else {
-        checkIfMoveIsValid(color, x, y)
+        checkIfMoveIsValid(color, x, y, currentBoard)
         addMoveProperty(property)
     }
 
     return result.get()
 }
 
-private fun SgfEditor.checkIfMoveIsValid(color: SgfColor, x: Int, y: Int) {
-    val currentBoard = extractBoard()
-    val (width, height) = currentBoard.boardSize
-    checkMove(x in 1..width && x in 1..height) {
-        "The stone is placed outside of the board"
-    }
-
+private fun SgfEditor.checkIfMoveIsValid(color: SgfColor, x: Int, y: Int, currentBoard: Board) {
     checkMove(nextToPlay() == color) {
         "It's not ${color.asString}'s turn to play"
     }
@@ -435,7 +434,7 @@ private fun SgfEditor.addMoveProperty(property: SgfProperty.Move): MoveResult<Sg
     val result = if (currentNode.hasRootProperties() || currentNode.hasSetupProperties()) {
         insertInNextNodeOrBranchOut(property)
     } else {
-        when (currentSequence.focus.move) {
+        when (currentNode.move) {
             property -> stay() // no-op
             null -> updateCurrentNode {
                 it.copy(

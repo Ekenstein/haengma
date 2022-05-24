@@ -12,18 +12,48 @@ import org.junit.jupiter.api.assertThrows
 class BoardTest {
     @Test
     fun `placing a stone outside of the board results an IllegalArgumentException`() {
+        val illegalPoints = (1..19).flatMap {
+            listOf(
+                SgfPoint(-1, it),
+                SgfPoint(0, it),
+                SgfPoint(20, it),
+                SgfPoint(it, -1),
+                SgfPoint(it, 0),
+                SgfPoint(it, 20)
+            )
+        }
+        val board = Board.empty(19)
+
         assertAll(
-            {
-                assertThrows<IllegalArgumentException> {
-                    Board.empty(19).placeStone(SgfColor.Black, SgfPoint(20, 1))
-                }
-            },
-            {
-                assertThrows<IllegalArgumentException> {
-                    Board.empty(15 to 25).placeStone(SgfColor.Black, SgfPoint(16, 26))
+            illegalPoints.map {
+                {
+                    assertThrows<IllegalArgumentException> {
+                        board.placeStone(SgfColor.Black, it)
+                    }
+                    assertThrows<IllegalArgumentException> {
+                        board.placeStone(SgfColor.Black, it)
+                    }
+                    assertThrows<IllegalArgumentException> {
+                        board.placeStone(SgfColor.White, it)
+                    }
+                    assertThrows<IllegalArgumentException> {
+                        board.placeStone(SgfColor.White, it)
+                    }
                 }
             }
         )
+//        assertAll(
+//            {
+//                assertThrows<IllegalArgumentException> {
+//                    Board.empty(19).placeStone(SgfColor.Black, SgfPoint(20, 1))
+//                }
+//            },
+//            {
+//                assertThrows<IllegalArgumentException> {
+//                    Board.empty(15 to 25).placeStone(SgfColor.Black, SgfPoint(16, 26))
+//                }
+//            }
+//        )
     }
 
     @Test
