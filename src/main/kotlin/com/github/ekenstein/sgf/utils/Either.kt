@@ -4,7 +4,14 @@ package com.github.ekenstein.sgf.utils
  * Represents either a left value or a right value, not both.
  */
 sealed class Either<out TLeft, out TRight> {
+    /**
+     * Represents a left [value]
+     */
     data class Left<T>(val value: T) : Either<T, Nothing>()
+
+    /**
+     * Represents a right [value]
+     */
     data class Right<T>(val value: T) : Either<Nothing, T>()
 }
 
