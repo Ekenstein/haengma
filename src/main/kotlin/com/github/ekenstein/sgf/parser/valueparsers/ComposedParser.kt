@@ -2,6 +2,8 @@ package com.github.ekenstein.sgf.parser.valueparsers
 
 import com.github.ekenstein.sgf.parser.throwParseException
 
+private data class Composed(val left: String, val right: String)
+
 internal fun <L, R> composed(
     leftParser: ValueParser<L>,
     rightParser: ValueParser<R>
@@ -9,11 +11,24 @@ internal fun <L, R> composed(
     val regex = Regex("""(?<=[^\\]):""")
     val parts = value.split(regex)
 
-    if (parts.size != 2) {
+    if (parts.isEmpty() || parts.size >= 3) {
         marker.throwParseException("Expected a composed value, but got $value")
     }
 
-    val (leftPart, rightPart) = parts
+    val (leftPart, rightPart) = when (parts.size) {
+        1 -> {
+            val part = parts[0]
+            if (part.startsWith(":")) {
+                Composed("", part)
+            } else if (part.endsWith(":")) {
+                Composed(part, "")
+            } else {
+                marker.throwParseException("Expected a composed value, but got $value")
+            }
+        }
+        2 -> Composed(parts[0], parts[1])
+        else -> marker.throwParseException("Expected a composed value, but got $value")
+    }
 
     val left = leftParser.parse(
         marker.copy(

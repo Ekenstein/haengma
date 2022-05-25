@@ -23,7 +23,7 @@ import com.github.ekenstein.sgf.parser.valueparsers.simpleTextParser
 import com.github.ekenstein.sgf.parser.valueparsers.sizeParser
 import com.github.ekenstein.sgf.parser.valueparsers.textParser
 import com.github.ekenstein.sgf.toPropertySet
-import com.github.ekenstein.sgf.utils.NonEmptyList
+import com.github.ekenstein.sgf.utils.toNelUnsafe
 import org.antlr.v4.runtime.BaseErrorListener
 import org.antlr.v4.runtime.CharStream
 import org.antlr.v4.runtime.CharStreams
@@ -49,16 +49,37 @@ private class SgfErrorListener : BaseErrorListener() {
     }
 }
 
+/**
+ * Parses the given [string] to an [SgfCollection]. If there are any parse errors, [SgfException.ParseError]
+ * will be thrown containing additional information of what went wrong.
+ * @param string The string to parse to an [SgfCollection]
+ * @param configure additional configuration for the parser
+ * @throws SgfException.ParseError If the string couldn't be parsed to an [SgfCollection].
+ */
 fun SgfCollection.Companion.from(
     string: String,
     configure: SgfParserConfiguration.() -> Unit = { }
 ): SgfCollection = from(CharStreams.fromString(string), configure)
 
+/**
+ * Opens and parses the file located at the given [path] to an [SgfCollection]. If there are any parse errors,
+ * [SgfException.ParseError] will be thrown containing additional information of what went wrong.
+ * @param path The path to the file that should be parsed to an [SgfCollection]
+ * @param configure additional configuration for the parser
+ * @throws SgfException.ParseError If the file couldn't be parsed to an [SgfCollection].
+ */
 fun SgfCollection.Companion.from(
     path: Path,
     configure: SgfParserConfiguration.() -> Unit = { }
 ): SgfCollection = from(CharStreams.fromPath(path), configure)
 
+/**
+ * Reads and parses the given [inputStream] to an [SgfCollection]. If there are any parse errors,
+ * [SgfException.ParseError] will be thrown containing additional information of what went wrong.
+ * @param inputStream The input stream to read and parse to an [SgfCollection]
+ * @param configure additional configuration for the parser
+ * @throws SgfException.ParseError If the string couldn't be parsed to an [SgfCollection].
+ */
 fun SgfCollection.Companion.from(
     inputStream: InputStream,
     configure: SgfParserConfiguration.() -> Unit = { }
@@ -86,7 +107,7 @@ private fun SgfCollection.Companion.from(
 private fun SgfParser.CollectionContext.extract(configuration: SgfParserConfiguration): SgfCollection {
     val trees = gameTree().map { it.extract(configuration) }
     return SgfCollection(
-        NonEmptyList.fromListUnsafe(trees)
+        trees.toNelUnsafe()
     )
 }
 
@@ -98,7 +119,7 @@ private fun SgfParser.GameTreeContext.extract(configuration: SgfParserConfigurat
 
     val variations = gameTree().map { it.extract(configuration) }
 
-    return SgfGameTree(NonEmptyList.fromListUnsafe(sequence), variations)
+    return SgfGameTree(sequence.toNelUnsafe(), variations)
 }
 
 private fun SgfParser.SequenceContext.extract(configuration: SgfParserConfiguration) =
@@ -149,12 +170,12 @@ private fun SgfParser.SetupContext.extract(): SgfProperty.Setup = when (this) {
 }
 
 private fun SgfParser.NodeAnnotationContext.extract(): SgfProperty.NodeAnnotation = when (this) {
-    is SgfParser.CommentContext -> SgfProperty.NodeAnnotation.C(VALUE().asText())
+    is SgfParser.CommentContext -> SgfProperty.NodeAnnotation.C(VALUE()?.asText() ?: "")
     is SgfParser.EvenPositionContext -> SgfProperty.NodeAnnotation.DM(VALUE().asDouble())
     is SgfParser.GoodForBlackContext -> SgfProperty.NodeAnnotation.GB(VALUE().asDouble())
     is SgfParser.GoodForWhiteContext -> SgfProperty.NodeAnnotation.GW(VALUE().asDouble())
     is SgfParser.HotspotContext -> SgfProperty.NodeAnnotation.HO(VALUE().asDouble())
-    is SgfParser.NodeNameContext -> SgfProperty.NodeAnnotation.N(VALUE().asSimpleText())
+    is SgfParser.NodeNameContext -> SgfProperty.NodeAnnotation.N(VALUE()?.asSimpleText() ?: "")
     is SgfParser.UnclearPositionContext -> SgfProperty.NodeAnnotation.UC(VALUE().asDouble())
     is SgfParser.ValueContext -> SgfProperty.NodeAnnotation.V(VALUE().asReal())
     else -> throw SgfException.ParseError("Unrecognized node annotation property $text", toMarker())
@@ -203,27 +224,27 @@ private fun SgfParser.RootContext.extract(): SgfProperty.Root = when (this) {
 private fun SgfParser.GameInfoContext.extract(): SgfProperty.GameInfo = when (this) {
     is SgfParser.HandicapContext -> SgfProperty.GameInfo.HA(VALUE().asNumber(2..9))
     is SgfParser.KomiContext -> SgfProperty.GameInfo.KM(VALUE().asReal())
-    is SgfParser.EventContext -> SgfProperty.GameInfo.EV(VALUE().asSimpleText())
-    is SgfParser.PlayerBlackContext -> SgfProperty.GameInfo.PB(VALUE().asSimpleText())
-    is SgfParser.PlayerWhiteContext -> SgfProperty.GameInfo.PW(VALUE().asSimpleText())
-    is SgfParser.WhiteRankContext -> SgfProperty.GameInfo.WR(VALUE().asSimpleText())
-    is SgfParser.BlackRankContext -> SgfProperty.GameInfo.BR(VALUE().asSimpleText())
+    is SgfParser.EventContext -> SgfProperty.GameInfo.EV(VALUE()?.asSimpleText() ?: "")
+    is SgfParser.PlayerBlackContext -> SgfProperty.GameInfo.PB(VALUE()?.asSimpleText() ?: "")
+    is SgfParser.PlayerWhiteContext -> SgfProperty.GameInfo.PW(VALUE()?.asSimpleText() ?: "")
+    is SgfParser.WhiteRankContext -> SgfProperty.GameInfo.WR(VALUE()?.asSimpleText() ?: "")
+    is SgfParser.BlackRankContext -> SgfProperty.GameInfo.BR(VALUE()?.asSimpleText() ?: "")
     is SgfParser.DateContext -> SgfProperty.GameInfo.DT(VALUE().asGameDates())
     is SgfParser.ResultContext -> SgfProperty.GameInfo.RE(VALUE().asGameResult())
     is SgfParser.TimeLimitContext -> SgfProperty.GameInfo.TM(VALUE().asReal())
-    is SgfParser.SourceContext -> SgfProperty.GameInfo.SO(VALUE().asSimpleText())
-    is SgfParser.GameNameContext -> SgfProperty.GameInfo.GN(VALUE().asSimpleText())
-    is SgfParser.GameCommentContext -> SgfProperty.GameInfo.GC(VALUE().asText())
-    is SgfParser.OpeningContext -> SgfProperty.GameInfo.ON(VALUE().asSimpleText())
-    is SgfParser.OvertimeContext -> SgfProperty.GameInfo.OT(VALUE().asSimpleText())
-    is SgfParser.RoundContext -> SgfProperty.GameInfo.RO(VALUE().asSimpleText())
-    is SgfParser.RulesContext -> SgfProperty.GameInfo.RU(VALUE().asSimpleText())
-    is SgfParser.UserContext -> SgfProperty.GameInfo.US(VALUE().asSimpleText())
-    is SgfParser.WhiteTeamContext -> SgfProperty.GameInfo.WT(VALUE().asSimpleText())
-    is SgfParser.BlackTeamContext -> SgfProperty.GameInfo.BT(VALUE().asSimpleText())
-    is SgfParser.AnnotationContext -> SgfProperty.GameInfo.AN(VALUE().asSimpleText())
-    is SgfParser.CopyrightContext -> SgfProperty.GameInfo.CP(VALUE().asSimpleText())
-    is SgfParser.PlaceContext -> SgfProperty.GameInfo.PC(VALUE().asSimpleText())
+    is SgfParser.SourceContext -> SgfProperty.GameInfo.SO(VALUE()?.asSimpleText() ?: "")
+    is SgfParser.GameNameContext -> SgfProperty.GameInfo.GN(VALUE()?.asSimpleText() ?: "")
+    is SgfParser.GameCommentContext -> SgfProperty.GameInfo.GC(VALUE()?.asText() ?: "")
+    is SgfParser.OpeningContext -> SgfProperty.GameInfo.ON(VALUE()?.asSimpleText() ?: "")
+    is SgfParser.OvertimeContext -> SgfProperty.GameInfo.OT(VALUE()?.asSimpleText() ?: "")
+    is SgfParser.RoundContext -> SgfProperty.GameInfo.RO(VALUE()?.asSimpleText() ?: "")
+    is SgfParser.RulesContext -> SgfProperty.GameInfo.RU(VALUE()?.asSimpleText() ?: "")
+    is SgfParser.UserContext -> SgfProperty.GameInfo.US(VALUE()?.asSimpleText() ?: "")
+    is SgfParser.WhiteTeamContext -> SgfProperty.GameInfo.WT(VALUE()?.asSimpleText() ?: "")
+    is SgfParser.BlackTeamContext -> SgfProperty.GameInfo.BT(VALUE()?.asSimpleText() ?: "")
+    is SgfParser.AnnotationContext -> SgfProperty.GameInfo.AN(VALUE()?.asSimpleText() ?: "")
+    is SgfParser.CopyrightContext -> SgfProperty.GameInfo.CP(VALUE()?.asSimpleText() ?: "")
+    is SgfParser.PlaceContext -> SgfProperty.GameInfo.PC(VALUE()?.asSimpleText() ?: "")
     else -> throw SgfException.ParseError("Unrecognized game info property $text", toMarker())
 }
 

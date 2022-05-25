@@ -4,15 +4,42 @@ import com.github.ekenstein.sgf.SgfColor
 import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.flip
 
+/**
+ * Represents a board position.
+ * @param stones The stones the position contains
+ * @param boardSize The size of the board where the first item is the width and the second item is the height
+ * @param blackCaptures the number of stones black has captured
+ * @param whiteCaptures the number of stones white has captured.
+ */
 data class Board(
     val stones: Map<SgfPoint, SgfColor>,
     val boardSize: Pair<Int, Int>,
     val blackCaptures: Int,
     val whiteCaptures: Int
 ) {
+    /**
+     * The width of the board.
+     */
+    val width = boardSize.first
+
+    /**
+     * The height of the board.
+     */
+    val height = boardSize.second
+
     companion object {
+        /**
+         * Returns an empty board position where the width and height of the board is the given [boardSize]
+         * @param boardSize The width and height of the board.
+         */
         fun empty(boardSize: Int) = empty(boardSize to boardSize)
 
+        /**
+         * Returns an empty board position with the given [boardSize].
+         *
+         * @param boardSize The size of the board where the first item is the width of the board and the second item
+         *                  is the height of the board.
+         */
         fun empty(boardSize: Pair<Int, Int>) = Board(
             stones = emptyMap(),
             boardSize = boardSize,
@@ -22,6 +49,9 @@ data class Board(
     }
 }
 
+/**
+ * Returns a text representation of the given board.
+ */
 fun Board.print(): String {
     val sb = StringBuilder()
     val (width, height) = boardSize
@@ -40,7 +70,23 @@ fun Board.print(): String {
     return sb.toString()
 }
 
+/**
+ * Places a stone of [color] at the given [point] and returns a new board with the updated position.
+ *
+ * If the stone captures some opponent stones, the number of captured stones are updated accordingly for the player,
+ * otherwise if the placed stone results in a suicide, the number of captured stones for the opponent is updated
+ * accordingly.
+ *
+ * If the stone is placed outside the board, an [IllegalArgumentException] will be thrown.
+ *
+ * Note that this function does not validate whether the given move is valid or not, just executes it.
+ * If you wish to validate a move, look at [SgfEditor.placeStone]
+ */
 fun Board.placeStone(color: SgfColor, point: SgfPoint): Board {
+    require(point.x in 1..width && point.y in 1..height) {
+        "The stone must not be placed outside of the board."
+    }
+
     val updatedBoard = copy(stones = stones + (point to color))
     val enemyColor = color.flip()
     val enemyAdjacentPoints = point.adjacentPoints(boardSize).filter {
@@ -106,12 +152,19 @@ private fun Board.countLibertiesForGroup(color: SgfColor, group: Set<SgfPoint>):
     val totalPossibleLiberties = adjacentPoints.size
     val enemies = adjacentPoints.count {
         val stone = stones[it]
-        stone != null && stone != color
+        stone == color.flip()
     }
 
     val deadLiberties = adjacentPoints.count { it in group }
     totalPossibleLiberties - enemies - deadLiberties
 }
 
+/**
+ * Returns true if the given [point] on the board is occupied by another stone, otherwise false.
+ */
 fun Board.isOccupied(point: SgfPoint) = stones.containsKey(point)
+
+/**
+ * Returns true if the given point on the board is occupied by another stone, otherwise false.
+ */
 fun Board.isOccupied(x: Int, y: Int) = isOccupied(SgfPoint(x, y))

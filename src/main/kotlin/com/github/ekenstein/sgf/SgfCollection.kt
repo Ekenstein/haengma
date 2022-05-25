@@ -177,6 +177,11 @@ sealed class SgfProperty {
             override val identifier: String = "GM"
         }
         data class ST(val style: Int) : Root() {
+            init {
+                require(style in 0..3) {
+                    "The style value must be between 0 and 3"
+                }
+            }
             override val identifier: String = "ST"
         }
     }

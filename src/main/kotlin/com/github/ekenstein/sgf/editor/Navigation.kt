@@ -31,7 +31,7 @@ fun SgfEditor.goToNextNode(): MoveResult<SgfEditor> = goToNextNodeInSequence().o
     goToLeftMostChildTree()
 }
 
-fun SgfEditor.goToNextNodeInSequence(): MoveResult<SgfEditor> = currentSequence.goRight().map(this) {
+private fun SgfEditor.goToNextNodeInSequence(): MoveResult<SgfEditor> = currentSequence.goRight().map(this) {
     copy(currentSequence = it)
 }
 
@@ -41,7 +41,7 @@ fun SgfEditor.goToNextNodeInSequence(): MoveResult<SgfEditor> = currentSequence.
  */
 tailrec fun SgfEditor.goToLastNode(): SgfEditor = when (val next = goToNextNode()) {
     is MoveResult.Failure -> this
-    is MoveResult.Success -> next.value.goToLastNode()
+    is MoveResult.Success -> next.position.goToLastNode()
 }
 
 /**
@@ -61,7 +61,7 @@ fun SgfEditor.goToPreviousNode(): MoveResult<SgfEditor> = goToPreviousNodeInSequ
     goToParentTree()
 }
 
-fun SgfEditor.goToPreviousNodeInSequence(): MoveResult<SgfEditor> = currentSequence.goLeft().map(this) {
+private fun SgfEditor.goToPreviousNodeInSequence(): MoveResult<SgfEditor> = currentSequence.goLeft().map(this) {
     copy(currentSequence = it)
 }
 
@@ -71,7 +71,7 @@ fun SgfEditor.goToPreviousNodeInSequence(): MoveResult<SgfEditor> = currentSeque
  */
 tailrec fun SgfEditor.goToRootNode(): SgfEditor = when (val previous = goToPreviousNode()) {
     is MoveResult.Failure -> this
-    is MoveResult.Success -> previous.value.goToRootNode()
+    is MoveResult.Success -> previous.position.goToRootNode()
 }
 
 /**
@@ -153,7 +153,7 @@ fun SgfEditor.tryRepeat(n: Int, move: (SgfEditor) -> MoveResult<SgfEditor>): Mov
     } else {
         when (val result = move(acc)) {
             is MoveResult.Failure -> result
-            is MoveResult.Success -> inner(n - 1, result.value)
+            is MoveResult.Success -> inner(n - 1, result.position)
         }
     }
 
@@ -167,7 +167,7 @@ fun SgfEditor.repeat(n: Int, move: (SgfEditor) -> MoveResult<SgfEditor>): SgfEdi
     tryRepeat(n, move).get()
 
 /**
- * Repeats a move while the condition returns true.
+ * Repeats the given [move] while the [condition] returns true.
  */
 fun SgfEditor.tryRepeatWhile(
     condition: (SgfEditor) -> Boolean,
@@ -178,13 +178,16 @@ fun SgfEditor.tryRepeatWhile(
     } else {
         when (val result = move(acc)) {
             is MoveResult.Failure -> result
-            is MoveResult.Success -> inner(result.value)
+            is MoveResult.Success -> inner(result.position)
         }
     }
 
     return inner(this).withOrigin(this)
 }
 
+/**
+ * Repeats the given [move] while the given [condition] returns false.
+ */
 fun SgfEditor.tryRepeatWhileNot(
     condition: (SgfEditor) -> Boolean,
     move: (SgfEditor) -> MoveResult<SgfEditor>

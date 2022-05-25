@@ -1,5 +1,10 @@
 package com.github.ekenstein.sgf.utils
 
+/**
+ * Represents a linked list which can either be [Cons] or [Nil]
+ * [Cons] represents a non-empty list with at least one item that has a tail.
+ * [Nil] represents an empty list.
+ */
 sealed class LinkedList<out T> : AbstractList<T>() {
     override val size: Int
         get() {
@@ -28,15 +33,27 @@ sealed class LinkedList<out T> : AbstractList<T>() {
         return inner(index, this)
     }
 
+    /**
+     * Represents an empty [LinkedList]. It has no head or tail.
+     */
     object Nil : LinkedList<Nothing>()
+
+    /**
+     * Represents a non-empty list with a [head] and a [tail]. The tail can be empty.
+     */
     data class Cons<T>(val head: T, val tail: LinkedList<T>) : LinkedList<T>()
 
     companion object {
-        fun <T> fromList(list: List<T>): LinkedList<T> {
-            return if (list.isEmpty()) {
+        /**
+         * Converts the given [list] to a [LinkedList]. If the list is a [LinkedList], the list will be returned,
+         * otherwise it will be converted to a [LinkedList].
+         */
+        fun <T> fromList(list: List<T>): LinkedList<T> = when (list) {
+            is LinkedList -> list
+            else -> if (list.isEmpty()) {
                 Nil
             } else {
-                Cons(list.first(), fromList(list.drop(1)))
+                Cons(list[0], fromList(list.drop(1)))
             }
         }
     }
@@ -44,11 +61,13 @@ sealed class LinkedList<out T> : AbstractList<T>() {
     /**
      * Reverses the current list and appends the [result] at the end of the reversed list.
      */
-    fun reverse(result: LinkedList<@UnsafeVariance T> = emptyLinkedList()): LinkedList<T> = when (this) {
-        is Cons -> {
-            tail.reverse(linkedListOf(head) + result)
+    fun reverse(result: LinkedList<@UnsafeVariance T> = emptyLinkedList()): LinkedList<T> {
+        tailrec fun inner(list: LinkedList<T>, result: LinkedList<T>): LinkedList<T> = when (list) {
+            is Cons -> inner(list.tail, Cons(list.head, result))
+            Nil -> result
         }
-        Nil -> result
+
+        return inner(this, result)
     }
 
     /**
@@ -69,6 +88,10 @@ sealed class LinkedList<out T> : AbstractList<T>() {
         Nil -> true
     }
 
+    /**
+     * Returns a pair of the head in this [LinkedList] and the tail of the [LinkedList].
+     * If the [LinkedList] represents [Nil], a pair of null to [Nil] will be returned.
+     */
     fun removeFirst(): Pair<T?, LinkedList<T>> = when (this) {
         is Cons -> head to tail
         Nil -> null to Nil

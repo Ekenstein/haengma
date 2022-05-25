@@ -1,5 +1,7 @@
 package com.github.ekenstein.sgf.parser
 
+import RandomTest
+import RandomTest.Companion.list
 import com.github.ekenstein.sgf.GameDate
 import com.github.ekenstein.sgf.GameResult
 import com.github.ekenstein.sgf.GameType
@@ -10,18 +12,20 @@ import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.SgfProperty
+import com.github.ekenstein.sgf.serialization.encodeToString
 import com.github.ekenstein.sgf.utils.nelOf
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import java.nio.charset.Charset
-import kotlin.test.assertEquals
 
-class SgfParserTest {
+class SgfParserTest : RandomTest {
     @Nested
     inner class `private properties` {
         @Test
@@ -888,6 +892,73 @@ class SgfParserTest {
         val uncompressedCollection = SgfCollection.from(uncompressedSgf)
         val compressedCollection = SgfCollection.from(compressedSgf)
         assertEquals(uncompressedCollection, compressedCollection)
+    }
+
+    @Test
+    fun `can parse an empty comment`() {
+        assertAll({
+            val sgf = "(;C[])"
+            val actual = SgfCollection.from(sgf).trees.head
+            val expected = SgfGameTree(nelOf(SgfNode(SgfProperty.NodeAnnotation.C(""))))
+            assertEquals(expected, actual)
+        })
+    }
+
+    @Test
+    fun `can serialize and then parse back the same tree`() {
+        val trees = random.list(100) { gameTree(3) }
+
+        assertAll(
+            trees.map { tree ->
+                {
+                    val sgf = tree.encodeToString()
+                    val actual = assertDoesNotThrow(sgf) { SgfCollection.from(sgf).trees.head }
+                    assertEquals(tree, actual)
+                }
+            }
+        )
+    }
+
+    @Test
+    fun `can parse a result where it's a winner, but with no more specification`() {
+        assertAll(
+            {
+                val sgf = "(;RE[W+])"
+                val tree = assertDoesNotThrow { SgfCollection.from(sgf).trees.head }
+                val expected = SgfGameTree(nelOf(SgfNode(SgfProperty.GameInfo.RE(GameResult.Wins(SgfColor.White)))))
+                assertEquals(expected, tree)
+            },
+            {
+                val sgf = "(;RE[B+])"
+                val tree = assertDoesNotThrow { SgfCollection.from(sgf).trees.head }
+                val expected = SgfGameTree(nelOf(SgfNode(SgfProperty.GameInfo.RE(GameResult.Wins(SgfColor.Black)))))
+                assertEquals(expected, tree)
+            }
+        )
+    }
+
+    @Test
+    fun `the application name can be empty on AP`() {
+        val sgf = "(;AP[:bar])"
+        val actual = assertDoesNotThrow { SgfCollection.from(sgf).trees.head }
+        val expected = SgfGameTree(nelOf(SgfNode(SgfProperty.Root.AP("", "bar"))))
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `the application version can be empty on AP`() {
+        val sgf = "(;AP[foo:])"
+        val actual = assertDoesNotThrow { SgfCollection.from(sgf).trees.head }
+        val expected = SgfGameTree(nelOf(SgfNode(SgfProperty.Root.AP("foo", ""))))
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `both name and version can be empty on AP`() {
+        val sgf = "(;AP[:])"
+        val actual = assertDoesNotThrow { SgfCollection.from(sgf).trees.head }
+        val expected = SgfGameTree(nelOf(SgfNode(SgfProperty.Root.AP("", ""))))
+        assertEquals(expected, actual)
     }
 
     private fun assertThrowsParseException(marker: Marker, block: () -> Unit) = try {
