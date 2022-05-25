@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>SgfEditor</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>haengma</span>
+            </a>
+    </div>
+    <div>
+2.0.2    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageIds="haengma::com.github.ekenstein.sgf.editor/SgfEditor///PointingToDeclaration//769193423">
+  <div class="breadcrumbs"><a href="../../../index.html">haengma</a><span class="delimiter">/</span><a href="../index.html">com.github.ekenstein.sgf.editor</a><span class="delimiter">/</span><a href="index.html">SgfEditor</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Sgf</span><wbr></wbr><span><span>Editor</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">SgfEditor</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>currentSequence<span class="token operator">: </span><a href="../../com.github.ekenstein.sgf.utils/-zipper/index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.github.ekenstein.sgf/-sgf-node/index.html">SgfNode</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>currentTree<span class="token operator">: </span><a href="../../com.github.ekenstein.sgf.utils/-tree-zipper/index.html">TreeZipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.github.ekenstein.sgf/-sgf-game-tree/index.html">SgfGameTree</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">An editor for a <a href="../../com.github.ekenstein.sgf/-sgf-game-tree/index.html">SgfGameTree</a>. Enables navigation and alteration of a tree.</p><p class="paragraph">You can navigate through sequences with:</p><ul><li><p class="paragraph"><a href="../go-to-next-node.html">SgfEditor.goToNextNode</a></p></li><li><p class="paragraph"><a href="../go-to-previous-node.html">SgfEditor.goToPreviousNode</a></p></li><li><p class="paragraph"><span data-unresolved-link="com.github.ekenstein.sgf.editor//goToNextNodeInSequence/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/">SgfEditor.goToNextNodeInSequence</span></p></li><li><p class="paragraph"><span data-unresolved-link="com.github.ekenstein.sgf.editor//goToPreviousNodeInSequence/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/">SgfEditor.goToPreviousNodeInSequence</span></p></li></ul><p class="paragraph">Traverse the trees with:</p><ul><li><p class="paragraph"><a href="../go-to-parent-tree.html">SgfEditor.goToParentTree</a></p></li><li><p class="paragraph"><a href="../go-to-next-tree.html">SgfEditor.goToNextTree</a></p></li><li><p class="paragraph"><a href="../go-to-previous-tree.html">SgfEditor.goToPreviousTree</a></p></li><li><p class="paragraph"><a href="../go-to-left-most-child-tree.html">SgfEditor.goToLeftMostChildTree</a></p></li></ul><p class="paragraph">You can quick-move through the tree with:</p><ul><li><p class="paragraph"><a href="../go-to-root-node.html">SgfEditor.goToRootNode</a></p></li><li><p class="paragraph"><a href="../go-to-last-node.html">SgfEditor.goToLastNode</a></p></li></ul><p class="paragraph">You can alter the tree by using:</p><ul><li><p class="paragraph"><a href="../place-stone.html">SgfEditor.placeStone</a></p></li><li><p class="paragraph"><a href="../pass.html">SgfEditor.pass</a>,</p></li><li><p class="paragraph"><a href="../add-stones.html">SgfEditor.addStones</a></p></li><li><p class="paragraph"><a href="../set-next-to-play.html">SgfEditor.setNextToPlay</a></p></li></ul></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Properties">Properties</button><button class="section-tab" data-togglable="Extensions">Extensions</button></div>
+    <div class="tabs-section-body">
+      <h2 class="tabbedcontent">Constructors</h2>
+      <div class="table" data-togglable="Constructors"><a data-name="57611982%2FConstructors%2F769193423" anchor-label="SgfEditor" id="57611982%2FConstructors%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-sgf-editor.html"><span>Sgf</span><wbr></wbr><span><span>Editor</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="57611982%2FConstructors%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-sgf-editor.html"><span class="token function">SgfEditor</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">gameTree<span class="token operator">: </span><a href="../../com.github.ekenstein.sgf/-sgf-game-tree/index.html">SgfGameTree</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1501345391%2FConstructors%2F769193423" anchor-label="SgfEditor" id="1501345391%2FConstructors%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-sgf-editor.html"><span>Sgf</span><wbr></wbr><span><span>Editor</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1501345391%2FConstructors%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-sgf-editor.html"><span class="token function">SgfEditor</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">gameInfo<span class="token operator">: </span><a href="../-game-info/index.html">GameInfo</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1884456140%2FConstructors%2F769193423" anchor-label="SgfEditor" id="1884456140%2FConstructors%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-sgf-editor.html"><span>Sgf</span><wbr></wbr><span><span>Editor</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1884456140%2FConstructors%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-sgf-editor.html"><span class="token function">SgfEditor</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">block<span class="token operator">: </span><span class="token keyword"></span><a href="../-game-info/index.html">GameInfo</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{ }</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1366200531%2FConstructors%2F769193423" anchor-label="SgfEditor" id="-1366200531%2FConstructors%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-sgf-editor.html"><span>Sgf</span><wbr></wbr><span><span>Editor</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1366200531%2FConstructors%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-sgf-editor.html"><span class="token function">SgfEditor</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">currentSequence<span class="token operator">: </span><a href="../../com.github.ekenstein.sgf.utils/-zipper/index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.github.ekenstein.sgf/-sgf-node/index.html">SgfNode</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">currentTree<span class="token operator">: </span><a href="../../com.github.ekenstein.sgf.utils/-tree-zipper/index.html">TreeZipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.github.ekenstein.sgf/-sgf-game-tree/index.html">SgfGameTree</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="-573529594%2FProperties%2F769193423" anchor-label="currentNode" id="-573529594%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="current-node.html">currentNode</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-573529594%2FProperties%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><a data-name="-573529594%2FProperties%2F769193423" anchor-label="currentNode" id="-573529594%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="current-node.html">currentNode</a><span class="token operator">: </span><a href="../../com.github.ekenstein.sgf/-sgf-node/index.html">SgfNode</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="176488359%2FProperties%2F769193423" anchor-label="currentSequence" id="176488359%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="current-sequence.html">currentSequence</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="176488359%2FProperties%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><a data-name="176488359%2FProperties%2F769193423" anchor-label="currentSequence" id="176488359%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="current-sequence.html">currentSequence</a><span class="token operator">: </span><a href="../../com.github.ekenstein.sgf.utils/-zipper/index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.github.ekenstein.sgf/-sgf-node/index.html">SgfNode</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-512482326%2FProperties%2F769193423" anchor-label="currentTree" id="-512482326%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="current-tree.html">currentTree</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-512482326%2FProperties%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><a data-name="-512482326%2FProperties%2F769193423" anchor-label="currentTree" id="-512482326%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="current-tree.html">currentTree</a><span class="token operator">: </span><a href="../../com.github.ekenstein.sgf.utils/-tree-zipper/index.html">TreeZipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.github.ekenstein.sgf/-sgf-game-tree/index.html">SgfGameTree</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="tabbedcontent">Extensions</h2>
+      <div class="table" data-togglable="Extensions"><a data-name="-904624420%2FExtensions%2F769193423" anchor-label="addStones" id="-904624420%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../add-stones.html"><span>add</span><wbr></wbr><span><span>Stones</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-904624420%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../add-stones.html"><span class="token function">addStones</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">color<span class="token operator">: </span><a href="../../com.github.ekenstein.sgf/-sgf-color/index.html">SgfColor</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">vararg </span>points<span class="token operator">: </span><a href="../../com.github.ekenstein.sgf/-sgf-point/index.html">SgfPoint</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">SgfEditor</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Adds the given stones to the position regardless of what was at the position before.</p></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../add-stones.html"><span class="token function">addStones</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">color<span class="token operator">: </span><a href="../../com.github.ekenstein.sgf/-sgf-color/index.html">SgfColor</a><span class="token punctuation">, </span></span><span class="parameter ">points<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.github.ekenstein.sgf/-sgf-point/index.html">SgfPoint</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">SgfEditor</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Adds the given set of stones to the position regardless of what was at the position before.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1263989341%2FExtensions%2F769193423" anchor-label="commit" id="1263989341%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../commit.html"><span><span>commit</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1263989341%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../commit.html"><span class="token function">commit</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.github.ekenstein.sgf/-sgf-game-tree/index.html">SgfGameTree</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Saves the state of the editor to a <a href="../../com.github.ekenstein.sgf/-sgf-game-tree/index.html">SgfGameTree</a></p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="2002245707%2FExtensions%2F769193423" anchor-label="extractBoard" id="2002245707%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../extract-board.html"><span>extract</span><wbr></wbr><span><span>Board</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2002245707%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../extract-board.html"><span class="token function">extractBoard</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-board/index.html">Board</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Extracts the current board position.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1866298630%2FExtensions%2F769193423" anchor-label="getGameInfo" id="1866298630%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../get-game-info.html"><span>get</span><wbr></wbr><span>Game</span><wbr></wbr><span><span>Info</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1866298630%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../get-game-info.html"><span class="token function">getGameInfo</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-game-info/index.html">GameInfo</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns the game information of the tree. If game information is missing, the default values will be used.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="307298369%2FExtensions%2F769193423" anchor-label="goToLastNode" id="307298369%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../go-to-last-node.html"><span>go</span><wbr></wbr><span>To</span><wbr></wbr><span>Last</span><wbr></wbr><span><span>Node</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="307298369%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">tailrec </span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../go-to-last-node.html"><span class="token function">goToLastNode</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">SgfEditor</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns an editor positioned at the last node. This will traverse the current sequence and all the left-most child trees associated with the current sequence.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1044356515%2FExtensions%2F769193423" anchor-label="goToLeftMostChildTree" id="-1044356515%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../go-to-left-most-child-tree.html"><span>go</span><wbr></wbr><span>To</span><wbr></wbr><span>Left</span><wbr></wbr><span>Most</span><wbr></wbr><span>Child</span><wbr></wbr><span><span>Tree</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1044356515%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../go-to-left-most-child-tree.html"><span class="token function">goToLeftMostChildTree</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.github.ekenstein.sgf.utils/-move-result/index.html">MoveResult</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">SgfEditor</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns an editor that is positioned at the beginning of the left-most child tree. If there are no children a <a href="../../com.github.ekenstein.sgf.utils/-move-result/-failure/index.html">MoveResult.Failure</a> will be returned, otherwise <a href="../../com.github.ekenstein.sgf.utils/-move-result/-success/index.html">MoveResult.Success</a></p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1922354983%2FExtensions%2F769193423" anchor-label="goToLeftMostChildTreeOrStay" id="-1922354983%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../go-to-left-most-child-tree-or-stay.html"><span>go</span><wbr></wbr><span>To</span><wbr></wbr><span>Left</span><wbr></wbr><span>Most</span><wbr></wbr><span>Child</span><wbr></wbr><span>Tree</span><wbr></wbr><span>Or</span><wbr></wbr><span><span>Stay</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1922354983%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../go-to-left-most-child-tree-or-stay.html"><span class="token function">goToLeftMostChildTreeOrStay</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">SgfEditor</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns an editor that is positioned at the beginning of the left-most child tree. If there are no children to the current tree, the current position will be returned.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-287828258%2FExtensions%2F769193423" anchor-label="goToNextNode" id="-287828258%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../go-to-next-node.html"><span>go</span><wbr></wbr><span>To</span><wbr></wbr><span>Next</span><wbr></wbr><span><span>Node</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-287828258%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../go-to-next-node.html"><span class="token function">goToNextNode</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.github.ekenstein.sgf.utils/-move-result/index.html">MoveResult</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">SgfEditor</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns an editor positioned at the next node. If there is no node to the right of the current node, the editor will try to position itself at the beginning of the left-most child tree. If there are no more nodes in the current sequence and no child trees, a <a href="../../com.github.ekenstein.sgf.utils/-move-result/-failure/index.html">MoveResult.Failure</a> will be returned, otherwise <a href="../../com.github.ekenstein.sgf.utils/-move-result/-success/index.html">MoveResult.Success</a></p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-688930662%2FExtensions%2F769193423" anchor-label="goToNextNodeOrStay" id="-688930662%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../go-to-next-node-or-stay.html"><span>go</span><wbr></wbr><span>To</span><wbr></wbr><span>Next</span><wbr></wbr><span>Node</span><wbr></wbr><span>Or</span><wbr></wbr><span><span>Stay</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-688930662%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../go-to-next-node-or-stay.html"><span class="token function">goToNextNodeOrStay</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">SgfEditor</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns an editor positioned at the next node. If there are no more nodes in the current sequence after the current node, the editor will try to position itself at the beginning of the left-most child tree. If there are no more nodes in the current sequence and no child trees, the current position will be returned.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1266875014%2FExtensions%2F769193423" anchor-label="goToNextTree" id="-1266875014%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../go-to-next-tree.html"><span>go</span><wbr></wbr><span>To</span><wbr></wbr><span>Next</span><wbr></wbr><span><span>Tree</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1266875014%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../go-to-next-tree.html"><span class="token function">goToNextTree</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.github.ekenstein.sgf.utils/-move-result/index.html">MoveResult</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">SgfEditor</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns an editor that is positioned at the beginning of the tree to the right of the current tree. If there are no trees to the right of the current tree, <a href="../../com.github.ekenstein.sgf.utils/-move-result/-failure/index.html">MoveResult.Failure</a> will be returned, otherwise <a href="../../com.github.ekenstein.sgf.utils/-move-result/-success/index.html">MoveResult.Success</a></p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="418794038%2FExtensions%2F769193423" anchor-label="goToNextTreeOrStay" id="418794038%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../go-to-next-tree-or-stay.html"><span>go</span><wbr></wbr><span>To</span><wbr></wbr><span>Next</span><wbr></wbr><span>Tree</span><wbr></wbr><span>Or</span><wbr></wbr><span><span>Stay</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="418794038%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../go-to-next-tree-or-stay.html"><span class="token function">goToNextTreeOrStay</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">SgfEditor</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns an editor that is positioned at the beginning of the tree to the right of the current tree. If there are no trees to the right of the current tree, the current position will be returned.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1407506831%2FExtensions%2F769193423" anchor-label="goToParentTree" id="-1407506831%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../go-to-parent-tree.html"><span>go</span><wbr></wbr><span>To</span><wbr></wbr><span>Parent</span><wbr></wbr><span><span>Tree</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1407506831%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../go-to-parent-tree.html"><span class="token function">goToParentTree</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.github.ekenstein.sgf.utils/-move-result/index.html">MoveResult</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">SgfEditor</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns an editor position at the end of the parent tree. If there is no parent to the given position, <a href="../../com.github.ekenstein.sgf.utils/-move-result/-failure/index.html">MoveResult.Failure</a> will be returned, otherwise <a href="../../com.github.ekenstein.sgf.utils/-move-result/-success/index.html">MoveResult.Success</a></p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="866096621%2FExtensions%2F769193423" anchor-label="goToParentTreeOrStay" id="866096621%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../go-to-parent-tree-or-stay.html"><span>go</span><wbr></wbr><span>To</span><wbr></wbr><span>Parent</span><wbr></wbr><span>Tree</span><wbr></wbr><span>Or</span><wbr></wbr><span><span>Stay</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="866096621%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../go-to-parent-tree-or-stay.html"><span class="token function">goToParentTreeOrStay</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">SgfEditor</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns an editor position at the end of the parent tree. If there is no parent to the given position, the current position will be returned.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1752921314%2FExtensions%2F769193423" anchor-label="goToPreviousNode" id="1752921314%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../go-to-previous-node.html"><span>go</span><wbr></wbr><span>To</span><wbr></wbr><span>Previous</span><wbr></wbr><span><span>Node</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1752921314%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../go-to-previous-node.html"><span class="token function">goToPreviousNode</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.github.ekenstein.sgf.utils/-move-result/index.html">MoveResult</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">SgfEditor</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns an editor positioned at the previous node. If there is no node to the left of the current node, the editor will try to position itself at the end of the parent sequence. If there is no node to the left of the current node or no parent, a <a href="../../com.github.ekenstein.sgf.utils/-move-result/-failure/index.html">MoveResult.Failure</a> will be returned, otherwise <a href="../../com.github.ekenstein.sgf.utils/-move-result/-success/index.html">MoveResult.Success</a></p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1481798754%2FExtensions%2F769193423" anchor-label="goToPreviousNodeOrStay" id="-1481798754%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../go-to-previous-node-or-stay.html"><span>go</span><wbr></wbr><span>To</span><wbr></wbr><span>Previous</span><wbr></wbr><span>Node</span><wbr></wbr><span>Or</span><wbr></wbr><span><span>Stay</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1481798754%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../go-to-previous-node-or-stay.html"><span class="token function">goToPreviousNodeOrStay</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">SgfEditor</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns an editor positioned at the previous node. If there is no node to the left of the current node, the editor will try to position itself at the end of the parent sequence. If there is no node to the left of the current node or no parent, the current position will be returned.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="773874558%2FExtensions%2F769193423" anchor-label="goToPreviousTree" id="773874558%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../go-to-previous-tree.html"><span>go</span><wbr></wbr><span>To</span><wbr></wbr><span>Previous</span><wbr></wbr><span><span>Tree</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="773874558%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../go-to-previous-tree.html"><span class="token function">goToPreviousTree</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.github.ekenstein.sgf.utils/-move-result/index.html">MoveResult</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">SgfEditor</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns an editor that is positioned at the beginning of the tree to the left of the current tree. If there are no trees to the left of the current tree, <a href="../../com.github.ekenstein.sgf.utils/-move-result/-failure/index.html">MoveResult.Failure</a> will be returned, otherwise <a href="../../com.github.ekenstein.sgf.utils/-move-result/-success/index.html">MoveResult.Success</a></p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-374074054%2FExtensions%2F769193423" anchor-label="goToPreviousTreeOrStay" id="-374074054%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../go-to-previous-tree-or-stay.html"><span>go</span><wbr></wbr><span>To</span><wbr></wbr><span>Previous</span><wbr></wbr><span>Tree</span><wbr></wbr><span>Or</span><wbr></wbr><span><span>Stay</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-374074054%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../go-to-previous-tree-or-stay.html"><span class="token function">goToPreviousTreeOrStay</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">SgfEditor</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns an editor that is positioned at the beginning of the tree to the left of the current tree. If there are no trees to the left of the current tree, the current position will be returned.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1972198003%2FExtensions%2F769193423" anchor-label="goToRootNode" id="-1972198003%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../go-to-root-node.html"><span>go</span><wbr></wbr><span>To</span><wbr></wbr><span>Root</span><wbr></wbr><span><span>Node</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1972198003%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">tailrec </span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../go-to-root-node.html"><span class="token function">goToRootNode</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">SgfEditor</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns an editor that is positioned at the root node. If the editor is already stationed at the root node, this editor will be returned.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="196024840%2FExtensions%2F769193423" anchor-label="nextToPlay" id="196024840%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../next-to-play.html"><span>next</span><wbr></wbr><span>To</span><wbr></wbr><span><span>Play</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="196024840%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../next-to-play.html"><span class="token function">nextToPlay</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.github.ekenstein.sgf/-sgf-color/index.html">SgfColor</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns whose turn it is to play at the current position.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="283412920%2FExtensions%2F769193423" anchor-label="pass" id="283412920%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../pass.html"><span><span>pass</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="283412920%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../pass.html"><span class="token function">pass</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">color<span class="token operator">: </span><a href="../../com.github.ekenstein.sgf/-sgf-color/index.html">SgfColor</a><span class="token punctuation">, </span></span><span class="parameter ">force<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">SgfEditor</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">The player of <a href="../pass.html">color</a> passes at the current position.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-588193597%2FExtensions%2F769193423" anchor-label="placeStone" id="-588193597%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../place-stone.html"><span>place</span><wbr></wbr><span><span>Stone</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-588193597%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../place-stone.html"><span class="token function">placeStone</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;color<span class="token operator">: </span><a href="../../com.github.ekenstein.sgf/-sgf-color/index.html">SgfColor</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;x<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;y<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;force<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">SgfEditor</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../place-stone.html"><span class="token function">placeStone</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;color<span class="token operator">: </span><a href="../../com.github.ekenstein.sgf/-sgf-color/index.html">SgfColor</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;point<span class="token operator">: </span><a href="../../com.github.ekenstein.sgf/-sgf-point/index.html">SgfPoint</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;force<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">SgfEditor</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Places a stone at the given point at the current position.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-2085636936%2FExtensions%2F769193423" anchor-label="removeStones" id="-2085636936%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../remove-stones.html"><span>remove</span><wbr></wbr><span><span>Stones</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2085636936%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../remove-stones.html"><span class="token function">removeStones</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">vararg </span>points<span class="token operator">: </span><a href="../../com.github.ekenstein.sgf/-sgf-point/index.html">SgfPoint</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">SgfEditor</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Clears the given <a href="../remove-stones.html">points</a> from stones in the current position.</p></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../remove-stones.html"><span class="token function">removeStones</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">points<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.github.ekenstein.sgf/-sgf-point/index.html">SgfPoint</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">SgfEditor</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Clears the given set of <a href="../remove-stones.html">points</a> from stones in the current position.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1877812997%2FExtensions%2F769193423" anchor-label="repeat" id="1877812997%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../repeat.html"><span><span>repeat</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1877812997%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../repeat.html"><span class="token function">repeat</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">n<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">move<span class="token operator">: </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="index.html">SgfEditor</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="../../com.github.ekenstein.sgf.utils/-move-result/index.html">MoveResult</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">SgfEditor</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">SgfEditor</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Repeats a move <a href="../repeat.html">n</a> number of times or throw if impossible.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-225382609%2FExtensions%2F769193423" anchor-label="setNextToPlay" id="-225382609%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../set-next-to-play.html"><span>set</span><wbr></wbr><span>Next</span><wbr></wbr><span>To</span><wbr></wbr><span><span>Play</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-225382609%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../set-next-to-play.html"><span class="token function">setNextToPlay</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">color<span class="token operator">: </span><a href="../../com.github.ekenstein.sgf/-sgf-color/index.html">SgfColor</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">SgfEditor</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Sets whose turn it is to play at the current position.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-2118544961%2FExtensions%2F769193423" anchor-label="stay" id="-2118544961%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../stay.html"><span><span>stay</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2118544961%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../stay.html"><span class="token function">stay</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.github.ekenstein.sgf.utils/-move-result/index.html">MoveResult</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">SgfEditor</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1919322784%2FExtensions%2F769193423" anchor-label="tryRepeat" id="-1919322784%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../try-repeat.html"><span>try</span><wbr></wbr><span><span>Repeat</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1919322784%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../try-repeat.html"><span class="token function">tryRepeat</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">n<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">move<span class="token operator">: </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="index.html">SgfEditor</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="../../com.github.ekenstein.sgf.utils/-move-result/index.html">MoveResult</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">SgfEditor</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.github.ekenstein.sgf.utils/-move-result/index.html">MoveResult</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">SgfEditor</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Repeats a move <a href="../try-repeat.html">n</a> number of times.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="31582870%2FExtensions%2F769193423" anchor-label="tryRepeatWhile" id="31582870%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../try-repeat-while.html"><span>try</span><wbr></wbr><span>Repeat</span><wbr></wbr><span><span>While</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="31582870%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../try-repeat-while.html"><span class="token function">tryRepeatWhile</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">condition<span class="token operator">: </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="index.html">SgfEditor</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">move<span class="token operator">: </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="index.html">SgfEditor</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="../../com.github.ekenstein.sgf.utils/-move-result/index.html">MoveResult</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">SgfEditor</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.github.ekenstein.sgf.utils/-move-result/index.html">MoveResult</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">SgfEditor</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Repeats the given <a href="../try-repeat-while.html">move</a> while the <a href="../try-repeat-while.html">condition</a> returns true.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1467040303%2FExtensions%2F769193423" anchor-label="tryRepeatWhileNot" id="1467040303%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../try-repeat-while-not.html"><span>try</span><wbr></wbr><span>Repeat</span><wbr></wbr><span>While</span><wbr></wbr><span><span>Not</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1467040303%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../try-repeat-while-not.html"><span class="token function">tryRepeatWhileNot</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">condition<span class="token operator">: </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="index.html">SgfEditor</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">move<span class="token operator">: </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="index.html">SgfEditor</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="../../com.github.ekenstein.sgf.utils/-move-result/index.html">MoveResult</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">SgfEditor</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.github.ekenstein.sgf.utils/-move-result/index.html">MoveResult</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">SgfEditor</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Repeats the given <a href="../try-repeat-while-not.html">move</a> while the given <a href="../try-repeat-while-not.html">condition</a> returns false.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1683918752%2FExtensions%2F769193423" anchor-label="updateCurrentNode" id="-1683918752%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../update-current-node.html"><span>update</span><wbr></wbr><span>Current</span><wbr></wbr><span><span>Node</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1683918752%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">SgfEditor</a><span class="token punctuation">.</span><a href="../update-current-node.html"><span class="token function">updateCurrentNode</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">block<span class="token operator">: </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="../../com.github.ekenstein.sgf/-sgf-node/index.html">SgfNode</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="../../com.github.ekenstein.sgf/-sgf-node/index.html">SgfNode</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">SgfEditor</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Executes the <a href="../update-current-node.html">block</a> and updates the current node to the resulting node.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+</body>
+</html>

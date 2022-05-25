@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>Zipper</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>haengma</span>
+            </a>
+    </div>
+    <div>
+2.0.2    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageIds="haengma::com.github.ekenstein.sgf.utils/Zipper///PointingToDeclaration//769193423">
+  <div class="breadcrumbs"><a href="../../../index.html">haengma</a><span class="delimiter">/</span><a href="../index.html">com.github.ekenstein.sgf.utils</a><span class="delimiter">/</span><a href="index.html">Zipper</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Zipper</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>left<span class="token operator">: </span><a href="../-linked-list/index.html">LinkedList</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>focus<span class="token operator">: </span><a href="index.html">T</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword">val </span>right<span class="token operator">: </span><a href="../-linked-list/index.html">LinkedList</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Represents a zipper that makes it easy and fast to navigate and splice in items in a list. <a href="focus.html">focus</a> represents the current item you're at, <a href="left.html">left</a> are the items to the left of the <a href="focus.html">focus</a> and <a href="right.html">right</a> are the items to the right of the <a href="focus.html">focus</a>.</p><p class="paragraph">When you're done you can commit the list by calling the function <a href="../commit.html">Zipper.commit</a>.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Properties">Properties</button><button class="section-tab" data-togglable="Extensions">Extensions</button><button class="section-tab" data-togglable="Parameters">Parameters</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Parameters</h2>
+      <div data-togglable="Parameters">
+        <div class="platform-hinted WithExtraAttributes" data-platform-hinted="data-platform-hinted" data-togglable="Parameters"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div data-togglable="Parameters"><div class="table" data-togglable="Parameters"><div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span><span>focus</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">The current item you're at</p></div></div></div></div></div><div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span><span>left</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">The items to the left of the <a href="focus.html">focus</a>. Note that the left items should be in reversed order.</p></div></div></div></div></div><div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span><span>right</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">The items to the right of the <a href="focus.html">focus</a>.</p></div></div></div></div></div></div></div></div></div>
+      </div>
+      <h2 class="tabbedcontent">Constructors</h2>
+      <div class="table" data-togglable="Constructors"><a data-name="-183455034%2FConstructors%2F769193423" anchor-label="Zipper" id="-183455034%2FConstructors%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-zipper.html"><span><span>Zipper</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-183455034%2FConstructors%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T</a><span class="token operator">&gt; </span><a href="-zipper.html"><span class="token function">Zipper</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;left<span class="token operator">: </span><a href="../-linked-list/index.html">LinkedList</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;focus<span class="token operator">: </span><a href="index.html">T</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;right<span class="token operator">: </span><a href="../-linked-list/index.html">LinkedList</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="229426188%2FProperties%2F769193423" anchor-label="focus" id="229426188%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="focus.html">focus</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="229426188%2FProperties%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><a data-name="229426188%2FProperties%2F769193423" anchor-label="focus" id="229426188%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="focus.html">focus</a><span class="token operator">: </span><a href="index.html">T</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-874375537%2FProperties%2F769193423" anchor-label="left" id="-874375537%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="left.html">left</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-874375537%2FProperties%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><a data-name="-874375537%2FProperties%2F769193423" anchor-label="left" id="-874375537%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="left.html">left</a><span class="token operator">: </span><a href="../-linked-list/index.html">LinkedList</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-102429880%2FProperties%2F769193423" anchor-label="right" id="-102429880%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="right.html">right</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-102429880%2FProperties%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><a data-name="-102429880%2FProperties%2F769193423" anchor-label="right" id="-102429880%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="right.html">right</a><span class="token operator">: </span><a href="../-linked-list/index.html">LinkedList</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="tabbedcontent">Extensions</h2>
+      <div class="table" data-togglable="Extensions"><a data-name="-1912316496%2FExtensions%2F769193423" anchor-label="commit" id="-1912316496%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../commit.html"><span><span>commit</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1912316496%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../commit.html">T</a><span class="token operator">&gt; </span><a href="index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../commit.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../commit.html"><span class="token function">commit</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-non-empty-list/index.html">NonEmptyList</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../commit.html">T</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Commits the given zipper to a <a href="../-non-empty-list/index.html">NonEmptyList</a>.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1311041323%2FExtensions%2F769193423" anchor-label="commitAtCurrentPosition" id="-1311041323%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../commit-at-current-position.html"><span>commit</span><wbr></wbr><span>At</span><wbr></wbr><span>Current</span><wbr></wbr><span><span>Position</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1311041323%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../commit-at-current-position.html">T</a><span class="token operator">&gt; </span><a href="index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../commit-at-current-position.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../commit-at-current-position.html"><span class="token function">commitAtCurrentPosition</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-non-empty-list/index.html">NonEmptyList</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../commit-at-current-position.html">T</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Commits the given zipper to a <a href="../-non-empty-list/index.html">NonEmptyList</a> from the current position. Meaning that the <a href="../-non-empty-list/head.html">NonEmptyList.head</a> will be the left-most item in the zipper and the last item in <a href="../-non-empty-list/tail.html">NonEmptyList.tail</a> will be the current focus of the zipper.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="865099480%2FExtensions%2F769193423" anchor-label="goLeft" id="865099480%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../go-left.html"><span>go</span><wbr></wbr><span><span>Left</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="865099480%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../go-left.html">T</a><span class="token operator">&gt; </span><a href="index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../go-left.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../go-left.html"><span class="token function">goLeft</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-move-result/index.html">MoveResult</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../go-left.html">T</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns a <a href="index.html">Zipper</a> that is positioned to the left of the current focus.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1371064871%2FExtensions%2F769193423" anchor-label="goRight" id="-1371064871%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../go-right.html"><span>go</span><wbr></wbr><span><span>Right</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1371064871%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../go-right.html">T</a><span class="token operator">&gt; </span><a href="index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../go-right.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../go-right.html"><span class="token function">goRight</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-move-result/index.html">MoveResult</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../go-right.html">T</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns a <a href="index.html">Zipper</a> that is positioned to the right of the current focus.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="245514259%2FExtensions%2F769193423" anchor-label="goRightUnsafe" id="245514259%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../go-right-unsafe.html"><span>go</span><wbr></wbr><span>Right</span><wbr></wbr><span><span>Unsafe</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="245514259%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../go-right-unsafe.html">T</a><span class="token operator">&gt; </span><a href="index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../go-right-unsafe.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../go-right-unsafe.html"><span class="token function">goRightUnsafe</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../go-right-unsafe.html">T</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns a <a href="index.html">Zipper</a> that is positioned to the right of the current focus. If there are no items to the right of the focus, an <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-illegal-state-exception/index.html">IllegalStateException</a> will be thrown.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1451253024%2FExtensions%2F769193423" anchor-label="goToFirst" id="1451253024%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../go-to-first.html"><span>go</span><wbr></wbr><span>To</span><wbr></wbr><span><span>First</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1451253024%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">tailrec </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../go-to-first.html">T</a><span class="token operator">&gt; </span><a href="index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../go-to-first.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../go-to-first.html"><span class="token function">goToFirst</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../go-to-first.html">T</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Goes to the first item of the given zipper. The current focus will be the last item in the right items iff there are any items to the left of the current focus. Otherwise, the current focus will remain the same.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1465512110%2FExtensions%2F769193423" anchor-label="goToLast" id="1465512110%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../go-to-last.html"><span>go</span><wbr></wbr><span>To</span><wbr></wbr><span><span>Last</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1465512110%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">tailrec </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../go-to-last.html">T</a><span class="token operator">&gt; </span><a href="index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../go-to-last.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../go-to-last.html"><span class="token function">goToLast</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../go-to-last.html">T</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Goes to the last item of the given zipper. The current focus will be the last item in the left items iff there are any items to the right of the current focus. Otherwise, the current focus will remain the same.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="710946871%2FExtensions%2F769193423" anchor-label="insertLeft" id="710946871%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../insert-left.html"><span>insert</span><wbr></wbr><span><span>Left</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="710946871%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../insert-left.html">T</a><span class="token operator">&gt; </span><a href="index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../insert-left.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../insert-left.html"><span class="token function">insertLeft</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">item<span class="token operator">: </span><a href="../insert-left.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../insert-left.html">T</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Inserts the given <a href="../insert-left.html">item</a> to the left of the current focus.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1661099244%2FExtensions%2F769193423" anchor-label="insertRight" id="-1661099244%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../insert-right.html"><span>insert</span><wbr></wbr><span><span>Right</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1661099244%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../insert-right.html">T</a><span class="token operator">&gt; </span><a href="index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../insert-right.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../insert-right.html"><span class="token function">insertRight</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">item<span class="token operator">: </span><a href="../insert-right.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../insert-right.html">T</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Inserts the given <a href="../insert-right.html">item</a> to the right of the current focus.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="28110996%2FExtensions%2F769193423" anchor-label="update" id="28110996%2FExtensions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../update.html"><span><span>update</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="28110996%2FExtensions%2F769193423"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../update.html">T</a><span class="token operator">&gt; </span><a href="index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../update.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../update.html"><span class="token function">update</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">f<span class="token operator">: </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="../update.html">T</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="../update.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">Zipper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../update.html">T</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns a <a href="index.html">Zipper</a> where the focus is the updated focus. Left and right remains the same.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+</body>
+</html>
