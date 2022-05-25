@@ -18,7 +18,7 @@ plugins {
 }
 
 group = "com.github.ekenstein"
-version = "2.0.2"
+version = "2.0.3"
 val kotlinJvmTarget = "1.8"
 
 repositories {
