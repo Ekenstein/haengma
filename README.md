@@ -28,7 +28,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.Ekenstein:haengma:2.0.2")
+    implementation("com.github.Ekenstein:haengma:2.0.3")
 }
 ```
 
@@ -80,7 +80,7 @@ fun main() {
     val anotherTree = SgfGameTree(nelOf(SgfNode(SgfProperty.Move.B(2, 2))))
     file.outputStream().use { SgfCollection(nelOf(tree, anotherTree)).encode(it) }
 
-    // ... or if you just wish to serialize the tree to a file
+    // ... or if you just wish to serialize the tree to a string
     val sgf = tree.encodeToString()
 
     // ... which prints to (;B[aa])
@@ -156,7 +156,7 @@ fun main() {
         .setNextToPlay(SgfColor.White)
         .placeStone(SgfColor.White, 10, 10)
 
-    // ... when you're done you commit the changes
+    // ... when you're done you can commit the changes
     val tree = editor.commit()
 
     // ... and the resulting sgf will be (;GM[1]FF[4]SZ[19]KM[0]AB[dd][ee][ff]AW[pp]PL[W];W[jj])
