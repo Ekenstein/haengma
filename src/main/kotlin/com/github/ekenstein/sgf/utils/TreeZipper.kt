@@ -98,9 +98,12 @@ fun <T> TreeZipper<T>.update(f: (T) -> T) = copy(
 fun <T> TreeZipper<T>.insertDownLeft(
     values: LinkedList<T>
 ) = when (val children = values + unzip.unzip(focus)) {
-    is LinkedList.Cons -> {
-        copy(left = emptyLinkedList(), focus = children.head, right = children.tail, top = this)
-    }
+    is LinkedList.Cons -> copy(
+        left = emptyLinkedList(),
+        focus = children.head,
+        right = children.tail,
+        top = this
+    )
     LinkedList.Nil -> error("There are no nodes to insert")
 }
 

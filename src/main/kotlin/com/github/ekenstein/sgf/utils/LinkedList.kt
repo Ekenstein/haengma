@@ -61,11 +61,13 @@ sealed class LinkedList<out T> : AbstractList<T>() {
     /**
      * Reverses the current list and appends the [result] at the end of the reversed list.
      */
-    fun reverse(result: LinkedList<@UnsafeVariance T> = emptyLinkedList()): LinkedList<T> = when (this) {
-        is Cons -> {
-            tail.reverse(linkedListOf(head) + result)
+    fun reverse(result: LinkedList<@UnsafeVariance T> = emptyLinkedList()): LinkedList<T> {
+        tailrec fun inner(list: LinkedList<T>, result: LinkedList<T>): LinkedList<T> = when (list) {
+            is Cons -> inner(list.tail, Cons(list.head, result))
+            Nil -> result
         }
-        Nil -> result
+
+        return inner(this, result)
     }
 
     /**

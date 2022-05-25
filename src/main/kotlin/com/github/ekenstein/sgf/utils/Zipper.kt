@@ -106,20 +106,14 @@ fun <T> Zipper<T>.insertRight(item: T) = copy(
 /**
  * Commits the given zipper to a [NonEmptyList].
  */
-fun <T> Zipper<T>.commit() = when (val reversed = left.reverse(linkedListOf(focus) + right)) {
-    is LinkedList.Cons -> nelOf(reversed.head, reversed.tail)
-    LinkedList.Nil -> error("A zipper can never be empty.")
-}
+fun <T> Zipper<T>.commit() = left.reverse(linkedListOf(focus) + right).toNelUnsafe()
 
 /**
  * Commits the given zipper to a [NonEmptyList] from the current position.
  * Meaning that the [NonEmptyList.head] will be the left-most item in the zipper and
  * the last item in [NonEmptyList.tail] will be the current focus of the zipper.
  */
-fun <T> Zipper<T>.commitAtCurrentPosition() = when (val reversed = left.reverse(linkedListOf(focus))) {
-    is LinkedList.Cons -> nelOf(reversed.head, reversed.tail)
-    LinkedList.Nil -> error("A zipper can never be empty.")
-}
+fun <T> Zipper<T>.commitAtCurrentPosition() = left.reverse(linkedListOf(focus)).toNelUnsafe()
 
 /**
  *  Returns a [Zipper] where the focus is the updated focus. Left and right remains the same.

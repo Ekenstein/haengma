@@ -42,18 +42,6 @@ class BoardTest {
                 }
             }
         )
-//        assertAll(
-//            {
-//                assertThrows<IllegalArgumentException> {
-//                    Board.empty(19).placeStone(SgfColor.Black, SgfPoint(20, 1))
-//                }
-//            },
-//            {
-//                assertThrows<IllegalArgumentException> {
-//                    Board.empty(15 to 25).placeStone(SgfColor.Black, SgfPoint(16, 26))
-//                }
-//            }
-//        )
     }
 
     @Test
