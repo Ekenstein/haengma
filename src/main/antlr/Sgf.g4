@@ -27,12 +27,12 @@ setup           : 'AB' VALUE+        #addBlack
                 | 'AE' VALUE+        #addEmpty
                 | 'PL' VALUE         #playerToPlay
                 ;
-nodeAnnotation  : 'C' VALUE          #comment
+nodeAnnotation  : 'C' (NONE|VALUE)   #comment
                 | 'DM' VALUE         #evenPosition
                 | 'GB' VALUE         #goodForBlack
                 | 'GW' VALUE         #goodForWhite
                 | 'HO' VALUE         #hotspot
-                | 'N' VALUE          #nodeName
+                | 'N' (NONE|VALUE)   #nodeName
                 | 'UC' VALUE         #unclearPosition
                 | 'V' VALUE          #value
                 ;
@@ -58,27 +58,27 @@ root            : 'AP' VALUE         #application
                 | 'ST' VALUE         #style
                 | 'SZ' VALUE         #size
                 ;
-gameInfo        : 'AN' VALUE         #annotation
-                | 'BR' VALUE         #blackRank
-                | 'BT' VALUE         #blackTeam
-                | 'CP' VALUE         #copyright
+gameInfo        : 'AN' (NONE|VALUE)  #annotation
+                | 'BR' (NONE|VALUE)  #blackRank
+                | 'BT' (NONE|VALUE)  #blackTeam
+                | 'CP' (NONE|VALUE)  #copyright
                 | 'DT' VALUE         #date
-                | 'EV' VALUE         #event
-                | 'GN' VALUE         #gameName
-                | 'GC' VALUE         #gameComment
-                | 'ON' VALUE         #opening
-                | 'OT' VALUE         #overtime
-                | 'PB' VALUE         #playerBlack
-                | 'PC' VALUE         #place
-                | 'PW' VALUE         #playerWhite
-                | 'RE' VALUE         #result
-                | 'RO' VALUE         #round
-                | 'RU' VALUE         #rules
-                | 'SO' VALUE         #source
+                | 'EV' (NONE|VALUE)  #event
+                | 'GN' (NONE|VALUE)  #gameName
+                | 'GC' (NONE|VALUE)  #gameComment
+                | 'ON' (NONE|VALUE)  #opening
+                | 'OT' (NONE|VALUE)  #overtime
+                | 'PB' (NONE|VALUE)  #playerBlack
+                | 'PC' (NONE|VALUE)  #place
+                | 'PW' (NONE|VALUE)  #playerWhite
+                | 'RE' (NONE|VALUE)  #result
+                | 'RO' (NONE|VALUE)  #round
+                | 'RU' (NONE|VALUE)  #rules
+                | 'SO' (NONE|VALUE)  #source
                 | 'TM' VALUE         #timeLimit
-                | 'US' VALUE         #user
-                | 'WR' VALUE         #whiteRank
-                | 'WT' VALUE         #whiteTeam
+                | 'US' (NONE|VALUE)  #user
+                | 'WR' (NONE|VALUE)  #whiteRank
+                | 'WT' (NONE|VALUE)  #whiteTeam
                 | 'HA' VALUE         #handicap
                 | 'KM' VALUE         #komi
                 ;
@@ -94,7 +94,7 @@ misc            : 'FG' (NONE|VALUE)  #figure
 privateProp     : PROP_IDENTIFIER (NONE | VALUE+);
 
 WS: [ \n\r\t]+ -> skip;
-PROP_IDENTIFIER : 'A'..'Z' 'A'..'Z'+;
+PROP_IDENTIFIER : 'A'..'Z'+;
 NONE            : L_BRACKET R_BRACKET;
 VALUE           : L_BRACKET ('\\]'|.)*? R_BRACKET;
 

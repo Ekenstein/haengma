@@ -4,15 +4,17 @@ import java.nio.file.Paths
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.inputStream
 
-val kotlinVersion by extra("1.6.20")
+val kotlinVersion by extra("1.6.21")
 val junitVersion by extra("5.8.2")
 
 plugins {
     kotlin("jvm") version "1.6.21"
+    id("org.jetbrains.dokka") version "1.6.21"
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
     id("com.github.ben-manes.versions") version "0.42.0"
     antlr
     `maven-publish`
+    jacoco
 }
 
 group = "com.github.ekenstein"
@@ -23,10 +25,19 @@ repositories {
     mavenCentral()
 }
 
+val dokkaHtml by tasks.getting(org.jetbrains.dokka.gradle.DokkaTask::class)
+
+val javadocJar: TaskProvider<Jar> by tasks.registering(Jar::class) {
+    dependsOn(dokkaHtml)
+    archiveClassifier.set("javadoc")
+    from(dokkaHtml.outputDirectory)
+}
+
 dependencies {
-    implementation(kotlin("stdlib"))
+    implementation("org.jetbrains.kotlin", "kotlin-stdlib", kotlinVersion)
+    testImplementation("org.jetbrains.kotlin", "kotlin-test", kotlinVersion)
     antlr("org.antlr", "antlr4", "4.10.1")
-    testImplementation(kotlin("test"))
+
     testImplementation("org.junit.jupiter", "junit-jupiter-params", junitVersion)
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)
     testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
@@ -51,6 +62,7 @@ tasks {
             .get("build", "generated-src", "antlr", "main", "com", "github", "ekenstein", "sgf", "parser")
             .toFile()
         mustRunAfter(ktlintMainSourceSetCheck)
+        mustRunAfter(dokkaHtml)
     }
 
     generateTestGrammarSource {
@@ -82,19 +94,56 @@ tasks {
         targetCompatibility = kotlinJvmTarget
     }
 
-    compileTestJava {
-        sourceCompatibility = kotlinJvmTarget
-        targetCompatibility = kotlinJvmTarget
+    listOf(compileJava, compileTestJava).map { task ->
+        task {
+            sourceCompatibility = kotlinJvmTarget
+            targetCompatibility = kotlinJvmTarget
+        }
+    }
+
+    build {
+        dependsOn("javadocJar")
     }
 
     check {
         dependsOn(test)
         dependsOn(ktlintCheck)
         dependsOn(dependencyUpdateSentinel)
+        dependsOn(jacocoTestCoverageVerification)
     }
 
     test {
         useJUnitPlatform()
+        finalizedBy(jacocoTestReport)
+    }
+
+    jacocoTestReport {
+        dependsOn(test)
+
+        // CSV report for coverage badge
+        reports.csv.required.set(true)
+
+        // Exclude generated code from coverage report
+        classDirectories.setFrom(
+            files(
+                classDirectories.files.filter { !it.path.contains("build/classes/java") }.map { file ->
+                    fileTree(file).exclude {
+                        it.name.contains("special\$\$inlined")
+                    }
+                }
+            )
+        )
+    }
+
+    jacocoTestCoverageVerification {
+        dependsOn(jacocoTestReport)
+        violationRules {
+            rule {
+                limit {
+                    minimum = BigDecimal(0.8)
+                }
+            }
+        }
     }
 }
 
@@ -109,6 +158,7 @@ publishing {
             artifactId = "haengma"
             version = project.version.toString()
             from(components["kotlin"])
+            artifact(javadocJar)
             artifact(tasks.kotlinSourcesJar)
 
             pom {

@@ -1,14 +1,14 @@
 package com.github.ekenstein.sgf.utils
 
-import org.junit.jupiter.api.Assertions.assertAll
+import RandomTest
+import RandomTest.Companion.item
+import RandomTest.Companion.list
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
-import utils.nextItem
-import utils.nextList
-import utils.rng
 
-class ZipperTest {
+class ZipperTest : RandomTest {
     @Test
     fun `toZipper takes a non-empty list and converts it to a zipper where the head of the list is the focus`() {
         val nel = nelOf(1, 2)
@@ -154,17 +154,15 @@ class ZipperTest {
             { it.goToFirst() }
         )
 
-        repeat(20) {
-            val perform = rng.nextList {
-                it.nextItem(operations)
+        val zippers = random.list(100) { list(100) { nextInt() }.toNelUnsafe() }
+        assertAll(
+            zippers.map { list ->
+                {
+                    val actual = random.list { item(operations) }.fold(list.toZipper()) { z, o -> o(z) }.commit()
+                    assertEquals(list, actual)
+                }
             }
-
-            val expected = rng.nextList { it.nextInt() }.toNelUnsafe()
-            val on = expected.toZipper()
-            val next = perform.fold(on) { z, p -> p(z) }
-            val actual = next.commit()
-            assertEquals(expected, actual)
-        }
+        )
     }
 
     @Test

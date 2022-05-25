@@ -8,6 +8,7 @@ private val numberFormatter: NumberFormat = DecimalFormat().apply {
     decimalFormatSymbols = DecimalFormatSymbols().apply {
         decimalSeparator = '.'
     }
+    isGroupingUsed = false
 }
 
 internal fun numberSerializer(number: Number) = ValueSerializer { appendable ->

@@ -1,5 +1,8 @@
 package com.github.ekenstein.sgf.editor
 
+import RandomTest
+import RandomTest.Companion.item
+import RandomTest.Companion.list
 import com.github.ekenstein.sgf.Move
 import com.github.ekenstein.sgf.SgfCollection
 import com.github.ekenstein.sgf.SgfColor
@@ -18,12 +21,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
-import utils.nextGameInfo
-import utils.nextList
-import utils.rng
-import utils.run
 
-class SgfEditorTest {
+class SgfEditorTest : RandomTest {
     @Test
     fun `playing a move will add it to the tree`() {
         val actualTree = SgfEditor()
@@ -217,16 +216,6 @@ class SgfEditorTest {
 
     @Test
     fun `navigating without changing anything is a no-op`() {
-        val expectedTree = SgfEditor()
-            .placeStone(SgfColor.Black, 3, 3)
-            .placeStone(SgfColor.White, 4, 4)
-            .goToPreviousNodeOrStay()
-            .placeStone(SgfColor.White, 5, 5)
-            .placeStone(SgfColor.Black, 6, 6)
-            .goToRootNode()
-            .placeStone(SgfColor.Black, 8, 8)
-            .commit()
-
         val operations: List<(SgfEditor) -> SgfEditor> = listOf(
             { it.goToRootNode() },
             { it.goToLastNode() },
@@ -238,13 +227,16 @@ class SgfEditorTest {
             { it.goToParentTreeOrStay() }
         )
 
-        val apply = rng.nextList(operations)
-
-        val actualTree = apply.fold(SgfEditor(expectedTree)) { editor, operation ->
-            operation(editor)
-        }.commit()
-
-        assertEquals(expectedTree, actualTree)
+        val trees = random.list(100) { gameTree(3) }
+        assertAll(
+            trees.map { tree ->
+                {
+                    val editor = random.list(20) { item(operations) }.fold(SgfEditor(tree)) { t, o -> o(t) }
+                    val actual = editor.commit()
+                    assertEquals(tree, actual)
+                }
+            }
+        )
     }
 
     @Nested
@@ -1175,42 +1167,17 @@ class SgfEditorTest {
 
     @Test
     fun `can always retrieve game info from the editor`() {
-        rng.run(100) {
-            val gameInfo = nextGameInfo()
-            val editor = SgfEditor(gameInfo)
-            val actualGameInfo = editor.getGameInfo()
-            assertEquals(gameInfo, actualGameInfo)
-
-            val expectedTree = SgfGameTree(nelOf(SgfNode(gameInfo.toSgfProperties())))
-            val actualTree = editor.commit()
-            assertEquals(expectedTree, actualTree)
-        }
+        val values = random.list(100) { gameInfo }
         assertAll(
-            {
-                val editor = SgfEditor(GameInfo.default)
-                val actualGameInfo = editor.getGameInfo()
-                assertEquals(GameInfo.default, actualGameInfo)
-            },
-            {
-                val gameTree = SgfGameTree(nelOf(SgfNode(SgfProperty.Setup.PL(SgfColor.Black))))
-                val editor = SgfEditor(gameTree)
-                val actualGameInfo = editor.getGameInfo()
-                assertEquals(GameInfo.default, actualGameInfo)
-            },
-            {
-                val gameInfo = GameInfo.default.apply {
-                    rules.komi = 6.5
-                    rules.boardSize = 9
+            values.map { gameInfo ->
+                {
+                    val editor = random.performOperations(
+                        SgfEditor(gameInfo),
+                        1..10
+                    )
+                    val actual = editor.getGameInfo()
+                    assertEquals(gameInfo, actual)
                 }
-
-                val editor = SgfEditor(gameInfo)
-                val actualGameInfo = editor.getGameInfo()
-                assertEquals(gameInfo, actualGameInfo)
-            },
-            {
-                val editor = SgfEditor(GameInfo.default).placeStone(SgfColor.Black, 1, 1)
-                val actualGameInfo = editor.getGameInfo()
-                assertEquals(GameInfo.default, actualGameInfo)
             }
         )
     }

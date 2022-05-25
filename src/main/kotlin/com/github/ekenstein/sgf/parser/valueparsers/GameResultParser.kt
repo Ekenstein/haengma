@@ -12,8 +12,6 @@ internal val gameResultParser = ValueParser { marker, value ->
                 "0" -> GameResult.Draw
                 "?" -> GameResult.Unknown
                 "void" -> GameResult.Suspended
-                "b" -> GameResult.Wins(SgfColor.Black)
-                "w" -> GameResult.Wins(SgfColor.White)
                 else -> marker.throwParseException("Expected a game result, but got $value")
             }
         }
@@ -28,6 +26,7 @@ internal val gameResultParser = ValueParser { marker, value ->
                 in listOf("f", "forfeit") -> GameResult.Forfeit(color)
                 in listOf("t", "time") -> GameResult.Time(color)
                 in listOf("r", "resign") -> GameResult.Resignation(color)
+                in listOf("") -> GameResult.Wins(color)
                 else -> {
                     val score = parts[1].toDoubleOrNull()
                         ?: marker.throwParseException("Expected a score in the game result, but got $value")

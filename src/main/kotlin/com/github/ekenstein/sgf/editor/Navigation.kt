@@ -31,7 +31,7 @@ fun SgfEditor.goToNextNode(): MoveResult<SgfEditor> = goToNextNodeInSequence().o
     goToLeftMostChildTree()
 }
 
-fun SgfEditor.goToNextNodeInSequence(): MoveResult<SgfEditor> = currentSequence.goRight().map(this) {
+private fun SgfEditor.goToNextNodeInSequence(): MoveResult<SgfEditor> = currentSequence.goRight().map(this) {
     copy(currentSequence = it)
 }
 
@@ -61,7 +61,7 @@ fun SgfEditor.goToPreviousNode(): MoveResult<SgfEditor> = goToPreviousNodeInSequ
     goToParentTree()
 }
 
-fun SgfEditor.goToPreviousNodeInSequence(): MoveResult<SgfEditor> = currentSequence.goLeft().map(this) {
+private fun SgfEditor.goToPreviousNodeInSequence(): MoveResult<SgfEditor> = currentSequence.goLeft().map(this) {
     copy(currentSequence = it)
 }
 
@@ -167,7 +167,7 @@ fun SgfEditor.repeat(n: Int, move: (SgfEditor) -> MoveResult<SgfEditor>): SgfEdi
     tryRepeat(n, move).get()
 
 /**
- * Repeats a move while the condition returns true.
+ * Repeats the given [move] while the [condition] returns true.
  */
 fun SgfEditor.tryRepeatWhile(
     condition: (SgfEditor) -> Boolean,
@@ -185,6 +185,9 @@ fun SgfEditor.tryRepeatWhile(
     return inner(this).withOrigin(this)
 }
 
+/**
+ * Repeats the given [move] while the given [condition] returns false.
+ */
 fun SgfEditor.tryRepeatWhileNot(
     condition: (SgfEditor) -> Boolean,
     move: (SgfEditor) -> MoveResult<SgfEditor>

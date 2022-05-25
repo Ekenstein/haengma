@@ -297,14 +297,37 @@ fun SgfEditor.pass(color: SgfColor, force: Boolean = false): SgfEditor {
  *  @throws [SgfException.IllegalMove] If the move would result in placing the stone outside the board, or if the move
  *  was invalid at the current position and the [force] flag was false.
  */
-fun SgfEditor.placeStone(color: SgfColor, x: Int, y: Int, force: Boolean = false): SgfEditor {
+fun SgfEditor.placeStone(color: SgfColor, x: Int, y: Int, force: Boolean = false) = placeStone(
+    color = color,
+    point = SgfPoint(x, y),
+    force = force
+)
+
+/**
+ * Places a stone at the given point at the current position.
+ *
+ * Will throw [SgfException.IllegalMove] iff:
+ *  - The stone is placed outside the board or ...
+ *  - [force] is false and ...
+ *  - It's not the [color]'s turn to play.
+ *  - The point is occupied by another stone.
+ *  - The placed stone results in repetition of the position (ko).
+ *  - The stone immediately dies when placed on the board (suicide).
+ *  @param color The color of the stone to place
+ *  @param point The point to place the stone
+ *  @param force Whether the execution of the move should be forced or not. If true, no validation will occur,
+ *               otherwise the move must be a valid move at the current position.
+ *  @throws [SgfException.IllegalMove] If the move would result in placing the stone outside the board, or if the move
+ *  was invalid at the current position and the [force] flag was false.
+ */
+fun SgfEditor.placeStone(color: SgfColor, point: SgfPoint, force: Boolean = false): SgfEditor {
     val currentBoard = extractBoard()
-    checkMove(x in 1..currentBoard.width && y in 1..currentBoard.height) {
+    checkMove(point.x in 1..currentBoard.width && point.y in 1..currentBoard.height) {
         "The stone is placed outside of the board"
     }
     val property = when (color) {
-        SgfColor.Black -> SgfProperty.Move.B(x, y)
-        SgfColor.White -> SgfProperty.Move.W(x, y)
+        SgfColor.Black -> SgfProperty.Move.B(Move.Stone(point))
+        SgfColor.White -> SgfProperty.Move.W(Move.Stone(point))
     }
 
     val result = if (force) {
@@ -314,23 +337,22 @@ fun SgfEditor.placeStone(color: SgfColor, x: Int, y: Int, force: Boolean = false
             }.stay()
         }
     } else {
-        checkIfMoveIsValid(color, x, y, currentBoard)
+        checkIfMoveIsValid(color, point, currentBoard)
         addMoveProperty(property)
     }
 
     return result.get()
 }
 
-private fun SgfEditor.checkIfMoveIsValid(color: SgfColor, x: Int, y: Int, currentBoard: Board) {
+private fun SgfEditor.checkIfMoveIsValid(color: SgfColor, point: SgfPoint, currentBoard: Board) {
     checkMove(nextToPlay() == color) {
         "It's not ${color.asString}'s turn to play"
     }
 
-    checkMove(!currentBoard.isOccupied(x, y)) {
-        "The point $x, $y is occupied"
+    checkMove(!currentBoard.isOccupied(point)) {
+        "The point ${point.x}, ${point.y} is occupied"
     }
 
-    val point = SgfPoint(x, y)
     val previousBoard = goToPreviousNode().orNull()?.extractBoard()
     val nextBoard = currentBoard.placeStone(color, point)
 
@@ -339,7 +361,7 @@ private fun SgfEditor.checkIfMoveIsValid(color: SgfColor, x: Int, y: Int, curren
     }
 
     checkMove(nextBoard.stones.containsKey(point)) {
-        "It is suicide to play at the point $x, $y"
+        "It is suicide to play at the point ${point.x}, ${point.y}"
     }
 }
 
