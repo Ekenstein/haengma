@@ -1,13 +1,14 @@
 import com.github.ekenstein.sgf.GameDate
+import com.github.ekenstein.sgf.GameInfo
 import com.github.ekenstein.sgf.GameResult
 import com.github.ekenstein.sgf.Move
+import com.github.ekenstein.sgf.Player
+import com.github.ekenstein.sgf.Rules
+import com.github.ekenstein.sgf.SgfColor
 import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.SgfProperty
-import com.github.ekenstein.sgf.editor.GameInfo
-import com.github.ekenstein.sgf.editor.Player
-import com.github.ekenstein.sgf.editor.Rules
 import com.github.ekenstein.sgf.editor.SgfEditor
 import com.github.ekenstein.sgf.editor.getGameInfo
 import com.github.ekenstein.sgf.editor.goToLastNode
@@ -119,6 +120,9 @@ interface RandomTest {
                 { SgfProperty.Move.MN(nextInt()) }
             )
         ).invoke()
+
+    val Random.color: SgfColor
+        get() = enum()
 
     val Random.setupProperty
         get() = item(

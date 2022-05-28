@@ -3,6 +3,7 @@ package com.github.ekenstein.sgf.editor
 import RandomTest
 import RandomTest.Companion.item
 import RandomTest.Companion.list
+import com.github.ekenstein.sgf.GameInfo
 import com.github.ekenstein.sgf.Move
 import com.github.ekenstein.sgf.SgfCollection
 import com.github.ekenstein.sgf.SgfColor
@@ -14,6 +15,7 @@ import com.github.ekenstein.sgf.SgfProperty
 import com.github.ekenstein.sgf.parser.from
 import com.github.ekenstein.sgf.propertySetOf
 import com.github.ekenstein.sgf.serialization.encodeToString
+import com.github.ekenstein.sgf.toSgfProperties
 import com.github.ekenstein.sgf.utils.nelOf
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -250,7 +252,9 @@ class SgfEditorTest : RandomTest {
                 },
                 {
                     val editor = SgfEditor {
-                        rules.handicap = 9
+                        rules {
+                            handicap = 9
+                        }
                     }
                     val occupiedPoints = listOf(
                         4 to 4, 10 to 4, 16 to 4,
@@ -266,8 +270,10 @@ class SgfEditorTest : RandomTest {
                 },
                 {
                     val editor = SgfEditor {
-                        rules.handicap = 9
-                        rules.boardSize = 13
+                        rules {
+                            handicap = 9
+                            boardSize = 13
+                        }
                     }
                     val occupiedPoints = listOf(
                         4 to 4, 7 to 4, 10 to 4,
@@ -283,8 +289,10 @@ class SgfEditorTest : RandomTest {
                 },
                 {
                     val editor = SgfEditor {
-                        rules.handicap = 9
-                        rules.boardSize = 9
+                        rules {
+                            handicap = 9
+                            boardSize = 9
+                        }
                     }
                     val occupiedPoints = listOf(
                         3 to 3, 5 to 3, 7 to 3,
@@ -365,21 +373,27 @@ class SgfEditorTest : RandomTest {
                 {
                     assertThrows<SgfException.IllegalMove> {
                         SgfEditor {
-                            rules.handicap = 2
+                            rules {
+                                handicap = 2
+                            }
                         }.placeStone(SgfColor.Black, 3, 3)
                     }
                 },
                 {
                     assertThrows<SgfException.IllegalMove> {
                         SgfEditor {
-                            rules.handicap = 9
+                            rules {
+                                handicap = 9
+                            }
                         }.setNextToPlay(SgfColor.Black).placeStone(SgfColor.White, 3, 3)
                     }
                 },
                 {
                     assertThrows<SgfException.IllegalMove> {
                         SgfEditor {
-                            rules.handicap = 9
+                            rules {
+                                handicap = 9
+                            }
                         }.pass(SgfColor.Black)
                     }
                 }
@@ -803,14 +817,14 @@ class SgfEditorTest : RandomTest {
         fun `stones added to the position must not be on the same node as move properties`() {
             assertAll(
                 {
-                    val tree = GameInfo.default.toGameTree()
-                    val actualTree = SgfEditor(tree)
+                    val actualTree = SgfEditor()
                         .placeStone(SgfColor.Black, 4, 4)
                         .addStones(SgfColor.Black, SgfPoint(4, 4), SgfPoint(5, 5))
                         .commit()
 
-                    val expectedTree = tree.copy(
-                        sequence = tree.sequence + nelOf(
+                    val expectedTree = SgfGameTree(
+                        nelOf(
+                            SgfNode(GameInfo.default.toSgfProperties()),
                             SgfNode(SgfProperty.Move.B(4, 4)),
                             SgfNode(SgfProperty.Setup.AB(setOf(SgfPoint(4, 4), SgfPoint(5, 5))))
                         )
@@ -1116,7 +1130,11 @@ class SgfEditorTest : RandomTest {
         @Test
         fun `always branch out a move if there are no moves to the right and the children is not empty`() {
             // you can create your own tree
-            val editor = SgfEditor { rules.handicap = 2 }
+            val editor = SgfEditor {
+                rules {
+                    handicap = 2
+                }
+            }
             val actualTree = editor
                 .placeStone(SgfColor.White, 17, 3)
                 .placeStone(SgfColor.Black, 16, 3)
@@ -1177,6 +1195,36 @@ class SgfEditorTest : RandomTest {
                     )
                     val actual = editor.getGameInfo()
                     assertEquals(gameInfo, actual)
+                }
+            }
+        )
+    }
+
+    @Test
+    fun `updating game info will always return the current position`() {
+        val editors = random.list(100) { gameTree(3) }.map { random.navigate(SgfEditor(it)) }
+
+        assertAll(
+            editors.map { editor ->
+                {
+                    val gameInfo = editor.getGameInfo()
+                    val actual = editor.updateGameInfo {
+                        gameComment = "Test"
+                    }
+
+                    val expectedGameInfo = gameInfo.copy(gameComment = "Test")
+
+                    if (editor.isRootNode()) {
+                        val expected = editor.currentNode.copy(
+                            properties = editor.currentNode.properties + expectedGameInfo.toSgfProperties()
+                        )
+                        assertEquals(expected, actual.currentNode)
+                    } else {
+                        assertEquals(editor.currentNode, actual.currentNode)
+                    }
+
+                    val actualGameInfo = actual.getGameInfo()
+                    assertEquals(expectedGameInfo, actualGameInfo)
                 }
             }
         )

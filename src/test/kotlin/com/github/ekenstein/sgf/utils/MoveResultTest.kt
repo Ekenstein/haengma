@@ -203,4 +203,27 @@ class MoveResultTest {
             }
         )
     }
+
+    @Test
+    fun `onSuccess will run the block iff the result was successful`() {
+        val result = MoveResult.Success(1, 2)
+        var wasExecuted = false
+        val actual = result.onSuccess {
+            wasExecuted = true
+            assertEquals(1, it)
+        }
+
+        assertEquals(result, actual)
+        assertTrue(wasExecuted)
+    }
+
+    @Test
+    fun `onSuccess will not run the block if the result was a failure`() {
+        val result = MoveResult.Failure(2)
+        val actual = result.onSuccess {
+            assertTrue(false, "Shouldn't run the block if the result was a failure")
+        }
+
+        assertEquals(result, actual)
+    }
 }

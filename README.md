@@ -28,7 +28,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.Ekenstein:haengma:2.0.3")
+    implementation("com.github.Ekenstein:haengma:2.1.0")
 }
 ```
 
@@ -49,6 +49,11 @@ fun main() {
     // ... or by deserializing an input stream
     val inputStream: InputStream = ...
     val collection = SgfCollection.from(inputStream)
+    
+    // ... with the deserialized sgf collection you can filter trees by their respective game information
+    val trees = collection.filter {
+        it.gameName == "The ear-reddening game"
+    }
 }
 ```
 
@@ -102,9 +107,11 @@ import com.github.ekenstein.sgf.serialization.encodeToString
 fun main() {
     // you can create your own tree
     val editor = SgfEditor {
-        rules.boardSize = 19
-        rules.komi = 0.5
-        rules.handicap = 2
+        rules {
+            boardSize = 19
+            komi = 0.5
+            handicap = 2
+        }
         gameDate = listOf(
             GameDate.of(2022, 5, 21),
             GameDate.of(2022, 5, 22)
@@ -124,6 +131,10 @@ fun main() {
         .placeStone(SgfColor.Black, 4, 4)
         .goToRootNode()
         .placeStone(SgfColor.White, 16, 16)
+        .updateGameInfo {
+            result = GameResult.Resignation(SgfColor.White)
+            gameName = "The ear-reddening game"
+        }
 
     // ... when you feel that you are done you can commit your editor to a tree
     val tree = updatedEditor.commit()
@@ -131,7 +142,7 @@ fun main() {
     // ... and the tree will contain all the branches that you've added
     val sgf = tree.encodeToString()
 
-    // ... which prints to (;GM[1]FF[4]SZ[19]KM[0]HA[2]AB[dp][pd](;W[pp])(;W[qc];B[pc];W[qd](;B[dd])(;B[pe])(;B[qe])))
+    // ... which prints to (;GM[1]RE[W+R]GN[The ear-reddening game]FF[4]SZ[19]KM[0]HA[2]AB[dp][pd](;W[pp])(;W[qc];B[pc];W[qd](;B[dd])(;B[pe])(;B[qe])))
     println(sgf)
 }
 ```
