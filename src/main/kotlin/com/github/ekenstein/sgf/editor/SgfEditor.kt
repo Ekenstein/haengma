@@ -12,10 +12,12 @@ import com.github.ekenstein.sgf.SgfProperty
 import com.github.ekenstein.sgf.asPointOrNull
 import com.github.ekenstein.sgf.gameInfo
 import com.github.ekenstein.sgf.getGameInfo
+import com.github.ekenstein.sgf.toPropertySet
 import com.github.ekenstein.sgf.toSgfProperties
 import com.github.ekenstein.sgf.utils.LinkedList
 import com.github.ekenstein.sgf.utils.MoveResult
 import com.github.ekenstein.sgf.utils.NonEmptyList
+import com.github.ekenstein.sgf.utils.NonEmptySet
 import com.github.ekenstein.sgf.utils.TreeZipper
 import com.github.ekenstein.sgf.utils.Unzip
 import com.github.ekenstein.sgf.utils.Zipper
@@ -29,13 +31,15 @@ import com.github.ekenstein.sgf.utils.indexOfCurrent
 import com.github.ekenstein.sgf.utils.insertDownLeft
 import com.github.ekenstein.sgf.utils.insertRight
 import com.github.ekenstein.sgf.utils.linkedListOfNotNull
+import com.github.ekenstein.sgf.utils.map
 import com.github.ekenstein.sgf.utils.nelOf
+import com.github.ekenstein.sgf.utils.nonEmptySetOf
 import com.github.ekenstein.sgf.utils.onSuccess
 import com.github.ekenstein.sgf.utils.orElse
-import com.github.ekenstein.sgf.utils.orError
 import com.github.ekenstein.sgf.utils.orNull
 import com.github.ekenstein.sgf.utils.toLinkedList
 import com.github.ekenstein.sgf.utils.toNel
+import com.github.ekenstein.sgf.utils.toNonEmptySetUnsafe
 import com.github.ekenstein.sgf.utils.toZipper
 import com.github.ekenstein.sgf.utils.update
 import com.github.ekenstein.sgf.utils.withOrigin
@@ -101,15 +105,15 @@ fun SgfEditor.updateGameInfo(block: GameInfoBuilder.() -> Unit): SgfEditor {
     fun SgfEditor.goToPreviousNodeWithBackTracking() = goToPreviousNodeInSequence()
         .onSuccess { _ ->
             backtracking.add {
-                it.goToNextNodeInSequence().orError { "Couldn't get back to next node in sequence." }
+                it.goToNextNodeInSequence().get()
             }
         }.orElse { _ ->
             goToParentTree().onSuccess { _ ->
                 val index = currentTree.indexOfCurrent()
                 backtracking.add { parent ->
-                    parent.goToLeftMostChildTree().flatMap { child ->
-                        child.tryRepeat(index) { it.goToNextTree() }
-                    }.orError { "Couldn't get back to child at $index" }
+                    parent.goToLeftMostChildTree().map { child ->
+                        child.repeat(index) { it.goToNextTree() }
+                    }.get()
                 }
             }
         }
@@ -267,22 +271,23 @@ fun SgfEditor.nextToPlay(): SgfColor {
 /**
  * Clears the given [points] from stones in the current position.
  */
-fun SgfEditor.removeStones(vararg points: SgfPoint) = removeStones(points.toSet())
+fun SgfEditor.removeStones(point: SgfPoint, vararg points: SgfPoint) = removeStones(nonEmptySetOf(point, *points))
 
 /**
  * Clears the given set of [points] from stones in the current position.
  */
-fun SgfEditor.removeStones(points: Set<SgfPoint>) = addSetupProperty(SgfProperty.Setup.AE(points.toSet()))
+fun SgfEditor.removeStones(points: NonEmptySet<SgfPoint>) = addSetupProperty(SgfProperty.Setup.AE(points))
 
 /**
  * Adds the given stones to the position regardless of what was at the position before.
  */
-fun SgfEditor.addStones(color: SgfColor, vararg points: SgfPoint) = addStones(color, points.toSet())
+fun SgfEditor.addStones(color: SgfColor, point: SgfPoint, vararg points: SgfPoint) =
+    addStones(color, nonEmptySetOf(point, *points))
 
 /**
  * Adds the given set of stones to the position regardless of what was at the position before.
  */
-fun SgfEditor.addStones(color: SgfColor, points: Set<SgfPoint>) = when (color) {
+fun SgfEditor.addStones(color: SgfColor, points: NonEmptySet<SgfPoint>) = when (color) {
     SgfColor.Black -> addSetupProperty(SgfProperty.Setup.AB(points))
     SgfColor.White -> addSetupProperty(SgfProperty.Setup.AW(points))
 }
@@ -432,25 +437,82 @@ private fun checkMove(value: Boolean, reason: () -> String) {
     }
 }
 
-private fun SgfEditor.addSetupProperty(property: SgfProperty.Setup): SgfEditor {
-    return if (!currentNode.hasMoveProperties()) {
-        updateCurrentNode { node ->
-            val updatedProperty = when (property) {
-                is SgfProperty.Setup.AB -> property.copy(
-                    points = property.points + node.property<SgfProperty.Setup.AB>()?.points.orEmpty()
-                )
-                is SgfProperty.Setup.AE -> property.copy(
-                    points = property.points + node.property<SgfProperty.Setup.AE>()?.points.orEmpty()
-                )
-                is SgfProperty.Setup.AW -> property.copy(
-                    points = property.points + node.property<SgfProperty.Setup.AW>()?.points.orEmpty()
-                )
-                is SgfProperty.Setup.PL -> property
-            }
+private fun SgfProperty.Setup.getPoints() = when (this) {
+    is SgfProperty.Setup.AB -> points
+    is SgfProperty.Setup.AE -> points
+    is SgfProperty.Setup.AW -> points
+    is SgfProperty.Setup.PL -> emptySet()
+}
 
-            node.copy(
-                properties = node.properties + updatedProperty
-            )
+private fun SgfProperty.Setup.setPoints(points: NonEmptySet<SgfPoint>) = when (this) {
+    is SgfProperty.Setup.AB -> copy(points = points)
+    is SgfProperty.Setup.AE -> copy(points = points)
+    is SgfProperty.Setup.AW -> copy(points = points)
+    is SgfProperty.Setup.PL -> this
+}
+
+private fun SgfNode.updateSetupProperties(
+    property: SgfProperty.Setup,
+    opposing: List<SgfProperty.Setup>
+): SgfNode {
+    val pointsByProperty = opposing.associateWith { it.getPoints() - property.getPoints() }
+    val removedProperties = pointsByProperty.filterValues { it.isEmpty() }.keys
+    val updatedProperties = (pointsByProperty - removedProperties).map { (property, points) ->
+        property.setPoints(points.toNonEmptySetUnsafe())
+    }
+
+    val newProperties = properties + property + updatedProperties - removedProperties
+
+    return copy(
+        properties = newProperties.toPropertySet()
+    )
+}
+
+private fun SgfEditor.addSetupProperty(property: SgfProperty.Setup): SgfEditor =
+    if (!currentNode.hasMoveProperties()) {
+        updateCurrentNode { node ->
+            when (property) {
+                is SgfProperty.Setup.AB -> {
+                    val updatedProperty = node.property<SgfProperty.Setup.AB>()
+                        ?.let { it.copy(points = it.points + property.points) }
+                        ?: property
+
+                    node.updateSetupProperties(
+                        updatedProperty,
+                        listOfNotNull(
+                            node.property<SgfProperty.Setup.AE>(),
+                            node.property<SgfProperty.Setup.AW>()
+                        )
+                    )
+                }
+                is SgfProperty.Setup.AE -> {
+                    val updatedProperty = node.property<SgfProperty.Setup.AE>()
+                        ?.let { it.copy(points = it.points + property.points) }
+                        ?: property
+
+                    node.updateSetupProperties(
+                        updatedProperty,
+                        listOfNotNull(
+                            node.property<SgfProperty.Setup.AB>(),
+                            node.property<SgfProperty.Setup.AW>()
+                        )
+                    )
+                }
+                is SgfProperty.Setup.AW -> {
+                    val updatedProperty = node.property<SgfProperty.Setup.AW>()
+                        ?.let { it.copy(points = it.points + property.points) }
+                        ?: property
+
+                    node.updateSetupProperties(
+                        updatedProperty,
+                        listOfNotNull(
+                            node.property<SgfProperty.Setup.AE>(),
+                            node.property<SgfProperty.Setup.AB>()
+                        )
+                    )
+                }
+                is SgfProperty.Setup.PL -> node.copy(properties = node.properties + property)
+            }
         }
     } else {
         val node = SgfNode(property)
@@ -463,7 +525,6 @@ private fun SgfEditor.addSetupProperty(property: SgfProperty.Setup): SgfEditor {
             }
         }
     }
-}
 
 private fun SgfEditor.goToTreeThatStartsWithProperty(property: SgfProperty): MoveResult<SgfEditor> {
     fun sequenceStartsWith(editor: SgfEditor) = editor.currentSequence.focus.move == property

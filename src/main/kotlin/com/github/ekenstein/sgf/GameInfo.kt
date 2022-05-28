@@ -1,5 +1,7 @@
 package com.github.ekenstein.sgf
 
+import com.github.ekenstein.sgf.utils.NonEmptySet
+import com.github.ekenstein.sgf.utils.nonEmptySetOf
 import kotlin.math.ceil
 
 private const val DEFAULT_SIZE = 19
@@ -28,21 +30,15 @@ data class Rules(
             "The board size must be greater or equal to 1."
         }
 
-        val maxHandicap = maxHandicapForBoardSize(boardSize)
-        require(handicap == 0 || handicap in 2..maxHandicap) {
-            "Invalid handicap $handicap. The handicap must be 0 or between 2 and $maxHandicap"
+        val handicapRange = handicapRangeForBoardSize(boardSize)
+        require(handicap in handicapRange) {
+            "Invalid handicap $handicap. The handicap must be in the range $handicapRange"
         }
     }
 
     companion object {
         val default = Rules(DEFAULT_SIZE, DEFAULT_KOMI, DEFAULT_HANDICAP)
     }
-}
-
-private fun edgeDistance(boardSize: Int) = when {
-    boardSize < 7 -> null
-    boardSize < 13 -> 3
-    else -> 4
 }
 
 /**
@@ -114,9 +110,12 @@ private fun Player.toSgfProperties(color: SgfColor): PropertySet = when (color) 
 
 private fun Rules.toSgfProperties(): PropertySet {
     val handicapProperties = handicap.takeIf { it >= 2 }?.let {
+        val edgeDistance = edgeDistance(boardSize)
+            ?: error("There's no edge distance for the board size $boardSize")
+
         propertySetOf(
             SgfProperty.GameInfo.HA(it),
-            SgfProperty.Setup.AB(handicapPoints(it, boardSize))
+            SgfProperty.Setup.AB(handicapPoints(it, boardSize, edgeDistance))
         )
     } ?: emptyPropertySet()
 
@@ -169,37 +168,42 @@ internal fun SgfNode.getGameInfo() = GameInfo(
     result = property<SgfProperty.GameInfo.RE>()?.result
 )
 
-private fun maxHandicapForBoardSize(boardSize: Int) = when {
-    boardSize < 7 -> 0
-    boardSize == 7 -> 4
-    boardSize % 2 == 0 -> 4
-    else -> 9
+private fun handicapRangeForBoardSize(boardSize: Int): List<Int> = when {
+    boardSize < 7 -> listOf(0)
+    boardSize == 7 -> listOf(0) + (2..4)
+    boardSize % 2 == 0 -> listOf(0) + (2..4)
+    else -> listOf(0) + (2..9)
 }
 
-private fun handicapPoints(handicap: Int, boardSize: Int): Set<SgfPoint> {
-    val edgeDistance = edgeDistance(boardSize) ?: return emptySet()
+private fun edgeDistance(boardSize: Int) = when {
+    boardSize < 7 -> null
+    boardSize < 13 -> 3
+    else -> 4
+}
+
+private fun handicapPoints(handicap: Int, boardSize: Int, edgeDistance: Int): NonEmptySet<SgfPoint> {
     val middle = ceil(boardSize / 2.0).toInt()
     val tengen = SgfPoint(middle, middle)
 
-    fun points(handicap: Int): Set<SgfPoint> = when (handicap) {
-        2 -> setOf(
+    fun points(handicap: Int): NonEmptySet<SgfPoint> = when (handicap) {
+        2 -> nonEmptySetOf(
             SgfPoint(x = edgeDistance, y = boardSize - edgeDistance + 1),
             SgfPoint(x = boardSize - edgeDistance + 1, y = edgeDistance)
         )
-        3 -> setOf(SgfPoint(x = boardSize - edgeDistance + 1, y = boardSize - edgeDistance + 1)) + points(2)
-        4 -> setOf(SgfPoint(x = edgeDistance, y = edgeDistance)) + points(3)
-        5 -> setOf(tengen) + points(4)
-        6 -> setOf(
+        3 -> nonEmptySetOf(SgfPoint(x = boardSize - edgeDistance + 1, y = boardSize - edgeDistance + 1)) + points(2)
+        4 -> nonEmptySetOf(SgfPoint(x = edgeDistance, y = edgeDistance)) + points(3)
+        5 -> nonEmptySetOf(tengen) + points(4)
+        6 -> nonEmptySetOf(
             SgfPoint(x = edgeDistance, y = middle),
             SgfPoint(x = boardSize - edgeDistance + 1, y = middle)
         ) + points(4)
-        7 -> setOf(tengen) + points(6)
-        8 -> setOf(
+        7 -> nonEmptySetOf(tengen) + points(6)
+        8 -> nonEmptySetOf(
             SgfPoint(middle, edgeDistance),
             SgfPoint(middle, boardSize - edgeDistance + 1)
         ) + points(6)
-        9 -> setOf(tengen) + points(8)
-        else -> emptySet()
+        9 -> nonEmptySetOf(tengen) + points(8)
+        else -> error("Invalid handicap value $handicap")
     }
 
     return points(handicap)

@@ -23,7 +23,9 @@ import com.github.ekenstein.sgf.parser.valueparsers.simpleTextParser
 import com.github.ekenstein.sgf.parser.valueparsers.sizeParser
 import com.github.ekenstein.sgf.parser.valueparsers.textParser
 import com.github.ekenstein.sgf.toPropertySet
+import com.github.ekenstein.sgf.utils.toNel
 import com.github.ekenstein.sgf.utils.toNelUnsafe
+import com.github.ekenstein.sgf.utils.toNonEmptySet
 import org.antlr.v4.runtime.BaseErrorListener
 import org.antlr.v4.runtime.CharStream
 import org.antlr.v4.runtime.CharStreams
@@ -162,9 +164,18 @@ private fun SgfParser.MoveContext.extract(): SgfProperty.Move = when (this) {
 }
 
 private fun SgfParser.SetupContext.extract(): SgfProperty.Setup = when (this) {
-    is SgfParser.AddEmptyContext -> SgfProperty.Setup.AE(VALUE().flatMap { it.asCompressedPoint() }.toSet())
-    is SgfParser.AddBlackContext -> SgfProperty.Setup.AB(VALUE().flatMap { it.asCompressedPoint() }.toSet())
-    is SgfParser.AddWhiteContext -> SgfProperty.Setup.AW(VALUE().flatMap { it.asCompressedPoint() }.toSet())
+    is SgfParser.AddEmptyContext -> SgfProperty.Setup.AE(
+        VALUE().flatMap { it.asCompressedPoint() }.toNonEmptySet()
+            ?: throw SgfException.ParseError("AE must not contain an empty set of points", toMarker())
+    )
+    is SgfParser.AddBlackContext -> SgfProperty.Setup.AB(
+        VALUE().flatMap { it.asCompressedPoint() }.toNonEmptySet()
+            ?: throw SgfException.ParseError("AB must not contain an empty set of points", toMarker())
+    )
+    is SgfParser.AddWhiteContext -> SgfProperty.Setup.AW(
+        VALUE().flatMap { it.asCompressedPoint() }.toNonEmptySet()
+            ?: throw SgfException.ParseError("AW must not contain an empty set of points", toMarker())
+    )
     is SgfParser.PlayerToPlayContext -> SgfProperty.Setup.PL(VALUE().asColor(true))
     else -> throw SgfException.ParseError("Unrecognized setup property $text", toMarker())
 }
@@ -191,14 +202,35 @@ private fun SgfParser.MoveAnnotationContext.extract(): SgfProperty.MoveAnnotatio
     }
 
 private fun SgfParser.MarkupContext.extract(): SgfProperty.Markup = when (this) {
-    is SgfParser.CircleContext -> SgfProperty.Markup.CR(VALUE().flatMap { it.asCompressedPoint() }.toSet())
-    is SgfParser.ArrowContext -> SgfProperty.Markup.AR(VALUE().map { it.asComposed(pointParser, pointParser) })
-    is SgfParser.LabelContext -> SgfProperty.Markup.LB(VALUE().map { it.asComposed(pointParser, simpleTextParser) })
+    is SgfParser.CircleContext -> SgfProperty.Markup.CR(
+        VALUE().flatMap { it.asCompressedPoint() }.toNonEmptySet()
+            ?: throw SgfException.ParseError("CR must not contain an empty set of points", toMarker())
+    )
+    is SgfParser.ArrowContext -> SgfProperty.Markup.AR(
+        VALUE().map { it.asComposed(pointParser, pointParser) }.toNel()
+            ?: throw SgfException.ParseError("AR must not contain an empty list of composed points", toMarker())
+    )
+    is SgfParser.LabelContext -> SgfProperty.Markup.LB(
+        VALUE().associate { it.asComposed(pointParser, simpleTextParser) }
+
+    )
     is SgfParser.LineContext -> SgfProperty.Markup.LN(VALUE().map { it.asComposed(pointParser, pointParser) })
-    is SgfParser.MarkContext -> SgfProperty.Markup.MA(VALUE().flatMap { it.asCompressedPoint() }.toSet())
-    is SgfParser.SelectedContext -> SgfProperty.Markup.SL(VALUE().flatMap { it.asCompressedPoint() }.toSet())
-    is SgfParser.SquareContext -> SgfProperty.Markup.SQ(VALUE().flatMap { it.asCompressedPoint() }.toSet())
-    is SgfParser.TriangleContext -> SgfProperty.Markup.TR(VALUE().flatMap { it.asCompressedPoint() }.toSet())
+    is SgfParser.MarkContext -> SgfProperty.Markup.MA(
+        VALUE().flatMap { it.asCompressedPoint() }.toNonEmptySet()
+            ?: throw SgfException.ParseError("MA must not contain an empty set of points", toMarker())
+    )
+    is SgfParser.SelectedContext -> SgfProperty.Markup.SL(
+        VALUE().flatMap { it.asCompressedPoint() }.toNonEmptySet()
+            ?: throw SgfException.ParseError("SL must not contain an empty set of points", toMarker())
+    )
+    is SgfParser.SquareContext -> SgfProperty.Markup.SQ(
+        VALUE().flatMap { it.asCompressedPoint() }.toNonEmptySet()
+            ?: throw SgfException.ParseError("SQ must not contain an empty set of points", toMarker())
+    )
+    is SgfParser.TriangleContext -> SgfProperty.Markup.TR(
+        VALUE().flatMap { it.asCompressedPoint() }.toNonEmptySet()
+            ?: throw SgfException.ParseError("TR must not contain an empty set of points", toMarker())
+    )
     is SgfParser.DimPointsContext -> SgfProperty.Markup.DD(
         VALUE()?.flatMap { it.asCompressedPoint() }?.toSet().orEmpty()
     )

@@ -46,6 +46,10 @@ fun <T, U> MoveResult<T>.map(origin: U, move: (T) -> U): MoveResult<U> = flatMap
     MoveResult.Success(move(it), origin)
 }
 
+fun <T> MoveResult<T>.map(move: (T) -> T): MoveResult<T> = flatMap {
+    MoveResult.Success(move(it), it)
+}
+
 /**
  * Returns the origin of the movement iff the result was [MoveResult.Failure], otherwise the new position.
  */

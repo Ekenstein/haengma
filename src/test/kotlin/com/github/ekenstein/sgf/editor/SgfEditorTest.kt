@@ -17,6 +17,8 @@ import com.github.ekenstein.sgf.propertySetOf
 import com.github.ekenstein.sgf.serialization.encodeToString
 import com.github.ekenstein.sgf.toSgfProperties
 import com.github.ekenstein.sgf.utils.nelOf
+import com.github.ekenstein.sgf.utils.nonEmptySetOf
+import com.github.ekenstein.sgf.utils.toNonEmptySetUnsafe
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
@@ -584,7 +586,7 @@ class SgfEditorTest : RandomTest {
             assertEquals(expectedStones, board.stones)
 
             val rootProperties = GameInfo.default.toSgfProperties() + propertySetOf(
-                SgfProperty.Setup.AB(setOf(SgfPoint(1, 1), SgfPoint(2, 2), SgfPoint(3, 1))),
+                SgfProperty.Setup.AB(nonEmptySetOf(SgfPoint(1, 1), SgfPoint(2, 2), SgfPoint(3, 1))),
                 SgfProperty.Setup.PL(SgfColor.White)
             )
 
@@ -608,13 +610,13 @@ class SgfEditorTest : RandomTest {
                 1 to 2,
                 3 to 2,
                 2 to 3
-            ).map { (x, y) -> SgfPoint(x, y) }.toSet()
+            ).map { (x, y) -> SgfPoint(x, y) }.toNonEmptySetUnsafe()
 
             val whiteStones = setOf(
                 3 to 1,
                 4 to 2,
                 3 to 3
-            ).map { (x, y) -> SgfPoint(x, y) }.toSet()
+            ).map { (x, y) -> SgfPoint(x, y) }.toNonEmptySetUnsafe()
 
             val koPosition = SgfEditor()
                 .addStones(SgfColor.Black, blackStones)
@@ -826,7 +828,7 @@ class SgfEditorTest : RandomTest {
                         nelOf(
                             SgfNode(GameInfo.default.toSgfProperties()),
                             SgfNode(SgfProperty.Move.B(4, 4)),
-                            SgfNode(SgfProperty.Setup.AB(setOf(SgfPoint(4, 4), SgfPoint(5, 5))))
+                            SgfNode(SgfProperty.Setup.AB(nonEmptySetOf(SgfPoint(4, 4), SgfPoint(5, 5))))
                         )
                     )
 
@@ -850,10 +852,10 @@ class SgfEditorTest : RandomTest {
                         ),
                         listOf(
                             SgfGameTree(
-                                nelOf(SgfNode(SgfProperty.Setup.AW(setOf(SgfPoint(6, 6)))))
+                                nelOf(SgfNode(SgfProperty.Setup.AW(nonEmptySetOf(SgfPoint(6, 6)))))
                             ),
                             SgfGameTree(
-                                nelOf(SgfNode(SgfProperty.Setup.AB(setOf(SgfPoint(5, 5)))))
+                                nelOf(SgfNode(SgfProperty.Setup.AB(nonEmptySetOf(SgfPoint(5, 5)))))
                             ),
                             SgfGameTree(
                                 nelOf(SgfNode(SgfProperty.Move.W(5, 5)))
@@ -875,7 +877,7 @@ class SgfEditorTest : RandomTest {
                         nelOf(
                             SgfNode(gameInfo.toSgfProperties()),
                             SgfNode(SgfProperty.Move.B(4, 4)),
-                            SgfNode(SgfProperty.Setup.AW(setOf(SgfPoint(7, 3)))),
+                            SgfNode(SgfProperty.Setup.AW(nonEmptySetOf(SgfPoint(7, 3)))),
                             SgfNode(SgfProperty.Move.W(5, 5))
                         )
                     )
@@ -894,7 +896,7 @@ class SgfEditorTest : RandomTest {
                         nelOf(
                             SgfNode(gameInfo.toSgfProperties()),
                             SgfNode(SgfProperty.Move.B(4, 4)),
-                            SgfNode(SgfProperty.Setup.AB(setOf(SgfPoint(7, 3)))),
+                            SgfNode(SgfProperty.Setup.AB(nonEmptySetOf(SgfPoint(7, 3)))),
                             SgfNode(SgfProperty.Move.W(5, 5))
                         )
                     )
@@ -915,7 +917,7 @@ class SgfEditorTest : RandomTest {
                         .commit()
 
                     val properties = gameInfo.toSgfProperties() + SgfProperty.Setup.AB(
-                        setOf(
+                        nonEmptySetOf(
                             SgfPoint(4, 4),
                             SgfPoint(5, 5)
                         )
@@ -937,8 +939,8 @@ class SgfEditorTest : RandomTest {
                             SgfNode(GameInfo.default.toSgfProperties()),
                             SgfNode(SgfProperty.Move.B(4, 4)),
                             SgfNode(
-                                SgfProperty.Setup.AB(setOf(SgfPoint(5, 5))),
-                                SgfProperty.Setup.AW(setOf(SgfPoint(4, 4), SgfPoint(6, 6)))
+                                SgfProperty.Setup.AB(nonEmptySetOf(SgfPoint(5, 5))),
+                                SgfProperty.Setup.AW(nonEmptySetOf(SgfPoint(4, 4), SgfPoint(6, 6)))
                             )
                         )
                     )
@@ -958,8 +960,8 @@ class SgfEditorTest : RandomTest {
                             SgfNode(GameInfo.default.toSgfProperties()),
                             SgfNode(SgfProperty.Move.B(4, 4)),
                             SgfNode(
-                                SgfProperty.Setup.AB(setOf(SgfPoint(5, 5))),
-                                SgfProperty.Setup.AE(setOf(SgfPoint(4, 4), SgfPoint(6, 6)))
+                                SgfProperty.Setup.AB(nonEmptySetOf(SgfPoint(5, 5))),
+                                SgfProperty.Setup.AE(nonEmptySetOf(SgfPoint(4, 4), SgfPoint(6, 6)))
                             )
                         )
                     )
@@ -981,7 +983,7 @@ class SgfEditorTest : RandomTest {
                 nelOf(
                     SgfNode(GameInfo.default.toSgfProperties()),
                     SgfNode(SgfProperty.Move.B(4, 4)),
-                    SgfNode(SgfProperty.Setup.AE(setOf(SgfPoint(4, 4)))),
+                    SgfNode(SgfProperty.Setup.AE(nonEmptySetOf(SgfPoint(4, 4)))),
                     SgfNode(SgfProperty.Move.W(4, 4))
                 )
             )
@@ -1013,9 +1015,9 @@ class SgfEditorTest : RandomTest {
                     SgfNode(GameInfo.default.toSgfProperties()),
                     SgfNode(SgfProperty.Move.B(4, 4)),
                     SgfNode(
-                        SgfProperty.Setup.AB(setOf(SgfPoint(5, 5))),
-                        SgfProperty.Setup.AW(setOf(SgfPoint(6, 6))),
-                        SgfProperty.Setup.AE(setOf(SgfPoint(7, 7)))
+                        SgfProperty.Setup.AB(nonEmptySetOf(SgfPoint(5, 5))),
+                        SgfProperty.Setup.AW(nonEmptySetOf(SgfPoint(6, 6))),
+                        SgfProperty.Setup.AE(nonEmptySetOf(SgfPoint(7, 7)))
                     )
                 )
             )
@@ -1228,5 +1230,77 @@ class SgfEditorTest : RandomTest {
                 }
             }
         )
+    }
+
+    @Test
+    fun `adding black stones will override added white stones and cleared points on the same node`() {
+        val editor = SgfEditor()
+            .addStones(SgfColor.White, SgfPoint(3, 3))
+            .addStones(SgfColor.Black, SgfPoint(5, 5))
+            .removeStones(SgfPoint(4, 4))
+            .addStones(SgfColor.Black, SgfPoint(3, 3), SgfPoint(4, 4))
+
+        val actual = editor.commit()
+        val expected = SgfGameTree(
+            SgfNode(
+                GameInfo.default.toSgfProperties() + SgfProperty.Setup.AB(
+                    nonEmptySetOf(
+                        SgfPoint(3, 3),
+                        SgfPoint(4, 4),
+                        SgfPoint(5, 5)
+                    )
+                )
+            )
+        )
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `adding white stones will override added black stones and cleared points on the same node`() {
+        val editor = SgfEditor()
+            .addStones(SgfColor.Black, SgfPoint(3, 3))
+            .addStones(SgfColor.White, SgfPoint(5, 5))
+            .removeStones(SgfPoint(4, 4))
+            .addStones(SgfColor.White, SgfPoint(3, 3), SgfPoint(4, 4))
+
+        val actual = editor.commit()
+        val expected = SgfGameTree(
+            SgfNode(
+                GameInfo.default.toSgfProperties() + SgfProperty.Setup.AW(
+                    nonEmptySetOf(
+                        SgfPoint(3, 3),
+                        SgfPoint(4, 4),
+                        SgfPoint(5, 5)
+                    )
+                )
+            )
+        )
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `removing stones will override added white and black stones`() {
+        val editor = SgfEditor()
+            .addStones(SgfColor.Black, SgfPoint(3, 3))
+            .removeStones(SgfPoint(5, 5))
+            .addStones(SgfColor.White, SgfPoint(3, 3), SgfPoint(4, 4))
+            .removeStones(SgfPoint(3, 3), SgfPoint(4, 4))
+
+        val actual = editor.commit()
+        val expected = SgfGameTree(
+            SgfNode(
+                GameInfo.default.toSgfProperties() + SgfProperty.Setup.AE(
+                    nonEmptySetOf(
+                        SgfPoint(3, 3),
+                        SgfPoint(4, 4),
+                        SgfPoint(5, 5)
+                    )
+                )
+            )
+        )
+
+        assertEquals(expected, actual)
     }
 }
