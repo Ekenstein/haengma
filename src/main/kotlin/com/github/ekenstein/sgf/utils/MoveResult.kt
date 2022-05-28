@@ -90,3 +90,11 @@ fun <T> MoveResult<T>.withOrigin(origin: T): MoveResult<T> = when (this) {
  * an [IllegalStateException] will be thrown containing the given [message].
  */
 fun <T> MoveResult<T>.orError(message: () -> String) = orNull() ?: error(message())
+
+/**
+ * Performs a side effect on the position iff the result was a success, otherwise this is a no-op.
+ */
+fun <T> MoveResult<T>.onSuccess(block: (T) -> Unit) = when (this) {
+    is MoveResult.Failure -> this
+    is MoveResult.Success -> also { position.run(block) }
+}

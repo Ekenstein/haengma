@@ -31,7 +31,7 @@ fun SgfEditor.goToNextNode(): MoveResult<SgfEditor> = goToNextNodeInSequence().o
     goToLeftMostChildTree()
 }
 
-private fun SgfEditor.goToNextNodeInSequence(): MoveResult<SgfEditor> = currentSequence.goRight().map(this) {
+internal fun SgfEditor.goToNextNodeInSequence(): MoveResult<SgfEditor> = currentSequence.goRight().map(this) {
     copy(currentSequence = it)
 }
 
@@ -61,7 +61,7 @@ fun SgfEditor.goToPreviousNode(): MoveResult<SgfEditor> = goToPreviousNodeInSequ
     goToParentTree()
 }
 
-private fun SgfEditor.goToPreviousNodeInSequence(): MoveResult<SgfEditor> = currentSequence.goLeft().map(this) {
+internal fun SgfEditor.goToPreviousNodeInSequence(): MoveResult<SgfEditor> = currentSequence.goLeft().map(this) {
     copy(currentSequence = it)
 }
 

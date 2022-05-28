@@ -1,6 +1,7 @@
 package com.github.ekenstein.sgf
 
 import com.github.ekenstein.sgf.utils.NonEmptyList
+import com.github.ekenstein.sgf.utils.nelOf
 import java.nio.charset.Charset
 import java.time.LocalDate
 import java.time.temporal.ChronoField
@@ -12,6 +13,15 @@ import java.util.GregorianCalendar
  * in a [SgfCollection].
  */
 data class SgfCollection(val trees: NonEmptyList<SgfGameTree>) {
+    constructor(tree: SgfGameTree, vararg trees: SgfGameTree) : this(nelOf(tree, *trees))
+    /**
+     * Filter game trees by its game information.
+     */
+    fun filter(predicate: (GameInfo) -> Boolean): List<SgfGameTree> = trees.filter {
+        val gameInfo = it.sequence.head.getGameInfo()
+        predicate(gameInfo)
+    }
+
     companion object
 }
 
@@ -21,6 +31,7 @@ data class SgfCollection(val trees: NonEmptyList<SgfGameTree>) {
  */
 data class SgfGameTree(val sequence: NonEmptyList<SgfNode>, val trees: List<SgfGameTree>) {
     constructor(sequence: NonEmptyList<SgfNode>) : this(sequence, emptyList())
+    constructor(node: SgfNode, vararg nodes: SgfNode) : this(nelOf(node, *nodes))
 }
 
 /**
@@ -166,9 +177,24 @@ sealed class SgfProperty {
         data class FF(val format: Int) : Root() {
             override val identifier: String = "FF"
         }
+
+        /**
+         * Defines the size of the board. If only a single value
+         * is given, the board is a square; with two numbers given,
+         * rectangular boards are possible.
+         * If a rectangular board is specified, the first number specifies
+         * the number of columns, the second provides the number of rows.
+         * The valid range for SZ is any size greater or equal to 1x1.
+         */
         data class SZ(val width: Int, val height: Int) : Root() {
             override val identifier: String = "SZ"
             constructor(size: Int) : this(size, size)
+
+            init {
+                require(width >= 1 && height >= 1) {
+                    "The size of the board must be greater or equal to 1x1."
+                }
+            }
         }
         data class CA(val charset: Charset) : Root() {
             override val identifier: String = "CA"
@@ -223,6 +249,15 @@ sealed class SgfProperty {
         data class WR(val rank: String) : GameInfo() {
             override val identifier: String = "WR"
         }
+
+        /**
+         * Provides a name for the game. The name is used to
+         * easily find games within a collection.
+         * The name should therefore contain some helpful information
+         * for identifying the game. 'GameName' could also be used
+         * as the file-name, if a collection is split into
+         * single files.
+         */
         data class GN(val name: String) : GameInfo() {
             override val identifier: String = "GN"
         }

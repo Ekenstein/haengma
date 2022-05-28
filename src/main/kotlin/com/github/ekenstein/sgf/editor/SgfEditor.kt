@@ -1,5 +1,7 @@
 package com.github.ekenstein.sgf.editor
 
+import com.github.ekenstein.sgf.GameInfo
+import com.github.ekenstein.sgf.GameInfoBuilder
 import com.github.ekenstein.sgf.Move
 import com.github.ekenstein.sgf.SgfColor
 import com.github.ekenstein.sgf.SgfException
@@ -8,6 +10,9 @@ import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.SgfProperty
 import com.github.ekenstein.sgf.asPointOrNull
+import com.github.ekenstein.sgf.gameInfo
+import com.github.ekenstein.sgf.getGameInfo
+import com.github.ekenstein.sgf.toSgfProperties
 import com.github.ekenstein.sgf.utils.LinkedList
 import com.github.ekenstein.sgf.utils.MoveResult
 import com.github.ekenstein.sgf.utils.NonEmptyList
@@ -20,11 +25,14 @@ import com.github.ekenstein.sgf.utils.flatMap
 import com.github.ekenstein.sgf.utils.get
 import com.github.ekenstein.sgf.utils.goRightUnsafe
 import com.github.ekenstein.sgf.utils.goUp
+import com.github.ekenstein.sgf.utils.indexOfCurrent
 import com.github.ekenstein.sgf.utils.insertDownLeft
 import com.github.ekenstein.sgf.utils.insertRight
 import com.github.ekenstein.sgf.utils.linkedListOfNotNull
 import com.github.ekenstein.sgf.utils.nelOf
+import com.github.ekenstein.sgf.utils.onSuccess
 import com.github.ekenstein.sgf.utils.orElse
+import com.github.ekenstein.sgf.utils.orError
 import com.github.ekenstein.sgf.utils.orNull
 import com.github.ekenstein.sgf.utils.toLinkedList
 import com.github.ekenstein.sgf.utils.toNel
@@ -46,8 +54,6 @@ private object GameTreeUnzip : Unzip<SgfGameTree> {
  * You can navigate through sequences with:
  * - [SgfEditor.goToNextNode]
  * - [SgfEditor.goToPreviousNode]
- * - [SgfEditor.goToNextNodeInSequence]
- * - [SgfEditor.goToPreviousNodeInSequence]
  *
  * Traverse the trees with:
  * - [SgfEditor.goToParentTree]
@@ -73,16 +79,56 @@ data class SgfEditor(
         gameTree.sequence.toZipper(),
         TreeZipper.ofNode(gameTree, GameTreeUnzip)
     )
-    constructor(gameInfo: GameInfo) : this(gameInfo.toGameTree())
-    constructor(block: GameInfo.() -> Unit = { }) : this(GameInfo.default.apply(block))
+    constructor(gameInfo: GameInfo) : this(SgfGameTree(nelOf(SgfNode(gameInfo.toSgfProperties()))))
+    constructor(block: GameInfoBuilder.() -> Unit = { }) : this(gameInfo(block))
 
     val currentNode: SgfNode = currentSequence.focus
+    val gameInfo: GameInfo by lazy { goToRootNode().currentNode.getGameInfo() }
 }
 
 /**
  * Returns the game information of the tree. If game information is missing, the default values will be used.
  */
 fun SgfEditor.getGameInfo(): GameInfo = goToRootNode().currentNode.getGameInfo()
+
+/**
+ * Will update the game info of the tree regardless of the position the editor is currently at.
+ * Will always return an updated editor located at the same position as the given editor.
+ */
+fun SgfEditor.updateGameInfo(block: GameInfoBuilder.() -> Unit): SgfEditor {
+    val backtracking = mutableListOf<(SgfEditor) -> SgfEditor>()
+
+    fun SgfEditor.goToPreviousNodeWithBackTracking() = goToPreviousNodeInSequence()
+        .onSuccess { _ ->
+            backtracking.add {
+                it.goToNextNodeInSequence().orError { "Couldn't get back to next node in sequence." }
+            }
+        }.orElse { _ ->
+            goToParentTree().onSuccess { _ ->
+                val index = currentTree.indexOfCurrent()
+                backtracking.add { parent ->
+                    parent.goToLeftMostChildTree().flatMap { child ->
+                        child.tryRepeat(index) { it.goToNextTree() }
+                    }.orError { "Couldn't get back to child at $index" }
+                }
+            }
+        }
+
+    tailrec fun SgfEditor.goToRootNodeWithBackTracking(): SgfEditor = when (val previous = goToPreviousNodeWithBackTracking()) {
+        is MoveResult.Failure -> this
+        is MoveResult.Success -> previous.position.goToRootNodeWithBackTracking()
+    }
+
+    val root = goToRootNodeWithBackTracking()
+    val gameInfo = gameInfo(root.currentNode.getGameInfo(), block)
+    val properties = gameInfo.toSgfProperties()
+
+    val newRoot = root.updateCurrentNode { rootNode ->
+        rootNode.copy(properties = rootNode.properties + properties)
+    }
+
+    return backtracking.reversed().fold(newRoot) { r, b -> b(r) }
+}
 
 private fun SgfEditor.insertBranch(node: SgfNode): SgfEditor {
     val mainVariation = SgfGameTree(nelOf(node))

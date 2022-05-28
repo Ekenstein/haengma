@@ -5,11 +5,13 @@ interface Unzip<T> {
     fun zip(node: T, children: LinkedList<T>): T
 }
 
+typealias Forest<T> = LinkedList<T>
+
 data class TreeZipper<T>(
-    val left: LinkedList<T>,
+    val left: Forest<T>,
     val focus: T,
-    val right: LinkedList<T>,
-    val top: TreeZipper<T>?,
+    val right: Forest<T>,
+    val top: LinkedList<Triple<Forest<T>, T, Forest<T>>>,
     val unzip: Unzip<T>
 ) {
     companion object {
@@ -17,7 +19,7 @@ data class TreeZipper<T>(
             left = LinkedList.Nil,
             focus = node,
             right = LinkedList.Nil,
-            top = null,
+            top = LinkedList.Nil,
             unzip = unzip
         )
     }
@@ -61,7 +63,7 @@ fun <T> TreeZipper<T>.goDownLeft() = when (val children = unzip.unzip(focus)) {
                 left = emptyLinkedList(),
                 focus = head,
                 right = tail,
-                top = this
+                top = linkedListOf(Triple(left, focus, right)) + top
             ),
             origin = this
         )
@@ -70,12 +72,18 @@ fun <T> TreeZipper<T>.goDownLeft() = when (val children = unzip.unzip(focus)) {
 }
 
 fun <T> TreeZipper<T>.goUp() = when (top) {
-    null -> MoveResult.Failure(this)
-    else -> {
+    LinkedList.Nil -> MoveResult.Failure(this)
+    is LinkedList.Cons -> {
         val children = (linkedListOf(focus) + left).reverse(right)
+        val (head, tail) = top
+        val (topLeft, topFocus, topRight) = head
         MoveResult.Success(
-            top.copy(
-                focus = unzip.zip(top.focus, children)
+            TreeZipper(
+                left = topLeft,
+                focus = unzip.zip(topFocus, children),
+                right = topRight,
+                top = tail,
+                unzip
             ),
             this
         )
@@ -102,9 +110,14 @@ fun <T> TreeZipper<T>.insertDownLeft(
         left = emptyLinkedList(),
         focus = children.head,
         right = children.tail,
-        top = this
+        top = linkedListOf(Triple(left, focus, right)) + top
     )
     LinkedList.Nil -> error("There are no nodes to insert")
 }
 
 fun <T> TreeZipper<T>.commit() = goToRoot().focus
+
+/**
+ * Returns the index of the focus.
+ */
+fun TreeZipper<*>.indexOfCurrent() = left.size
