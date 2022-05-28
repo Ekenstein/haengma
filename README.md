@@ -1,4 +1,5 @@
 # Haengma
+[![Docs](https://img.shields.io/badge/docs-latest-informational)](https://ekenstein.github.io/haengma/)
 [![Release](https://jitpack.io/v/Ekenstein/haengma.svg)](https://jitpack.io/#Ekenstein/haengma)
 [![License](https://img.shields.io/github/license/ekenstein/haengma)](https://github.com/ekenstein/haengma/blob/main/LICENSE)
 ![Build Status](https://github.com/ekenstein/haengma/workflows/CI/badge.svg)
