@@ -1,6 +1,7 @@
 package com.github.ekenstein.sgf
 
 import com.github.ekenstein.sgf.utils.NonEmptyList
+import com.github.ekenstein.sgf.utils.NonEmptySet
 import com.github.ekenstein.sgf.utils.nelOf
 import java.nio.charset.Charset
 import java.time.LocalDate
@@ -83,14 +84,14 @@ sealed class SgfProperty {
     }
 
     sealed class Setup : SgfProperty() {
-        data class AB(val points: Set<SgfPoint>) : Setup() {
+        data class AB(val points: NonEmptySet<SgfPoint>) : Setup() {
             override val identifier: String = "AB"
         }
 
-        data class AW(val points: Set<SgfPoint>) : Setup() {
+        data class AW(val points: NonEmptySet<SgfPoint>) : Setup() {
             override val identifier: String = "AW"
         }
-        data class AE(val points: Set<SgfPoint>) : Setup() {
+        data class AE(val points: NonEmptySet<SgfPoint>) : Setup() {
             override val identifier: String = "AE"
         }
         data class PL(val color: SgfColor) : Setup() {
@@ -141,28 +142,28 @@ sealed class SgfProperty {
     }
 
     sealed class Markup : SgfProperty() {
-        data class AR(val points: List<Pair<SgfPoint, SgfPoint>>) : Markup() {
+        data class AR(val points: NonEmptyList<Pair<SgfPoint, SgfPoint>>) : Markup() {
             override val identifier: String = "AR"
         }
-        data class CR(val points: Set<SgfPoint>) : Markup() {
+        data class CR(val points: NonEmptySet<SgfPoint>) : Markup() {
             override val identifier: String = "CR"
         }
-        data class LB(val label: List<Pair<SgfPoint, String>>) : Markup() {
+        data class LB(val label: Map<SgfPoint, String>) : Markup() {
             override val identifier: String = "LB"
         }
         data class LN(val line: List<Pair<SgfPoint, SgfPoint>>) : Markup() {
             override val identifier: String = "LN"
         }
-        data class MA(val points: Set<SgfPoint>) : Markup() {
+        data class MA(val points: NonEmptySet<SgfPoint>) : Markup() {
             override val identifier: String = "MA"
         }
-        data class SL(val selected: Set<SgfPoint>) : Markup() {
+        data class SL(val selected: NonEmptySet<SgfPoint>) : Markup() {
             override val identifier: String = "SL"
         }
-        data class SQ(val points: Set<SgfPoint>) : Markup() {
+        data class SQ(val points: NonEmptySet<SgfPoint>) : Markup() {
             override val identifier: String = "SQ"
         }
-        data class TR(val points: Set<SgfPoint>) : Markup() {
+        data class TR(val points: NonEmptySet<SgfPoint>) : Markup() {
             override val identifier: String = "TR"
         }
         data class DD(val points: Set<SgfPoint>) : Markup() {

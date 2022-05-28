@@ -27,6 +27,7 @@ import com.github.ekenstein.sgf.toPropertySet
 import com.github.ekenstein.sgf.utils.MoveResult
 import com.github.ekenstein.sgf.utils.orStay
 import com.github.ekenstein.sgf.utils.toNelUnsafe
+import com.github.ekenstein.sgf.utils.toNonEmptySetUnsafe
 import kotlin.random.Random
 
 typealias Gen<T> = Random.() -> T
@@ -128,9 +129,9 @@ interface RandomTest {
         get() = item(
             listOf(
                 { SgfProperty.Setup.PL(enum()) },
-                { SgfProperty.Setup.AB(list(1..10) { point() }.toSet()) },
-                { SgfProperty.Setup.AW(list(1..10) { point() }.toSet()) },
-                { SgfProperty.Setup.AE(list(1..10) { point() }.toSet()) }
+                { SgfProperty.Setup.AB(list(1..10) { point() }.toNonEmptySetUnsafe()) },
+                { SgfProperty.Setup.AW(list(1..10) { point() }.toNonEmptySetUnsafe()) },
+                { SgfProperty.Setup.AE(list(1..10) { point() }.toNonEmptySetUnsafe()) }
             )
         ).invoke()
 
@@ -163,17 +164,19 @@ interface RandomTest {
                 {
                     val points = list(1..10) {
                         pair({ point() }, { point() })
-                    }
+                    }.toNelUnsafe()
+
                     SgfProperty.Markup.AR(points)
                 },
                 {
                     val labels = list(1..10) {
                         pair({ point() }, { string(1..100) })
-                    }
+                    }.toMap()
+
                     SgfProperty.Markup.LB(labels)
                 },
-                { SgfProperty.Markup.CR(list(1..10) { point() }.toSet()) },
-                { SgfProperty.Markup.MA(list(1..10) { point() }.toSet()) },
+                { SgfProperty.Markup.CR(list(1..10) { point() }.toNonEmptySetUnsafe()) },
+                { SgfProperty.Markup.MA(list(1..10) { point() }.toNonEmptySetUnsafe()) },
                 {
                     val lines = list(1..10) {
                         pair({ point() }, { point() })
@@ -181,9 +184,9 @@ interface RandomTest {
 
                     SgfProperty.Markup.LN(lines)
                 },
-                { SgfProperty.Markup.SL(list(1..10) { point() }.toSet()) },
-                { SgfProperty.Markup.SQ(list(1..10) { point() }.toSet()) },
-                { SgfProperty.Markup.TR(list(1..10) { point() }.toSet()) },
+                { SgfProperty.Markup.SL(list(1..10) { point() }.toNonEmptySetUnsafe()) },
+                { SgfProperty.Markup.SQ(list(1..10) { point() }.toNonEmptySetUnsafe()) },
+                { SgfProperty.Markup.TR(list(1..10) { point() }.toNonEmptySetUnsafe()) },
                 { SgfProperty.Markup.DD(list(1..10) { point() }.toSet()) }
             )
         ).invoke()
