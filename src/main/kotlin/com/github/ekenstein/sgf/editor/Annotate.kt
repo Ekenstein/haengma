@@ -31,17 +31,21 @@ sealed class CommentMode {
  *  separated by a new line.
  * @return An updated [SgfEditor] containing the [comment] on the current node.
  */
-fun SgfEditor.comment(comment: String, mode: CommentMode = CommentMode.Append("\r\n")): SgfEditor {
-    fun getOldComment() = currentNode.property<SgfProperty.NodeAnnotation.C>()?.comment
-        ?: ""
-
+fun SgfEditor.addComment(comment: String, mode: CommentMode = CommentMode.Append("\r\n")): SgfEditor {
+    val oldComment = getComment().takeIf { it.isNotEmpty() }
     val updatedComment = when (mode) {
-        is CommentMode.Append -> listOf(getOldComment(), comment).joinToString(mode.separator)
+        is CommentMode.Append -> listOfNotNull(oldComment, comment).joinToString(mode.separator)
         CommentMode.Replace -> comment
-        is CommentMode.Prepend -> listOf(comment, getOldComment()).joinToString(mode.separator)
+        is CommentMode.Prepend -> listOf(comment, oldComment).joinToString(mode.separator)
     }
 
     return updateCurrentNode {
         it.copy(properties = it.properties + SgfProperty.NodeAnnotation.C(updatedComment))
     }
 }
+
+/**
+ * Returns the comments on the current node or an empty string if there are no comments on the current node.
+ */
+fun SgfEditor.getComment(): String = currentNode.property<SgfProperty.NodeAnnotation.C>()?.comment
+    ?: ""

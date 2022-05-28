@@ -1309,7 +1309,7 @@ class SgfEditorTest : RandomTest {
         assertAll(
             {
                 val actual = SgfEditor()
-                    .comment("Hello", CommentMode.Replace)
+                    .addComment("Hello", CommentMode.Replace)
                     .commit()
 
                 val expected = SgfGameTree(
@@ -1320,8 +1320,8 @@ class SgfEditorTest : RandomTest {
             },
             {
                 val actual = SgfEditor()
-                    .comment("Hello")
-                    .comment("Yo")
+                    .addComment("Hello")
+                    .addComment("Yo")
                     .commit()
 
                 val expected = SgfGameTree(
@@ -1332,9 +1332,9 @@ class SgfEditorTest : RandomTest {
             },
             {
                 val actual = SgfEditor()
-                    .comment("Hello")
+                    .addComment("Hello")
                     .placeStone(SgfColor.Black, 3, 3)
-                    .comment("Yo", CommentMode.Replace)
+                    .addComment("Yo", CommentMode.Replace)
                     .commit()
 
                 val expected = SgfGameTree(
@@ -1352,8 +1352,8 @@ class SgfEditorTest : RandomTest {
         assertAll(
             {
                 val actual = SgfEditor()
-                    .comment("Hello")
-                    .comment("Yo")
+                    .addComment("Hello")
+                    .addComment("Yo")
                     .commit()
 
                 val expectedComment = SgfProperty.NodeAnnotation.C("Hello\r\nYo")
@@ -1368,8 +1368,8 @@ class SgfEditorTest : RandomTest {
             },
             {
                 val actual = SgfEditor()
-                    .comment("Hello")
-                    .comment("Yo", CommentMode.Append(", "))
+                    .addComment("Hello")
+                    .addComment("Yo", CommentMode.Append(", "))
                     .commit()
 
                 val expectedComment = SgfProperty.NodeAnnotation.C("Hello, Yo")
@@ -1384,9 +1384,9 @@ class SgfEditorTest : RandomTest {
             },
             {
                 val actual = SgfEditor()
-                    .comment("Hello")
+                    .addComment("Hello")
                     .placeStone(SgfColor.Black, 3, 3)
-                    .comment("Yo", CommentMode.Append("FooBar"))
+                    .addComment("Yo", CommentMode.Append("FooBar"))
                     .commit()
 
                 val expected = SgfGameTree(
@@ -1394,6 +1394,20 @@ class SgfEditorTest : RandomTest {
                         GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.C("Hello")
                     ),
                     SgfNode(SgfProperty.Move.B(3, 3), SgfProperty.NodeAnnotation.C("Yo"))
+                )
+
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = SgfEditor()
+                    .addComment("")
+                    .addComment("Hello", CommentMode.Append(", "))
+                    .commit()
+
+                val expected = SgfGameTree(
+                    SgfNode(
+                        GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.C("Hello")
+                    )
                 )
 
                 assertEquals(expected, actual)
@@ -1406,8 +1420,8 @@ class SgfEditorTest : RandomTest {
         assertAll(
             {
                 val actual = SgfEditor()
-                    .comment("Hello")
-                    .comment("Yo", CommentMode.Prepend("\r\n"))
+                    .addComment("Hello")
+                    .addComment("Yo", CommentMode.Prepend("\r\n"))
                     .commit()
 
                 val expectedComment = SgfProperty.NodeAnnotation.C("Yo\r\nHello")
@@ -1422,8 +1436,8 @@ class SgfEditorTest : RandomTest {
             },
             {
                 val actual = SgfEditor()
-                    .comment("Hello")
-                    .comment("Yo", CommentMode.Prepend(", "))
+                    .addComment("Hello")
+                    .addComment("Yo", CommentMode.Prepend(", "))
                     .commit()
 
                 val expectedComment = SgfProperty.NodeAnnotation.C("Yo, Hello")
@@ -1438,9 +1452,9 @@ class SgfEditorTest : RandomTest {
             },
             {
                 val actual = SgfEditor()
-                    .comment("Hello")
+                    .addComment("Hello")
                     .placeStone(SgfColor.Black, 3, 3)
-                    .comment("Yo", CommentMode.Prepend("FooBar"))
+                    .addComment("Yo", CommentMode.Prepend("FooBar"))
                     .commit()
 
                 val expected = SgfGameTree(
@@ -1451,7 +1465,38 @@ class SgfEditorTest : RandomTest {
                 )
 
                 assertEquals(expected, actual)
+            },
+            {
+                val actual = SgfEditor()
+                    .addComment("")
+                    .addComment("Hello", CommentMode.Prepend(", "))
+                    .commit()
+
+                val expected = SgfGameTree(
+                    SgfNode(
+                        GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.C("Hello")
+                    )
+                )
+
+                assertEquals(expected, actual)
             }
         )
+    }
+
+    @Test
+    fun `if there are no comments on the current node an empty string will be returned`() {
+        val actual = SgfEditor().getComment()
+        assertEquals("", actual)
+    }
+
+    @Test
+    fun `if there are comments on the current node, the comments will be returned`() {
+        val actual = SgfEditor()
+            .addComment("Hello")
+            .addComment("Yo!")
+            .getComment()
+
+        val expected = "Hello\r\nYo!"
+        assertEquals(expected, actual)
     }
 }
