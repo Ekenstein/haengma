@@ -1303,4 +1303,200 @@ class SgfEditorTest : RandomTest {
 
         assertEquals(expected, actual)
     }
+
+    @Test
+    fun `commenting the current node with replace mode will replace the old comment`() {
+        assertAll(
+            {
+                val actual = SgfEditor()
+                    .addComment("Hello", CommentMode.Replace)
+                    .commit()
+
+                val expected = SgfGameTree(
+                    SgfNode(GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.C("Hello"))
+                )
+
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = SgfEditor()
+                    .addComment("Hello")
+                    .addComment("Yo")
+                    .commit()
+
+                val expected = SgfGameTree(
+                    SgfNode(GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.C("Yo"))
+                )
+
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = SgfEditor()
+                    .addComment("Hello")
+                    .placeStone(SgfColor.Black, 3, 3)
+                    .addComment("Yo", CommentMode.Replace)
+                    .commit()
+
+                val expected = SgfGameTree(
+                    SgfNode(GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.C("Hello")),
+                    SgfNode(SgfProperty.Move.B(3, 3), SgfProperty.NodeAnnotation.C("Yo"))
+                )
+
+                assertEquals(expected, actual)
+            }
+        )
+    }
+
+    @Test
+    fun `commenting the current node by appending to the old comment will append the comment at the end`() {
+        assertAll(
+            {
+                val actual = SgfEditor()
+                    .addComment("Hello")
+                    .addComment("Yo")
+                    .commit()
+
+                val expectedComment = SgfProperty.NodeAnnotation.C("Hello\r\nYo")
+
+                val expected = SgfGameTree(
+                    SgfNode(
+                        GameInfo.default.toSgfProperties() + expectedComment
+                    )
+                )
+
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = SgfEditor()
+                    .addComment("Hello")
+                    .addComment("Yo", CommentMode.Append(", "))
+                    .commit()
+
+                val expectedComment = SgfProperty.NodeAnnotation.C("Hello, Yo")
+
+                val expected = SgfGameTree(
+                    SgfNode(
+                        GameInfo.default.toSgfProperties() + expectedComment
+                    )
+                )
+
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = SgfEditor()
+                    .addComment("Hello")
+                    .placeStone(SgfColor.Black, 3, 3)
+                    .addComment("Yo", CommentMode.Append("FooBar"))
+                    .commit()
+
+                val expected = SgfGameTree(
+                    SgfNode(
+                        GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.C("Hello")
+                    ),
+                    SgfNode(SgfProperty.Move.B(3, 3), SgfProperty.NodeAnnotation.C("Yo"))
+                )
+
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = SgfEditor()
+                    .addComment("")
+                    .addComment("Hello", CommentMode.Append(", "))
+                    .commit()
+
+                val expected = SgfGameTree(
+                    SgfNode(
+                        GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.C("Hello")
+                    )
+                )
+
+                assertEquals(expected, actual)
+            }
+        )
+    }
+
+    @Test
+    fun `commenting the current node by prepending to the old comment will prepend the comment at the beginning`() {
+        assertAll(
+            {
+                val actual = SgfEditor()
+                    .addComment("Hello")
+                    .addComment("Yo", CommentMode.Prepend("\r\n"))
+                    .commit()
+
+                val expectedComment = SgfProperty.NodeAnnotation.C("Yo\r\nHello")
+
+                val expected = SgfGameTree(
+                    SgfNode(
+                        GameInfo.default.toSgfProperties() + expectedComment
+                    )
+                )
+
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = SgfEditor()
+                    .addComment("Hello")
+                    .addComment("Yo", CommentMode.Prepend(", "))
+                    .commit()
+
+                val expectedComment = SgfProperty.NodeAnnotation.C("Yo, Hello")
+
+                val expected = SgfGameTree(
+                    SgfNode(
+                        GameInfo.default.toSgfProperties() + expectedComment
+                    )
+                )
+
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = SgfEditor()
+                    .addComment("Hello")
+                    .placeStone(SgfColor.Black, 3, 3)
+                    .addComment("Yo", CommentMode.Prepend("FooBar"))
+                    .commit()
+
+                val expected = SgfGameTree(
+                    SgfNode(
+                        GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.C("Hello")
+                    ),
+                    SgfNode(SgfProperty.Move.B(3, 3), SgfProperty.NodeAnnotation.C("Yo"))
+                )
+
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = SgfEditor()
+                    .addComment("")
+                    .addComment("Hello", CommentMode.Prepend(", "))
+                    .commit()
+
+                val expected = SgfGameTree(
+                    SgfNode(
+                        GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.C("Hello")
+                    )
+                )
+
+                assertEquals(expected, actual)
+            }
+        )
+    }
+
+    @Test
+    fun `if there are no comments on the current node an empty string will be returned`() {
+        val actual = SgfEditor().getComment()
+        assertEquals("", actual)
+    }
+
+    @Test
+    fun `if there are comments on the current node, the comments will be returned`() {
+        val actual = SgfEditor()
+            .addComment("Hello")
+            .addComment("Yo!")
+            .getComment()
+
+        val expected = "Hello\r\nYo!"
+        assertEquals(expected, actual)
+    }
 }

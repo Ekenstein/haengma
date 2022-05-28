@@ -53,6 +53,24 @@ data class SgfNode(val properties: PropertySet) {
      * otherwise false.
      */
     inline fun <reified T : SgfProperty> hasProperty() = properties.filterIsInstance<T>().any()
+
+    /**
+     * Checks whether this node contains setup properties or not. True if it contains setup properties, otherwise
+     * false.
+     */
+    fun hasSetupProperties() = hasProperty<SgfProperty.Setup>()
+
+    /**
+     * Checks whether this node contains root properties or not. True if it contains root properties, otherwise
+     * false.
+     */
+    fun hasRootProperties() = hasProperty<SgfProperty.Root>()
+
+    /**
+     * Checks whether this node contains move properties or not. True if it contains move properties, otherwise
+     * false.
+     */
+    fun hasMoveProperties() = hasProperty<SgfProperty.Move>()
 }
 
 sealed class SgfProperty {
