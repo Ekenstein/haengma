@@ -36,7 +36,7 @@ fun SgfEditor.addComment(comment: String, mode: CommentMode = CommentMode.Append
     val updatedComment = when (mode) {
         is CommentMode.Append -> listOfNotNull(oldComment, comment).joinToString(mode.separator)
         CommentMode.Replace -> comment
-        is CommentMode.Prepend -> listOf(comment, oldComment).joinToString(mode.separator)
+        is CommentMode.Prepend -> listOfNotNull(comment, oldComment).joinToString(mode.separator)
     }
 
     return updateCurrentNode {
