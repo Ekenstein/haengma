@@ -89,11 +89,6 @@ tasks {
         }
     }
 
-    compileJava {
-        sourceCompatibility = kotlinJvmTarget
-        targetCompatibility = kotlinJvmTarget
-    }
-
     listOf(compileJava, compileTestJava).map { task ->
         task {
             sourceCompatibility = kotlinJvmTarget
