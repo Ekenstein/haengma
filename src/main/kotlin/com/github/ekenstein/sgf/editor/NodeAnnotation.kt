@@ -73,7 +73,7 @@ private fun Remark.toSgf() = when (this) {
 }
 
 @DslMarker
-annotation class NodeAnnotationDslMarker
+private annotation class NodeAnnotationDslMarker
 
 /**
  * Annotates the current node.
