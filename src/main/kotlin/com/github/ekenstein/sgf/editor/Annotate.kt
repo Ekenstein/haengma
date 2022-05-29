@@ -49,7 +49,7 @@ fun SgfEditor.addComment(comment: String, mode: CommentMode = CommentMode.Append
  * Sets whether the current node is a hotspot or not. True indicates that something interesting happened (e.g.
  * node contains a game-deciding move).
  */
-fun SgfEditor.markHotspot(value: Boolean): SgfEditor {
+fun SgfEditor.setHotspot(value: Boolean): SgfEditor {
     val property = SgfProperty.NodeAnnotation.HO(SgfDouble.Normal)
 
     return when (value) {
