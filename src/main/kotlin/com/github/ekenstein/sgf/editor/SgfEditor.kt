@@ -2,7 +2,6 @@ package com.github.ekenstein.sgf.editor
 
 import com.github.ekenstein.sgf.GameInfo
 import com.github.ekenstein.sgf.GameInfoBuilder
-import com.github.ekenstein.sgf.Move
 import com.github.ekenstein.sgf.SgfColor
 import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfNode
@@ -59,12 +58,27 @@ private object GameTreeUnzip : Unzip<SgfGameTree> {
  * You can quick-move through the tree with:
  * - [SgfEditor.goToRootNode]
  * - [SgfEditor.goToLastNode]
+ * - [SgfEditor.tryRepeat]
+ * - [SgfEditor.tryRepeatWhile]
+ * - [SgfEditor.tryRepeatWhileNot]
  *
  * You can alter the tree by using:
  * - [SgfEditor.placeStone]
  * - [SgfEditor.pass],
  * - [SgfEditor.addStones]
  * - [SgfEditor.setNextToPlay]
+ * - [SgfEditor.addComment]
+ * - [SgfEditor.updateCurrentNode]
+ * - [SgfEditor.updateGameInfo]
+ *
+ * You can query the tree by using:
+ * - [SgfEditor.isRootNode]
+ * - [SgfEditor.nextToPlay]
+ * - [SgfEditor.getComment]
+ * - [SgfEditor.getGameInfo]
+ *
+ * You can save your changes by using:
+ * - [SgfEditor.commit]
  */
 data class SgfEditor(
     val currentSequence: Zipper<SgfNode>,
@@ -79,11 +93,6 @@ data class SgfEditor(
 
     val currentNode: SgfNode = currentSequence.focus
 }
-
-/**
- * Returns the game information of the tree. If game information is missing, the default values will be used.
- */
-fun SgfEditor.getGameInfo(): GameInfo = goToRootNode().currentNode.getGameInfo()
 
 /**
  * Will update the game info of the tree regardless of the position the editor is currently at.
@@ -124,42 +133,6 @@ fun SgfEditor.updateGameInfo(block: GameInfoBuilder.() -> Unit): SgfEditor {
     return backtracking.reversed().fold(newRoot) { r, b -> b(r) }
 }
 
-internal fun SgfEditor.insertBranch(node: SgfNode): SgfEditor {
-    val mainVariation = SgfGameTree(nelOf(node))
-    val restOfSequence = currentSequence.right.toNel()?.let {
-        SgfGameTree(
-            sequence = it,
-            trees = currentTree.focus.trees
-        )
-    }
-    val newTree = currentTree.update {
-        it.copy(
-            sequence = currentSequence.commitAtCurrentPosition(),
-            trees = if (restOfSequence == null) {
-                it.trees
-            } else {
-                emptyList()
-            }
-        )
-    }
-
-    return copy(
-        currentSequence = mainVariation.sequence.toZipper(),
-        currentTree = newTree.insertDownLeft(linkedListOfNotNull(mainVariation, restOfSequence))
-    )
-}
-
-internal fun SgfEditor.insertNodeToTheRight(node: SgfNode): SgfEditor {
-    val sequence = currentSequence.insertRight(node).goRightUnsafe()
-
-    return copy(
-        currentSequence = sequence,
-        currentTree = currentTree.update {
-            it.copy(sequence = sequence.commit())
-        }
-    )
-}
-
 /**
  * Executes the [block] and updates the current node to the resulting node.
  */
@@ -177,6 +150,19 @@ fun SgfEditor.updateCurrentNode(block: (SgfNode) -> SgfNode): SgfEditor {
  * Saves the state of the editor to a [SgfGameTree]
  */
 fun SgfEditor.commit() = currentTree.commit()
+
+/**
+ * Extracts the current board position.
+ */
+fun SgfEditor.extractBoard(): Board {
+    val sequence = getFullSequence()
+    val boardSize = when (val size = goToRootNode().currentSequence.focus.property<SgfProperty.Root.SZ>()) {
+        null -> 19 to 19
+        else -> size.width to size.height
+    }
+
+    return sequence.fold(Board.empty(boardSize), ::applyNodePropertiesToBoard)
+}
 
 private fun SgfEditor.getFullSequence(): NonEmptyList<SgfNode> {
     tailrec fun TreeZipper<SgfGameTree>.nodes(result: NonEmptyList<SgfNode>): NonEmptyList<SgfNode> =
@@ -214,15 +200,38 @@ private fun applyNodePropertiesToBoard(
     newBoard ?: b
 }
 
-/**
- * Extracts the current board position.
- */
-fun SgfEditor.extractBoard(): Board {
-    val sequence = getFullSequence()
-    val boardSize = when (val size = goToRootNode().currentSequence.focus.property<SgfProperty.Root.SZ>()) {
-        null -> 19 to 19
-        else -> size.width to size.height
+internal fun SgfEditor.insertBranch(node: SgfNode): SgfEditor {
+    val mainVariation = SgfGameTree(nelOf(node))
+    val restOfSequence = currentSequence.right.toNel()?.let {
+        SgfGameTree(
+            sequence = it,
+            trees = currentTree.focus.trees
+        )
+    }
+    val newTree = currentTree.update {
+        it.copy(
+            sequence = currentSequence.commitAtCurrentPosition(),
+            trees = if (restOfSequence == null) {
+                it.trees
+            } else {
+                emptyList()
+            }
+        )
     }
 
-    return sequence.fold(Board.empty(boardSize), ::applyNodePropertiesToBoard)
+    return copy(
+        currentSequence = mainVariation.sequence.toZipper(),
+        currentTree = newTree.insertDownLeft(linkedListOfNotNull(mainVariation, restOfSequence))
+    )
+}
+
+internal fun SgfEditor.insertNodeToTheRight(node: SgfNode): SgfEditor {
+    val sequence = currentSequence.insertRight(node).goRightUnsafe()
+
+    return copy(
+        currentSequence = sequence,
+        currentTree = currentTree.update {
+            it.copy(sequence = sequence.commit())
+        }
+    )
 }

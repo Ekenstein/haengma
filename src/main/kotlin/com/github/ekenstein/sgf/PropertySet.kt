@@ -44,6 +44,14 @@ class PropertySet internal constructor(private val properties: Map<String, SgfPr
     operator fun minus(property: SgfProperty) = PropertySet(
         properties = properties - property.identifier
     )
+
+    operator fun minus(properties: Set<SgfProperty>): PropertySet {
+        val propertiesToRemove = properties.map { it.identifier }.toSet()
+
+        return PropertySet(
+            properties = this.properties - propertiesToRemove
+        )
+    }
 }
 
 /**

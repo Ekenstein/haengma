@@ -1,5 +1,8 @@
 package com.github.ekenstein.sgf.utils
 
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
+
 /**
  * Represents either a successful movement or a failed movement.
  */
@@ -18,6 +21,15 @@ sealed class MoveResult<out T> {
      * Represents a successful movement. Contains the new [position] and the [origin] prior to the movement.
      */
     data class Success<T>(val position: T, override val origin: T) : MoveResult<T>()
+}
+
+@OptIn(ExperimentalContracts::class)
+fun <T> MoveResult<T>.isSuccess(): Boolean {
+    contract {
+        returns(true) implies (this@isSuccess is MoveResult.Success)
+        returns(false) implies (this@isSuccess is MoveResult.Failure)
+    }
+    return this is MoveResult.Success
 }
 
 /**
