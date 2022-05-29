@@ -1,5 +1,6 @@
 package com.github.ekenstein.sgf.editor
 
+import com.github.ekenstein.sgf.SgfDouble
 import com.github.ekenstein.sgf.SgfProperty
 
 /**
@@ -45,7 +46,18 @@ fun SgfEditor.addComment(comment: String, mode: CommentMode = CommentMode.Append
 }
 
 /**
- * Returns the comments on the current node or an empty string if there are no comments on the current node.
+ * Sets whether the current node is a hotspot or not. True indicates that something interesting happened (e.g.
+ * node contains a game-deciding move).
  */
-fun SgfEditor.getComment(): String = currentNode.property<SgfProperty.NodeAnnotation.C>()?.comment
-    ?: ""
+fun SgfEditor.setHotspot(value: Boolean): SgfEditor {
+    val property = SgfProperty.NodeAnnotation.HO(SgfDouble.Normal)
+
+    return when (value) {
+        true -> updateCurrentNode {
+            it.copy(properties = it.properties + property)
+        }
+        false -> updateCurrentNode {
+            it.copy(properties = it.properties - property)
+        }
+    }
+}

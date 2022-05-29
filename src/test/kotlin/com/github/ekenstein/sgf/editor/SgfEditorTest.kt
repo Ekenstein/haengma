@@ -7,6 +7,7 @@ import com.github.ekenstein.sgf.GameInfo
 import com.github.ekenstein.sgf.Move
 import com.github.ekenstein.sgf.SgfCollection
 import com.github.ekenstein.sgf.SgfColor
+import com.github.ekenstein.sgf.SgfDouble
 import com.github.ekenstein.sgf.SgfException
 import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfNode
@@ -16,10 +17,14 @@ import com.github.ekenstein.sgf.parser.from
 import com.github.ekenstein.sgf.propertySetOf
 import com.github.ekenstein.sgf.serialization.encodeToString
 import com.github.ekenstein.sgf.toSgfProperties
+import com.github.ekenstein.sgf.utils.MoveResult
+import com.github.ekenstein.sgf.utils.isSuccess
 import com.github.ekenstein.sgf.utils.nelOf
 import com.github.ekenstein.sgf.utils.nonEmptySetOf
+import com.github.ekenstein.sgf.utils.orStay
 import com.github.ekenstein.sgf.utils.toNonEmptySetUnsafe
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -1498,5 +1503,96 @@ class SgfEditorTest : RandomTest {
 
         val expected = "Hello\r\nYo!"
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `setting the position as a hotspot to false will remove the previous hotspot property`() {
+        val actual = SgfEditor()
+            .setHotspot(true)
+            .setHotspot(false)
+            .commit()
+
+        val expected = SgfGameTree(SgfNode(GameInfo.default.toSgfProperties()))
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `setting the position as a hotspot to false is a no-op if the node never was marked as a hotspot`() {
+        val actual = SgfEditor()
+            .setHotspot(false)
+            .commit()
+
+        val expected = SgfGameTree(SgfNode(GameInfo.default.toSgfProperties()))
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `marking the position as a hotspot annotates the node in the sgf tree`() {
+        assertAll(
+            {
+                val actual = SgfEditor().setHotspot(true).commit()
+                val expected = SgfGameTree(
+                    SgfNode(GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.HO(SgfDouble.Normal))
+                )
+                assertEquals(expected, actual)
+            },
+            {
+                val actual = SgfEditor().setHotspot(true).setHotspot(true).commit()
+                val expected = SgfGameTree(
+                    SgfNode(GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.HO(SgfDouble.Normal))
+                )
+                assertEquals(expected, actual)
+            }
+        )
+    }
+
+    @Test
+    fun `can retrieve whether the current node is a hotspot or not`() {
+        assertAll(
+            { assertFalse(SgfEditor().isHotspot()) },
+            { assertTrue(SgfEditor().setHotspot(true).isHotspot()) },
+            { assertFalse(SgfEditor().setHotspot(false).isHotspot()) },
+            { assertFalse(SgfEditor().setHotspot(true).pass(SgfColor.Black).isHotspot()) }
+        )
+    }
+
+    @Test
+    fun `navigating to the next hotspot will return an editor positioned at the next hotspot`() {
+        assertAll(
+            {
+                val editor = SgfEditor()
+                val actual = editor.goToNextHotspot()
+                val expected = MoveResult.Failure(editor)
+                assertEquals(expected, actual)
+            },
+            {
+                val editor = SgfEditor().setHotspot(true)
+                assertFalse(editor.goToNextHotspot().isSuccess())
+            },
+            {
+                val editor = SgfEditor()
+                    .setHotspot(true)
+                    .placeStone(SgfColor.Black, 3, 3)
+                    .placeStone(SgfColor.White, 4, 4)
+                    .goToPreviousNodeOrStay()
+                    .placeStone(SgfColor.White, 5, 5)
+                    .setHotspot(true)
+                    .placeStone(SgfColor.Black, 6, 6)
+                    .goToRootNode()
+                    .goToNextHotspot()
+                    .orStay()
+
+                val expectedCurrentNode = SgfNode(
+                    SgfProperty.Move.W(5, 5),
+                    SgfProperty.NodeAnnotation.HO(SgfDouble.Normal)
+                )
+                assertEquals(expectedCurrentNode, editor.currentNode)
+                assertTrue(editor.isHotspot())
+
+                val continuation = editor.goToPreviousHotspot().orStay()
+                assertTrue(continuation.isHotspot())
+                assertTrue(continuation.isRootNode())
+            }
+        )
     }
 }

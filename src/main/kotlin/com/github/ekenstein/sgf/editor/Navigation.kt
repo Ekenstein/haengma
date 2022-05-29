@@ -1,6 +1,7 @@
 package com.github.ekenstein.sgf.editor
 
 import com.github.ekenstein.sgf.utils.MoveResult
+import com.github.ekenstein.sgf.utils.flatMap
 import com.github.ekenstein.sgf.utils.get
 import com.github.ekenstein.sgf.utils.goDownLeft
 import com.github.ekenstein.sgf.utils.goLeft
@@ -197,3 +198,43 @@ fun SgfEditor.tryRepeatWhileNot(
 }
 
 fun SgfEditor.stay(): MoveResult<SgfEditor> = MoveResult.Success(this, this)
+
+/**
+ * Goes to the next "hotspot" in the tree. See [SgfEditor.isHotspot] and [SgfEditor.setHotspot]
+ * for more information about what a hotspot is.
+ */
+fun SgfEditor.goToNextHotspot(): MoveResult<SgfEditor> {
+    fun isHotspot(editor: SgfEditor) = editor.isHotspot()
+
+    return if (isHotspot()) {
+        goToNextNode().flatMap { next ->
+            next.tryRepeatWhileNot(::isHotspot) {
+                it.goToNextNode()
+            }
+        }
+    } else {
+        tryRepeatWhileNot(::isHotspot) {
+            it.goToNextNode()
+        }
+    }
+}
+
+/**
+ * Goes to the previous "hotspot" in the tree. See [SgfEditor.isHotspot] and [SgfEditor.setHotspot]
+ * for more information about what a hotspot is.
+ */
+fun SgfEditor.goToPreviousHotspot(): MoveResult<SgfEditor> {
+    fun isHotspot(editor: SgfEditor) = editor.isHotspot()
+
+    return if (isHotspot()) {
+        goToPreviousNode().flatMap { next ->
+            next.tryRepeatWhileNot(::isHotspot) {
+                it.goToPreviousNode()
+            }
+        }
+    } else {
+        tryRepeatWhileNot(::isHotspot) {
+            it.goToPreviousNode()
+        }
+    }
+}

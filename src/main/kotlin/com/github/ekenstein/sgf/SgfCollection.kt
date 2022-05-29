@@ -118,18 +118,59 @@ sealed class SgfProperty {
     }
 
     sealed class NodeAnnotation : SgfProperty() {
+        /**
+         * Provides a comment text for the given node. The purpose of
+         * providing both a node name and a comment is to have a short
+         * identifier like "doesn't work" or "Dia. 15" that can be
+         * displayed directly with the properties of the node, even if
+         * the comment is turned off or shown in a separate window.
+         */
         data class C(val comment: String) : NodeAnnotation() {
             override val identifier: String = "C"
         }
+
+        /**
+         * The position is even. SGF viewers should display a
+         * message. This property may indicate main variations in
+         * opening libraries (joseki) too. Thus [SgfDouble.Emphasized] indicates an
+         * even result for both players and that this is a main
+         * variation of this joseki/opening.
+         * This property must not be mixed with UC, GB or GW
+         * within a node.
+         */
         data class DM(val value: SgfDouble) : NodeAnnotation() {
             override val identifier: String = "DM"
         }
+
+        /**
+         * Something good for black. SGF viewers should display a
+         * message. The property is not related to any specific place
+         * on the board, but marks the whole node instead.
+         * GB must not be mixed with GW, DM or UC within a node.
+         */
         data class GB(val value: SgfDouble) : NodeAnnotation() {
             override val identifier: String = "GB"
         }
+
+        /**
+         * Something good for white. SGF viewers should display a
+         * message. The property is not related to any specific place
+         * on the board, but marks the whole node instead.
+         * GW must not be mixed with GB, DM or UC within a node.
+         */
         data class GW(val value: SgfDouble) : NodeAnnotation() {
             override val identifier: String = "GW"
         }
+
+        /**
+         * Node is a 'hotspot', i.e. something interesting (e.g.
+         * node contains a game-deciding move).
+         * SGF viewers should display a message.
+         * The property is not related to any specific place
+         * on the board, but marks the whole node instead.
+         * Sophisticated applications could implement the navigation
+         * command next/previous hotspot.
+         */
         data class HO(val value: SgfDouble) : NodeAnnotation() {
             override val identifier: String = "HO"
         }
