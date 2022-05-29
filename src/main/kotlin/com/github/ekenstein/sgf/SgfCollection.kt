@@ -208,22 +208,45 @@ sealed class SgfProperty {
     }
 
     sealed class MoveAnnotation : SgfProperty() {
+        /**
+         * The played move is bad.
+         * Viewers should display a message.
+         * Must not be mixed with TE, DO and IT
+         */
         data class BM(val value: SgfDouble) : MoveAnnotation() {
             override val identifier: String = "BM"
         }
+
+        /**
+         * The played move is doubtful.
+         * Viewers should display a message.
+         * Must not be mixed with TE, BM and IT
+         */
         object DO : MoveAnnotation() {
             override val identifier: String = "DO"
         }
+
+        /**
+         * The played move is interesting.
+         * Viewers should display a message.
+         * Must not be mixed with TE, DO and BM
+         */
         object IT : MoveAnnotation() {
             override val identifier: String = "IT"
         }
+
+        /**
+         * The played move is a tesuji (good move).
+         * Viewers should display a message.
+         * Must not be mixed with BM, DO and IT
+         */
         data class TE(val value: SgfDouble) : MoveAnnotation() {
             override val identifier: String = "TE"
         }
     }
 
     sealed class Markup : SgfProperty() {
-        data class AR(val points: NonEmptyList<Pair<SgfPoint, SgfPoint>>) : Markup() {
+        data class AR(val points: NonEmptySet<Pair<SgfPoint, SgfPoint>>) : Markup() {
             override val identifier: String = "AR"
         }
         data class CR(val points: NonEmptySet<SgfPoint>) : Markup() {

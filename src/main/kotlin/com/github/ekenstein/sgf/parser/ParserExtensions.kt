@@ -207,7 +207,7 @@ private fun SgfParser.MarkupContext.extract(): SgfProperty.Markup = when (this) 
             ?: throw SgfException.ParseError("CR must not contain an empty set of points", toMarker())
     )
     is SgfParser.ArrowContext -> SgfProperty.Markup.AR(
-        VALUE().map { it.asComposed(pointParser, pointParser) }.toNel()
+        VALUE().map { it.asComposed(pointParser, pointParser) }.toNonEmptySet()
             ?: throw SgfException.ParseError("AR must not contain an empty list of composed points", toMarker())
     )
     is SgfParser.LabelContext -> SgfProperty.Markup.LB(
