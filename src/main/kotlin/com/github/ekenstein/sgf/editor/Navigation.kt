@@ -200,8 +200,7 @@ fun SgfEditor.tryRepeatWhileNot(
 fun SgfEditor.stay(): MoveResult<SgfEditor> = MoveResult.Success(this, this)
 
 /**
- * Goes to the next "hotspot" in the tree. See [SgfEditor.isHotspot] and [SgfEditor.setHotspot]
- * for more information about what a hotspot is.
+ * Goes to the next "hotspot" in the tree. Hotspots can be added by using [SgfEditor.annotateNode]
  */
 fun SgfEditor.goToNextHotspot(): MoveResult<SgfEditor> {
     fun isHotspot(editor: SgfEditor) = editor.isHotspot()
@@ -220,8 +219,8 @@ fun SgfEditor.goToNextHotspot(): MoveResult<SgfEditor> {
 }
 
 /**
- * Goes to the previous "hotspot" in the tree. See [SgfEditor.isHotspot] and [SgfEditor.setHotspot]
- * for more information about what a hotspot is.
+ * Goes to the previous "hotspot" in the tree. Hotspots can be added by using [SgfEditor.annotateNode]
+ * @see [NodeAnnotationBuilder.isHotspot]
  */
 fun SgfEditor.goToPreviousHotspot(): MoveResult<SgfEditor> {
     fun isHotspot(editor: SgfEditor) = editor.isHotspot()
