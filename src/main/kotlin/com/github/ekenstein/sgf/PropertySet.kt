@@ -52,6 +52,11 @@ class PropertySet internal constructor(private val properties: Map<String, SgfPr
             properties = this.properties - propertiesToRemove
         )
     }
+
+    /**
+     * Removes all the properties that has the type [T] from the set.
+     */
+    inline fun <reified T : SgfProperty> removePropertiesOfType() = this - filterIsInstance<T>().toSet()
 }
 
 /**

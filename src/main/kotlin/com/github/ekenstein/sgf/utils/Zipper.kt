@@ -1,5 +1,9 @@
 package com.github.ekenstein.sgf.utils
 
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+
 /**
  * Represents a zipper that makes it easy and fast to navigate and splice in items in a list.
  * [focus] represents the current item you're at, [left] are the items to the left of the [focus]
@@ -118,6 +122,12 @@ fun <T> Zipper<T>.commitAtCurrentPosition() = left.reverse(linkedListOf(focus)).
 /**
  *  Returns a [Zipper] where the focus is the updated focus. Left and right remains the same.
  */
-fun <T> Zipper<T>.update(f: (T) -> T) = copy(
-    focus = f(focus)
-)
+@OptIn(ExperimentalContracts::class)
+fun <T> Zipper<T>.update(f: (T) -> T): Zipper<T> {
+    contract {
+        callsInPlace(f, InvocationKind.EXACTLY_ONCE)
+    }
+    return copy(
+        focus = f(focus)
+    )
+}

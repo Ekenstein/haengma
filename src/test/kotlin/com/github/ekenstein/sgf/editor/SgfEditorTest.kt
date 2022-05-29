@@ -25,6 +25,7 @@ import com.github.ekenstein.sgf.utils.orStay
 import com.github.ekenstein.sgf.utils.toNonEmptySetUnsafe
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -1310,206 +1311,10 @@ class SgfEditorTest : RandomTest {
     }
 
     @Test
-    fun `commenting the current node with replace mode will replace the old comment`() {
-        assertAll(
-            {
-                val actual = SgfEditor()
-                    .addComment("Hello", CommentMode.Replace)
-                    .commit()
-
-                val expected = SgfGameTree(
-                    SgfNode(GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.C("Hello"))
-                )
-
-                assertEquals(expected, actual)
-            },
-            {
-                val actual = SgfEditor()
-                    .addComment("Hello")
-                    .addComment("Yo")
-                    .commit()
-
-                val expected = SgfGameTree(
-                    SgfNode(GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.C("Yo"))
-                )
-
-                assertEquals(expected, actual)
-            },
-            {
-                val actual = SgfEditor()
-                    .addComment("Hello")
-                    .placeStone(SgfColor.Black, 3, 3)
-                    .addComment("Yo", CommentMode.Replace)
-                    .commit()
-
-                val expected = SgfGameTree(
-                    SgfNode(GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.C("Hello")),
-                    SgfNode(SgfProperty.Move.B(3, 3), SgfProperty.NodeAnnotation.C("Yo"))
-                )
-
-                assertEquals(expected, actual)
-            }
-        )
-    }
-
-    @Test
-    fun `commenting the current node by appending to the old comment will append the comment at the end`() {
-        assertAll(
-            {
-                val actual = SgfEditor()
-                    .addComment("Hello")
-                    .addComment("Yo")
-                    .commit()
-
-                val expectedComment = SgfProperty.NodeAnnotation.C("Hello\r\nYo")
-
-                val expected = SgfGameTree(
-                    SgfNode(
-                        GameInfo.default.toSgfProperties() + expectedComment
-                    )
-                )
-
-                assertEquals(expected, actual)
-            },
-            {
-                val actual = SgfEditor()
-                    .addComment("Hello")
-                    .addComment("Yo", CommentMode.Append(", "))
-                    .commit()
-
-                val expectedComment = SgfProperty.NodeAnnotation.C("Hello, Yo")
-
-                val expected = SgfGameTree(
-                    SgfNode(
-                        GameInfo.default.toSgfProperties() + expectedComment
-                    )
-                )
-
-                assertEquals(expected, actual)
-            },
-            {
-                val actual = SgfEditor()
-                    .addComment("Hello")
-                    .placeStone(SgfColor.Black, 3, 3)
-                    .addComment("Yo", CommentMode.Append("FooBar"))
-                    .commit()
-
-                val expected = SgfGameTree(
-                    SgfNode(
-                        GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.C("Hello")
-                    ),
-                    SgfNode(SgfProperty.Move.B(3, 3), SgfProperty.NodeAnnotation.C("Yo"))
-                )
-
-                assertEquals(expected, actual)
-            },
-            {
-                val actual = SgfEditor()
-                    .addComment("")
-                    .addComment("Hello", CommentMode.Append(", "))
-                    .commit()
-
-                val expected = SgfGameTree(
-                    SgfNode(
-                        GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.C("Hello")
-                    )
-                )
-
-                assertEquals(expected, actual)
-            }
-        )
-    }
-
-    @Test
-    fun `commenting the current node by prepending to the old comment will prepend the comment at the beginning`() {
-        assertAll(
-            {
-                val actual = SgfEditor()
-                    .addComment("Hello")
-                    .addComment("Yo", CommentMode.Prepend("\r\n"))
-                    .commit()
-
-                val expectedComment = SgfProperty.NodeAnnotation.C("Yo\r\nHello")
-
-                val expected = SgfGameTree(
-                    SgfNode(
-                        GameInfo.default.toSgfProperties() + expectedComment
-                    )
-                )
-
-                assertEquals(expected, actual)
-            },
-            {
-                val actual = SgfEditor()
-                    .addComment("Hello")
-                    .addComment("Yo", CommentMode.Prepend(", "))
-                    .commit()
-
-                val expectedComment = SgfProperty.NodeAnnotation.C("Yo, Hello")
-
-                val expected = SgfGameTree(
-                    SgfNode(
-                        GameInfo.default.toSgfProperties() + expectedComment
-                    )
-                )
-
-                assertEquals(expected, actual)
-            },
-            {
-                val actual = SgfEditor()
-                    .addComment("Hello")
-                    .placeStone(SgfColor.Black, 3, 3)
-                    .addComment("Yo", CommentMode.Prepend("FooBar"))
-                    .commit()
-
-                val expected = SgfGameTree(
-                    SgfNode(
-                        GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.C("Hello")
-                    ),
-                    SgfNode(SgfProperty.Move.B(3, 3), SgfProperty.NodeAnnotation.C("Yo"))
-                )
-
-                assertEquals(expected, actual)
-            },
-            {
-                val actual = SgfEditor()
-                    .addComment("")
-                    .addComment("Hello", CommentMode.Prepend(", "))
-                    .commit()
-
-                val expected = SgfGameTree(
-                    SgfNode(
-                        GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.C("Hello")
-                    )
-                )
-
-                assertEquals(expected, actual)
-            }
-        )
-    }
-
-    @Test
-    fun `if there are no comments on the current node an empty string will be returned`() {
-        val actual = SgfEditor().getComment()
-        assertEquals("", actual)
-    }
-
-    @Test
-    fun `if there are comments on the current node, the comments will be returned`() {
-        val actual = SgfEditor()
-            .addComment("Hello")
-            .addComment("Yo!")
-            .getComment()
-
-        val expected = "Hello\r\nYo!"
-        assertEquals(expected, actual)
-    }
-
-    @Test
     fun `setting the position as a hotspot to false will remove the previous hotspot property`() {
         val actual = SgfEditor()
-            .setHotspot(true)
-            .setHotspot(false)
+            .annotateNode { isHotspot = true }
+            .annotateNode { isHotspot = false }
             .commit()
 
         val expected = SgfGameTree(SgfNode(GameInfo.default.toSgfProperties()))
@@ -1519,7 +1324,10 @@ class SgfEditorTest : RandomTest {
     @Test
     fun `setting the position as a hotspot to false is a no-op if the node never was marked as a hotspot`() {
         val actual = SgfEditor()
-            .setHotspot(false)
+            .annotateNode {
+                isHotspot = false
+                assertEquals(false, isHotspot)
+            }
             .commit()
 
         val expected = SgfGameTree(SgfNode(GameInfo.default.toSgfProperties()))
@@ -1528,31 +1336,23 @@ class SgfEditorTest : RandomTest {
 
     @Test
     fun `marking the position as a hotspot annotates the node in the sgf tree`() {
-        assertAll(
-            {
-                val actual = SgfEditor().setHotspot(true).commit()
-                val expected = SgfGameTree(
-                    SgfNode(GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.HO(SgfDouble.Normal))
-                )
-                assertEquals(expected, actual)
-            },
-            {
-                val actual = SgfEditor().setHotspot(true).setHotspot(true).commit()
-                val expected = SgfGameTree(
-                    SgfNode(GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.HO(SgfDouble.Normal))
-                )
-                assertEquals(expected, actual)
-            }
+        val actual = SgfEditor().annotateNode {
+            isHotspot = true
+            assertEquals(true, isHotspot)
+        }.commit()
+        val expected = SgfGameTree(
+            SgfNode(GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.HO(SgfDouble.Normal))
         )
+        assertEquals(expected, actual)
     }
 
     @Test
     fun `can retrieve whether the current node is a hotspot or not`() {
         assertAll(
             { assertFalse(SgfEditor().isHotspot()) },
-            { assertTrue(SgfEditor().setHotspot(true).isHotspot()) },
-            { assertFalse(SgfEditor().setHotspot(false).isHotspot()) },
-            { assertFalse(SgfEditor().setHotspot(true).pass(SgfColor.Black).isHotspot()) }
+            { assertTrue(SgfEditor().annotateNode { isHotspot = true }.isHotspot()) },
+            { assertFalse(SgfEditor().annotateNode { isHotspot = false }.isHotspot()) },
+            { assertFalse(SgfEditor().annotateNode { isHotspot = true }.pass(SgfColor.Black).isHotspot()) }
         )
     }
 
@@ -1566,17 +1366,21 @@ class SgfEditorTest : RandomTest {
                 assertEquals(expected, actual)
             },
             {
-                val editor = SgfEditor().setHotspot(true)
+                val editor = SgfEditor().annotateNode { isHotspot = true }
                 assertFalse(editor.goToNextHotspot().isSuccess())
             },
             {
                 val editor = SgfEditor()
-                    .setHotspot(true)
+                    .annotateNode {
+                        isHotspot = true
+                    }
                     .placeStone(SgfColor.Black, 3, 3)
                     .placeStone(SgfColor.White, 4, 4)
                     .goToPreviousNodeOrStay()
                     .placeStone(SgfColor.White, 5, 5)
-                    .setHotspot(true)
+                    .annotateNode {
+                        isHotspot = true
+                    }
                     .placeStone(SgfColor.Black, 6, 6)
                     .goToRootNode()
                     .goToNextHotspot()
@@ -1592,6 +1396,214 @@ class SgfEditorTest : RandomTest {
                 val continuation = editor.goToPreviousHotspot().orStay()
                 assertTrue(continuation.isHotspot())
                 assertTrue(continuation.isRootNode())
+            }
+        )
+    }
+
+    @Test
+    fun `setting node name to null removes the name property from the current node`() {
+        assertAll(
+            {
+                val actual = SgfEditor().annotateNode { name = null }
+
+                assertNull(actual.getName())
+                val expected = SgfGameTree(SgfNode(GameInfo.default.toSgfProperties()))
+                assertEquals(expected, actual.commit())
+            },
+            {
+                val actual = SgfEditor().annotateNode { name = "Test" }.annotateNode { name = null }
+                assertNull(actual.getName())
+                val expected = SgfGameTree(SgfNode(GameInfo.default.toSgfProperties()))
+                assertEquals(expected, actual.commit())
+            }
+        )
+    }
+
+    @Test
+    fun `setting node name will add the name to the current node`() {
+        assertAll(
+            {
+                val actual = SgfEditor().annotateNode { name = "Test" }
+                assertEquals("Test", actual.getName())
+                val expected = SgfGameTree(
+                    SgfNode(GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.N("Test"))
+                )
+
+                assertEquals(expected, actual.commit())
+            },
+            {
+                val actual = SgfEditor()
+                    .annotateNode {
+                        name = "Root"
+                        assertEquals("Root", name)
+                    }
+                    .pass(SgfColor.Black)
+                    .annotateNode {
+                        name = "Pass"
+                        assertEquals("Pass", name)
+                    }
+
+                assertEquals("Pass", actual.getName())
+                val expected = SgfGameTree(
+                    SgfNode(GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.N("Root")),
+                    SgfNode(SgfProperty.Move.B.pass(), SgfProperty.NodeAnnotation.N("Pass"))
+                )
+
+                assertEquals(expected, actual.commit())
+            }
+        )
+    }
+
+    @Test
+    fun `default name for a node is null`() {
+        SgfEditor().annotateNode { assertNull(name) }
+    }
+
+    @Test
+    fun `default comment for a node is null`() {
+        SgfEditor().annotateNode { assertNull(comment) }
+    }
+
+    @Test
+    fun `setting comment to null will remove the comment from the current node`() {
+        assertAll(
+            {
+                val actual = SgfEditor().annotateNode { comment = null }
+                assertNull(actual.getComment())
+
+                val expected = SgfGameTree(
+                    SgfNode(GameInfo.default.toSgfProperties())
+                )
+
+                assertEquals(expected, actual.commit())
+            },
+            {
+                val actual = SgfEditor().annotateNode { comment = "Hello" }.annotateNode { comment = null }
+                assertNull(actual.getComment())
+
+                val expected = SgfGameTree(
+                    SgfNode(GameInfo.default.toSgfProperties())
+                )
+
+                assertEquals(expected, actual.commit())
+            }
+        )
+    }
+
+    @Test
+    fun `setting comment to a non-null value will add the comment to the current node`() {
+        assertAll(
+            {
+                val actual = SgfEditor().annotateNode {
+                    comment = "Hello"
+                }.annotateNode {
+                    comment += "\r\nYo!"
+                }
+
+                val expectedComment = "Hello\r\nYo!"
+                assertEquals(expectedComment, actual.getComment())
+                val expected = SgfGameTree(
+                    SgfNode(
+                        GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.C(expectedComment)
+                    )
+                )
+
+                assertEquals(expected, actual.commit())
+            },
+            {
+                val actual = SgfEditor().annotateNode {
+                    comment = "Hello"
+                    assertEquals("Hello", comment)
+                }.annotateNode {
+                    comment = "Yo!\r\n$comment"
+                    assertEquals("Yo!\r\nHello", comment)
+                }
+
+                val expectedComment = "Yo!\r\nHello"
+                assertEquals(expectedComment, actual.getComment())
+                val expected = SgfGameTree(
+                    SgfNode(
+                        GameInfo.default.toSgfProperties() + SgfProperty.NodeAnnotation.C(expectedComment)
+                    )
+                )
+
+                assertEquals(expected, actual.commit())
+            }
+        )
+    }
+
+    @Test
+    fun `setting remark to null will remove all remark properties from the node`() {
+        val remarks = listOf(
+            Remark.Unclear,
+            Remark.MainVariation,
+            Remark.Even,
+            Remark.Good(SgfColor.Black),
+            Remark.Good(SgfColor.White)
+        )
+
+        assertAll(
+            remarks.map {
+                {
+                    val actual = SgfEditor()
+                        .annotateNode { remark = it }
+                        .annotateNode { remark = null }
+                        .commit()
+
+                    val expected = SgfGameTree(
+                        nelOf(
+                            SgfNode(GameInfo.default.toSgfProperties())
+                        )
+                    )
+
+                    assertEquals(expected, actual)
+                }
+            }
+        )
+    }
+
+    @Test
+    fun `override remark with another remark will remove the old property`() {
+        val remarks = listOf(
+            Remark.Unclear,
+            Remark.MainVariation,
+            Remark.Even,
+            Remark.Good(SgfColor.Black),
+            Remark.Good(SgfColor.White)
+        )
+
+        val remarkByRemarks = remarks.associateWith { remarks }
+
+        assertAll(
+            remarkByRemarks.map { (remark, remarks) ->
+                {
+                    val editor = remarks.fold(SgfEditor()) { editor, r ->
+                        editor.annotateNode {
+                            this.remark = r
+                            assertEquals(r, this.remark)
+                        }
+                    }
+
+                    val actual = editor.annotateNode { this.remark = remark }.commit()
+
+                    val expectedProperty = when (remark) {
+                        Remark.Even -> SgfProperty.NodeAnnotation.DM(SgfDouble.Normal)
+                        is Remark.Good -> when (remark.color) {
+                            SgfColor.Black -> SgfProperty.NodeAnnotation.GB(SgfDouble.Normal)
+                            SgfColor.White -> SgfProperty.NodeAnnotation.GW(SgfDouble.Normal)
+                        }
+                        Remark.MainVariation -> SgfProperty.NodeAnnotation.DM(SgfDouble.Emphasized)
+                        Remark.Unclear -> SgfProperty.NodeAnnotation.UC(SgfDouble.Normal)
+                    }
+
+                    val expected = SgfGameTree(
+                        SgfNode(
+                            GameInfo.default.toSgfProperties() + expectedProperty
+                        )
+                    )
+
+                    assertEquals(expected, actual)
+                }
             }
         )
     }

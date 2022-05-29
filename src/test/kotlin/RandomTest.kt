@@ -9,13 +9,17 @@ import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.SgfProperty
+import com.github.ekenstein.sgf.editor.Remark
 import com.github.ekenstein.sgf.editor.SgfEditor
+import com.github.ekenstein.sgf.editor.annotateNode
 import com.github.ekenstein.sgf.editor.getGameInfo
 import com.github.ekenstein.sgf.editor.goToLastNode
 import com.github.ekenstein.sgf.editor.goToLeftMostChildTree
+import com.github.ekenstein.sgf.editor.goToNextHotspot
 import com.github.ekenstein.sgf.editor.goToNextNode
 import com.github.ekenstein.sgf.editor.goToNextTree
 import com.github.ekenstein.sgf.editor.goToParentTree
+import com.github.ekenstein.sgf.editor.goToPreviousHotspot
 import com.github.ekenstein.sgf.editor.goToPreviousNode
 import com.github.ekenstein.sgf.editor.goToPreviousTree
 import com.github.ekenstein.sgf.editor.goToRootNode
@@ -109,6 +113,17 @@ interface RandomTest {
                 GameDate.of(2019),
                 GameDate.of(2019, 3),
                 GameDate.of(2019, 2, 28)
+            )
+        )
+
+    val Random.remark
+        get() = item(
+            listOf(
+                Remark.Even,
+                Remark.MainVariation,
+                Remark.Unclear,
+                Remark.Good(SgfColor.Black),
+                Remark.Good(SgfColor.White)
             )
         )
 
@@ -343,14 +358,24 @@ interface RandomTest {
                 { it.goToNextNode() },
                 { it.goToLeftMostChildTree() },
                 { it.goToNextTree() },
-                { it.goToPreviousTree() }
+                { it.goToPreviousTree() },
+                { it.goToNextHotspot() },
+                { it.goToPreviousHotspot() }
             )
         )
 
     private fun Random.execution(size: Int): (SgfEditor) -> SgfEditor = item(
         listOf(
             { it.placeStone(it.nextToPlay(), point(size), true) },
-            { it.pass(it.nextToPlay()) }
+            { it.pass(it.nextToPlay()) },
+            {
+                it.annotateNode {
+                    comment = valueOrNull { string() }
+                    isHotspot = nextBoolean()
+                    remark = valueOrNull { remark }
+                    name = valueOrNull { string() }
+                }
+            }
         )
     )
 

@@ -1,5 +1,13 @@
 package com.github.ekenstein.sgf
 
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+
+@DslMarker
+annotation class GameInfoDslMarker
+
+@GameInfoDslMarker
 interface PlayerBuilder {
     /**
      * The name of the player or null if the player name is unknown.
@@ -21,6 +29,7 @@ interface PlayerBuilder {
     var team: String?
 }
 
+@GameInfoDslMarker
 interface GameRuleBuilder {
     /**
      * The size of the board. This is assumed that the board is a square.
@@ -49,6 +58,7 @@ interface GameRuleBuilder {
     var handicap: Int
 }
 
+@GameInfoDslMarker
 interface GameInfoBuilder {
     /**
      * The result of the game, if any. Default is null.
@@ -164,7 +174,11 @@ internal class DefaultGameInfoBuilder(var gameInfo: GameInfo) : GameInfoBuilder 
 
 fun gameInfo(block: GameInfoBuilder.() -> Unit): GameInfo = gameInfo(GameInfo.default, block)
 
+@OptIn(ExperimentalContracts::class)
 fun gameInfo(gameInfo: GameInfo, block: GameInfoBuilder.() -> Unit): GameInfo {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
     val builder = DefaultGameInfoBuilder(gameInfo)
     builder.block()
     return builder.gameInfo

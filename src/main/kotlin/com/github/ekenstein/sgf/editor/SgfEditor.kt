@@ -33,6 +33,9 @@ import com.github.ekenstein.sgf.utils.toLinkedList
 import com.github.ekenstein.sgf.utils.toNel
 import com.github.ekenstein.sgf.utils.toZipper
 import com.github.ekenstein.sgf.utils.update
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 private object GameTreeUnzip : Unzip<SgfGameTree> {
     override fun unzip(node: SgfGameTree): LinkedList<SgfGameTree> = node.trees.toLinkedList()
@@ -98,7 +101,11 @@ data class SgfEditor(
  * Will update the game info of the tree regardless of the position the editor is currently at.
  * Will always return an updated editor located at the same position as the given editor.
  */
+@OptIn(ExperimentalContracts::class)
 fun SgfEditor.updateGameInfo(block: GameInfoBuilder.() -> Unit): SgfEditor {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
     val backtracking = mutableListOf<(SgfEditor) -> SgfEditor>()
 
     fun SgfEditor.goToPreviousNodeWithBackTracking() = goToPreviousNodeInSequence()
@@ -136,7 +143,12 @@ fun SgfEditor.updateGameInfo(block: GameInfoBuilder.() -> Unit): SgfEditor {
 /**
  * Executes the [block] and updates the current node to the resulting node.
  */
+@OptIn(ExperimentalContracts::class)
 fun SgfEditor.updateCurrentNode(block: (SgfNode) -> SgfNode): SgfEditor {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+
     val newSequence = currentSequence.update(block)
     return copy(
         currentSequence = newSequence,

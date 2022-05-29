@@ -18,10 +18,9 @@ fun SgfEditor.isRootNode() = currentTree.top.isEmpty() && currentSequence.left.i
 fun SgfEditor.getGameInfo(): GameInfo = goToRootNode().currentNode.getGameInfo()
 
 /**
- * Returns the comments on the current node or an empty string if there are no comments on the current node.
+ * Returns the comments on the current node or null if there are no comments on the current node.
  */
-fun SgfEditor.getComment(): String = currentNode.property<SgfProperty.NodeAnnotation.C>()?.comment
-    ?: ""
+fun SgfEditor.getComment(): String? = currentNode.property<SgfProperty.NodeAnnotation.C>()?.comment
 
 /**
  * Returns whose turn it is to play at the current position.
@@ -51,6 +50,11 @@ fun SgfEditor.nextToPlay(): SgfColor {
  * True if it is a "hotspot", otherwise false.
  */
 fun SgfEditor.isHotspot(): Boolean = currentNode.hasProperty<SgfProperty.NodeAnnotation.HO>()
+
+/**
+ * Returns the name of the node, if the node has a name, otherwise null.
+ */
+fun SgfEditor.getName(): String? = currentNode.property<SgfProperty.NodeAnnotation.N>()?.name
 
 private fun SgfEditor.startingColor(): SgfColor = if (getGameInfo().rules.handicap >= 2) {
     SgfColor.White

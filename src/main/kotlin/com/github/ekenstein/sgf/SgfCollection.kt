@@ -73,6 +73,10 @@ data class SgfNode(val properties: PropertySet) {
     fun hasMoveProperties() = hasProperty<SgfProperty.Move>()
 }
 
+/**
+ * Represents a property on a [SgfNode].
+ * @see <a href="https://www.red-bean.com/sgf/properties.html">FF[4] properties</a>
+ */
 sealed class SgfProperty {
     internal abstract val identifier: String
 
@@ -174,12 +178,30 @@ sealed class SgfProperty {
         data class HO(val value: SgfDouble) : NodeAnnotation() {
             override val identifier: String = "HO"
         }
+
+        /**
+         * Provides a name for the node. For more info have a look at
+         * the [C]-property.
+         */
         data class N(val name: String) : NodeAnnotation() {
             override val identifier: String = "N"
         }
+
+        /**
+         * The position is unclear. SGF viewers should display a
+         * message. This property must not be mixed with DM, GB or GW
+         * within a node.
+         */
         data class UC(val value: SgfDouble) : NodeAnnotation() {
             override val identifier: String = "UC"
         }
+
+        /**
+         * Define a value for the node.  Positive values are good for
+         * black, negative values are good for white.
+         * The interpretation of particular values is game-specific.
+         * In Go, this is the estimated score.
+         */
         data class V(val value: Double) : NodeAnnotation() {
             override val identifier: String = "V"
         }
