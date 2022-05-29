@@ -23,7 +23,6 @@ import com.github.ekenstein.sgf.parser.valueparsers.simpleTextParser
 import com.github.ekenstein.sgf.parser.valueparsers.sizeParser
 import com.github.ekenstein.sgf.parser.valueparsers.textParser
 import com.github.ekenstein.sgf.toPropertySet
-import com.github.ekenstein.sgf.utils.toNel
 import com.github.ekenstein.sgf.utils.toNelUnsafe
 import com.github.ekenstein.sgf.utils.toNonEmptySet
 import org.antlr.v4.runtime.BaseErrorListener

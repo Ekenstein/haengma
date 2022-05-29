@@ -179,7 +179,7 @@ interface RandomTest {
                 {
                     val points = list(1..10) {
                         pair({ point() }, { point() })
-                    }.toNelUnsafe()
+                    }.toNonEmptySetUnsafe()
 
                     SgfProperty.Markup.AR(points)
                 },
