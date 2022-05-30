@@ -961,10 +961,34 @@ class SgfParserTest : RandomTest {
         assertEquals(expected, actual)
     }
 
+    @Test
+    fun `can parse an empty node`() {
+        val sgf = "(;)"
+        val actual = assertDoesNotThrow { SgfCollection.from(sgf).trees.head }
+        val expected = SgfGameTree(SgfNode())
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `can not parse an empty tree`() {
+        val sgf = "()"
+        assertThrowsParseException(marker(1, 1)) {
+            SgfCollection.from(sgf)
+        }
+    }
+
+    @Test
+    fun `can not parse an empty collection`() {
+        assertThrowsParseException(marker(0, 0)) {
+            SgfCollection.from("")
+        }
+    }
+
     private fun assertThrowsParseException(marker: Marker, block: () -> Unit) = try {
         block()
         assertTrue(false, "Expected an SgfException.ParseError")
     } catch (ex: SgfException.ParseError) {
+        println(ex)
         assertEquals(marker, ex.marker)
     }
 
