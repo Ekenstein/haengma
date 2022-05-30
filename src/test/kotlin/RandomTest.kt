@@ -195,7 +195,7 @@ interface RandomTest {
                 {
                     val lines = list(1..10) {
                         pair({ point() }, { point() })
-                    }
+                    }.toNonEmptySetUnsafe()
 
                     SgfProperty.Markup.LN(lines)
                 },

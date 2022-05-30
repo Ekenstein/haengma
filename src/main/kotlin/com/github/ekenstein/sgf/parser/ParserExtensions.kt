@@ -213,7 +213,10 @@ private fun SgfParser.MarkupContext.extract(): SgfProperty.Markup = when (this) 
         VALUE().associate { it.asComposed(pointParser, simpleTextParser) }
 
     )
-    is SgfParser.LineContext -> SgfProperty.Markup.LN(VALUE().map { it.asComposed(pointParser, pointParser) })
+    is SgfParser.LineContext -> SgfProperty.Markup.LN(
+        VALUE().map { it.asComposed(pointParser, pointParser) }.toNonEmptySet()
+            ?: throw SgfException.ParseError("LN must not contain an empty set of composed points", toMarker())
+    )
     is SgfParser.MarkContext -> SgfProperty.Markup.MA(
         VALUE().flatMap { it.asCompressedPoint() }.toNonEmptySet()
             ?: throw SgfException.ParseError("MA must not contain an empty set of points", toMarker())

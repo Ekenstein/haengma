@@ -5,7 +5,7 @@ grammar Sgf;
 collection      : gameTree+;
 gameTree        : '(' sequence gameTree* ')';
 sequence        : node+;
-node            : ';' prop+;
+node            : ';' prop*;
 prop            : move
                 | setup
                 | nodeAnnotation

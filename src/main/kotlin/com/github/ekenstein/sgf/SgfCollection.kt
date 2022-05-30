@@ -255,7 +255,7 @@ sealed class SgfProperty {
         data class LB(val label: Map<SgfPoint, String>) : Markup() {
             override val identifier: String = "LB"
         }
-        data class LN(val line: List<Pair<SgfPoint, SgfPoint>>) : Markup() {
+        data class LN(val line: NonEmptySet<Pair<SgfPoint, SgfPoint>>) : Markup() {
             override val identifier: String = "LN"
         }
         data class MA(val points: NonEmptySet<SgfPoint>) : Markup() {
