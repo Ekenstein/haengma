@@ -53,7 +53,7 @@ tasks {
         dependsOn(dependencyUpdates)
     }
 
-    withType<KotlinCompile>() {
+    withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "1.8"
     }
 
