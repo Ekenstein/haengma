@@ -32,6 +32,24 @@ class SgfSerializationTest {
         assertEquals(expected, actual)
     }
 
+    @ParameterizedTest
+    @MethodSource("locales")
+    fun `regardless of locale, larger numbers will never have a group separator`(locale: Locale) {
+        val overNineThousand = 5000000
+        val sOverNineThousand = "5000000"
+        val tree = SgfGameTree(
+            SgfNode(SgfProperty.Move.MN(overNineThousand)),
+            SgfNode(SgfProperty.GameInfo.KM(overNineThousand.toDouble()))
+        )
+
+        val actual = withLocale(locale) {
+            tree.encodeToString()
+        }
+
+        val expected = "(;MN[$sOverNineThousand];KM[$sOverNineThousand])"
+        assertEquals(expected, actual)
+    }
+
     @Test
     fun `serializing game dates will add partial dates whenever possible`() {
         assertAll(
