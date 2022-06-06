@@ -6,6 +6,7 @@ import com.github.ekenstein.sgf.SgfColor
 import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfProperty
 import com.github.ekenstein.sgf.getGameInfo
+import com.github.ekenstein.sgf.utils.MoveResult
 import com.github.ekenstein.sgf.utils.orNull
 
 /**
@@ -73,3 +74,23 @@ fun SgfEditor.getCurrentMove(): Pair<SgfColor, Move>? = currentNode.properties.m
         else -> null
     }
 }.singleOrNull()
+
+/**
+ * Returns the current move number.
+ */
+fun SgfEditor.getMoveNumber(): Int {
+    tailrec fun SgfEditor.count(moveNumber: Int): Int {
+        val nextMoveNumber = if (getCurrentMove() != null) {
+            moveNumber + 1
+        } else {
+            moveNumber
+        }
+
+        return when (val prev = goToPreviousNode()) {
+            is MoveResult.Failure -> nextMoveNumber
+            is MoveResult.Success -> prev.position.count(nextMoveNumber)
+        }
+    }
+
+    return count(0)
+}
