@@ -1,6 +1,7 @@
 package com.github.ekenstein.sgf.editor
 
 import com.github.ekenstein.sgf.GameInfo
+import com.github.ekenstein.sgf.Move
 import com.github.ekenstein.sgf.SgfColor
 import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfProperty
@@ -61,3 +62,14 @@ private fun SgfEditor.startingColor(): SgfColor = if (getGameInfo().rules.handic
 } else {
     SgfColor.Black
 }
+
+/**
+ * Returns the move of the current node, if there is a move on the current node, otherwise null will be returned.
+ */
+fun SgfEditor.getCurrentMove(): Pair<SgfColor, Move>? = currentNode.properties.mapNotNull {
+    when (it) {
+        is SgfProperty.Move.B -> SgfColor.Black to it.move
+        is SgfProperty.Move.W -> SgfColor.White to it.move
+        else -> null
+    }
+}.singleOrNull()
