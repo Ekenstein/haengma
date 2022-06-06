@@ -237,3 +237,29 @@ fun SgfEditor.goToPreviousHotspot(): MoveResult<SgfEditor> {
         }
     }
 }
+
+fun SgfEditor.goToNextMove(): MoveResult<SgfEditor> = if (hasMove(this)) {
+    goToNextNode().flatMap { next ->
+        next.tryRepeatWhileNot(::hasMove) {
+            it.goToNextNode()
+        }
+    }
+} else {
+    tryRepeatWhileNot(::hasMove) {
+        it.goToNextNode()
+    }
+}
+
+fun SgfEditor.goToPreviousMove(): MoveResult<SgfEditor> = if (hasMove(this)) {
+    goToPreviousNode().flatMap { prev ->
+        prev.tryRepeatWhileNot(::hasMove) {
+            it.goToPreviousNode()
+        }
+    }
+} else {
+    tryRepeatWhileNot(::hasMove) {
+        it.goToPreviousNode()
+    }
+}
+
+private fun hasMove(editor: SgfEditor) = editor.getCurrentMove() != null
