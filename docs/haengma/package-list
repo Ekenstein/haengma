@@ -7,12 +7,14 @@ $dokka.location:com.github.ekenstein.sgf.editor//annotateNode/com.github.ekenste
 $dokka.location:com.github.ekenstein.sgf.editor//commit/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/commit.html
 $dokka.location:com.github.ekenstein.sgf.editor//extractBoard/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/extract-board.html
 $dokka.location:com.github.ekenstein.sgf.editor//getComment/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/get-comment.html
+$dokka.location:com.github.ekenstein.sgf.editor//getCurrentMove/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/get-current-move.html
 $dokka.location:com.github.ekenstein.sgf.editor//getGameInfo/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/get-game-info.html
 $dokka.location:com.github.ekenstein.sgf.editor//getName/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/get-name.html
 $dokka.location:com.github.ekenstein.sgf.editor//goToLastNode/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/go-to-last-node.html
 $dokka.location:com.github.ekenstein.sgf.editor//goToLeftMostChildTree/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/go-to-left-most-child-tree.html
 $dokka.location:com.github.ekenstein.sgf.editor//goToLeftMostChildTreeOrStay/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/go-to-left-most-child-tree-or-stay.html
 $dokka.location:com.github.ekenstein.sgf.editor//goToNextHotspot/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/go-to-next-hotspot.html
+$dokka.location:com.github.ekenstein.sgf.editor//goToNextMove/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/go-to-next-move.html
 $dokka.location:com.github.ekenstein.sgf.editor//goToNextNode/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/go-to-next-node.html
 $dokka.location:com.github.ekenstein.sgf.editor//goToNextNodeOrStay/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/go-to-next-node-or-stay.html
 $dokka.location:com.github.ekenstein.sgf.editor//goToNextTree/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/go-to-next-tree.html
@@ -20,6 +22,7 @@ $dokka.location:com.github.ekenstein.sgf.editor//goToNextTreeOrStay/com.github.e
 $dokka.location:com.github.ekenstein.sgf.editor//goToParentTree/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/go-to-parent-tree.html
 $dokka.location:com.github.ekenstein.sgf.editor//goToParentTreeOrStay/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/go-to-parent-tree-or-stay.html
 $dokka.location:com.github.ekenstein.sgf.editor//goToPreviousHotspot/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/go-to-previous-hotspot.html
+$dokka.location:com.github.ekenstein.sgf.editor//goToPreviousMove/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/go-to-previous-move.html
 $dokka.location:com.github.ekenstein.sgf.editor//goToPreviousNode/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/go-to-previous-node.html
 $dokka.location:com.github.ekenstein.sgf.editor//goToPreviousNodeOrStay/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/go-to-previous-node-or-stay.html
 $dokka.location:com.github.ekenstein.sgf.editor//goToPreviousTree/com.github.ekenstein.sgf.editor.SgfEditor#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/go-to-previous-tree.html
@@ -61,8 +64,6 @@ $dokka.location:com.github.ekenstein.sgf.editor/NodeAnnotationBuilder/comment/#/
 $dokka.location:com.github.ekenstein.sgf.editor/NodeAnnotationBuilder/isHotspot/#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/-node-annotation-builder/is-hotspot.html
 $dokka.location:com.github.ekenstein.sgf.editor/NodeAnnotationBuilder/name/#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/-node-annotation-builder/name.html
 $dokka.location:com.github.ekenstein.sgf.editor/NodeAnnotationBuilder/remark/#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/-node-annotation-builder/remark.html
-$dokka.location:com.github.ekenstein.sgf.editor/NodeAnnotationDslMarker///PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/-node-annotation-dsl-marker/index.html
-$dokka.location:com.github.ekenstein.sgf.editor/NodeAnnotationDslMarker/NodeAnnotationDslMarker/#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/-node-annotation-dsl-marker/-node-annotation-dsl-marker.html
 $dokka.location:com.github.ekenstein.sgf.editor/Remark.Even///PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/-remark/-even/index.html
 $dokka.location:com.github.ekenstein.sgf.editor/Remark.Good///PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/-remark/-good/index.html
 $dokka.location:com.github.ekenstein.sgf.editor/Remark.Good/Good/#com.github.ekenstein.sgf.SgfColor/PointingToDeclaration/haengma/com.github.ekenstein.sgf.editor/-remark/-good/-good.html
@@ -476,7 +477,7 @@ $dokka.location:com.github.ekenstein.sgf/SgfProperty.GameInfo.WT/WT/#kotlin.Stri
 $dokka.location:com.github.ekenstein.sgf/SgfProperty.GameInfo.WT/team/#/PointingToDeclaration/haengma/com.github.ekenstein.sgf/-sgf-property/-game-info/-w-t/team.html
 $dokka.location:com.github.ekenstein.sgf/SgfProperty.GameInfo///PointingToDeclaration/haengma/com.github.ekenstein.sgf/-sgf-property/-game-info/index.html
 $dokka.location:com.github.ekenstein.sgf/SgfProperty.Markup.AR///PointingToDeclaration/haengma/com.github.ekenstein.sgf/-sgf-property/-markup/-a-r/index.html
-$dokka.location:com.github.ekenstein.sgf/SgfProperty.Markup.AR/AR/#com.github.ekenstein.sgf.utils.NonEmptyList[kotlin.Pair[com.github.ekenstein.sgf.SgfPoint,com.github.ekenstein.sgf.SgfPoint]]/PointingToDeclaration/haengma/com.github.ekenstein.sgf/-sgf-property/-markup/-a-r/-a-r.html
+$dokka.location:com.github.ekenstein.sgf/SgfProperty.Markup.AR/AR/#com.github.ekenstein.sgf.utils.NonEmptySet[kotlin.Pair[com.github.ekenstein.sgf.SgfPoint,com.github.ekenstein.sgf.SgfPoint]]/PointingToDeclaration/haengma/com.github.ekenstein.sgf/-sgf-property/-markup/-a-r/-a-r.html
 $dokka.location:com.github.ekenstein.sgf/SgfProperty.Markup.AR/points/#/PointingToDeclaration/haengma/com.github.ekenstein.sgf/-sgf-property/-markup/-a-r/points.html
 $dokka.location:com.github.ekenstein.sgf/SgfProperty.Markup.CR///PointingToDeclaration/haengma/com.github.ekenstein.sgf/-sgf-property/-markup/-c-r/index.html
 $dokka.location:com.github.ekenstein.sgf/SgfProperty.Markup.CR/CR/#com.github.ekenstein.sgf.utils.NonEmptySet[com.github.ekenstein.sgf.SgfPoint]/PointingToDeclaration/haengma/com.github.ekenstein.sgf/-sgf-property/-markup/-c-r/-c-r.html
@@ -488,7 +489,7 @@ $dokka.location:com.github.ekenstein.sgf/SgfProperty.Markup.LB///PointingToDecla
 $dokka.location:com.github.ekenstein.sgf/SgfProperty.Markup.LB/LB/#kotlin.collections.Map[com.github.ekenstein.sgf.SgfPoint,kotlin.String]/PointingToDeclaration/haengma/com.github.ekenstein.sgf/-sgf-property/-markup/-l-b/-l-b.html
 $dokka.location:com.github.ekenstein.sgf/SgfProperty.Markup.LB/label/#/PointingToDeclaration/haengma/com.github.ekenstein.sgf/-sgf-property/-markup/-l-b/label.html
 $dokka.location:com.github.ekenstein.sgf/SgfProperty.Markup.LN///PointingToDeclaration/haengma/com.github.ekenstein.sgf/-sgf-property/-markup/-l-n/index.html
-$dokka.location:com.github.ekenstein.sgf/SgfProperty.Markup.LN/LN/#kotlin.collections.List[kotlin.Pair[com.github.ekenstein.sgf.SgfPoint,com.github.ekenstein.sgf.SgfPoint]]/PointingToDeclaration/haengma/com.github.ekenstein.sgf/-sgf-property/-markup/-l-n/-l-n.html
+$dokka.location:com.github.ekenstein.sgf/SgfProperty.Markup.LN/LN/#com.github.ekenstein.sgf.utils.NonEmptySet[kotlin.Pair[com.github.ekenstein.sgf.SgfPoint,com.github.ekenstein.sgf.SgfPoint]]/PointingToDeclaration/haengma/com.github.ekenstein.sgf/-sgf-property/-markup/-l-n/-l-n.html
 $dokka.location:com.github.ekenstein.sgf/SgfProperty.Markup.LN/line/#/PointingToDeclaration/haengma/com.github.ekenstein.sgf/-sgf-property/-markup/-l-n/line.html
 $dokka.location:com.github.ekenstein.sgf/SgfProperty.Markup.MA///PointingToDeclaration/haengma/com.github.ekenstein.sgf/-sgf-property/-markup/-m-a/index.html
 $dokka.location:com.github.ekenstein.sgf/SgfProperty.Markup.MA/MA/#com.github.ekenstein.sgf.utils.NonEmptySet[com.github.ekenstein.sgf.SgfPoint]/PointingToDeclaration/haengma/com.github.ekenstein.sgf/-sgf-property/-markup/-m-a/-m-a.html

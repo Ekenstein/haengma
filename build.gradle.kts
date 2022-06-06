@@ -18,7 +18,7 @@ plugins {
 }
 
 group = "com.github.ekenstein"
-version = "2.2.0"
+version = "2.2.1"
 val kotlinJvmTarget = "1.8"
 
 repositories {
@@ -187,7 +187,7 @@ class UpgradeToUnstableFilter : com.github.benmanes.gradle.versions.updates.reso
 
 abstract class DependencyUpdateSentinel @Inject constructor(private val buildDir: File) : DefaultTask() {
     @ExperimentalPathApi
-    @org.gradle.api.tasks.TaskAction
+    @TaskAction
     fun check() {
         val updateIndicator = "The following dependencies have later milestone versions:"
         val report = Paths.get(buildDir.toString(), "dependencyUpdates", "report.txt")
