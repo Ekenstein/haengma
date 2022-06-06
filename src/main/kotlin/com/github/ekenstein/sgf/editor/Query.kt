@@ -63,6 +63,9 @@ private fun SgfEditor.startingColor(): SgfColor = if (getGameInfo().rules.handic
     SgfColor.Black
 }
 
+/**
+ * Returns the move of the current node, if there is a move on the current node, otherwise null will be returned.
+ */
 fun SgfEditor.getCurrentMove(): Pair<SgfColor, Move>? = currentNode.properties.mapNotNull {
     when (it) {
         is SgfProperty.Move.B -> SgfColor.Black to it.move

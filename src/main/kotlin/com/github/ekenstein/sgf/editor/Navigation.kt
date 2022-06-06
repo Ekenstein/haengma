@@ -238,6 +238,17 @@ fun SgfEditor.goToPreviousHotspot(): MoveResult<SgfEditor> {
     }
 }
 
+/**
+ * Goes to the next move in the tree. If the current node is on a move, it will skip
+ * the current node and go to the next node.
+ *
+ * If there are no more moves in the tree, a [MoveResult.Failure] will be returned, otherwise [MoveResult.Success].
+ *
+ * Note that this function will only traverse the tree by going to the left most child tree, e.g. when it comes
+ * to the end of the sequence of the current tree.
+ *
+ * The current move can be fetched through the function [SgfEditor.getCurrentMove].
+ */
 fun SgfEditor.goToNextMove(): MoveResult<SgfEditor> = if (hasMove(this)) {
     goToNextNode().flatMap { next ->
         next.tryRepeatWhileNot(::hasMove) {
@@ -250,6 +261,14 @@ fun SgfEditor.goToNextMove(): MoveResult<SgfEditor> = if (hasMove(this)) {
     }
 }
 
+/**
+ * Goes to the previous move in the tree. If the current node is on a move, it will skip the current node
+ * and go to the previous node.
+ *
+ * If there are no previous moves in the tree, a [MoveResult.Failure] will be returned, otherwise [MoveResult.Success].
+ *
+ * The current move can be fetched through the function [SgfEditor.getCurrentMove].
+ */
 fun SgfEditor.goToPreviousMove(): MoveResult<SgfEditor> = if (hasMove(this)) {
     goToPreviousNode().flatMap { prev ->
         prev.tryRepeatWhileNot(::hasMove) {
