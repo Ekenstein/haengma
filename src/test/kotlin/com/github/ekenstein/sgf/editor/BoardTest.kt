@@ -1,7 +1,9 @@
 package com.github.ekenstein.sgf.editor
 
+import com.github.ekenstein.sgf.SgfCollection
 import com.github.ekenstein.sgf.SgfColor
 import com.github.ekenstein.sgf.SgfPoint
+import com.github.ekenstein.sgf.parser.from
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -135,5 +137,86 @@ class BoardTest {
                 assertFalse(board.isOccupied(SgfPoint(4, 3)))
             }
         )
+    }
+
+    @Test
+    fun `if the board only contains black stones, the territory all belongs to black`() {
+        val board = Board.empty(19).placeStone(SgfColor.Black, SgfPoint(10, 10))
+        val expectedTerritory = board.emptyIntersections - SgfPoint(10, 10)
+        val expected = mapOf(SgfColor.Black to expectedTerritory)
+        val actual = board.getTerritories()
+        assertEquals(expected, actual)
+
+        val komi = 6.5
+        val expectedScore = expectedTerritory.count() - komi
+        assertEquals(expectedScore, board.count(komi))
+    }
+
+    @Test
+    fun `splitting the board with black and white stones maps out the corresponding territories`() {
+        val blackBorder = (1..19).associate { SgfPoint(10, it) to SgfColor.Black }
+        val whiteBorder = (1..19).associate { SgfPoint(9, it) to SgfColor.White }
+        val board = Board.empty(19).copy(stones = blackBorder + whiteBorder)
+
+        val expectedWhiteTerritory = board.emptyIntersections.filter { (x, _) -> x < 9 }.toSet()
+        val expectedBlackTerritory = board.emptyIntersections.filter { (x, _) -> x > 10 }.toSet()
+
+        val expected = mapOf(
+            SgfColor.White to expectedWhiteTerritory,
+            SgfColor.Black to expectedBlackTerritory
+        )
+
+        val actual = board.getTerritories()
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `dame doesn't count as territory`() {
+        val sgf = "(;SZ[5]AW[cd][dd][ed][ce]AB[ca][cb][db][eb])"
+
+        val tree = SgfCollection.from(sgf).trees.head
+        val board = SgfEditor(tree).extractBoard()
+
+        val expectedWhiteTerritory = setOf(
+            SgfPoint(4, 5),
+            SgfPoint(5, 5)
+        )
+
+        val expectedBlackTerritory = setOf(
+            SgfPoint(4, 1),
+            SgfPoint(5, 1)
+        )
+
+        val expected = mapOf(
+            SgfColor.White to expectedWhiteTerritory,
+            SgfColor.Black to expectedBlackTerritory
+        )
+
+        val actual = board.getTerritories()
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `removing a group from the board increases the capture count of the opponent`() {
+        val board = Board.empty(19)
+            .placeStone(SgfColor.Black, SgfPoint(3, 3))
+            .placeStone(SgfColor.Black, SgfPoint(3, 4))
+            .placeStone(SgfColor.White, SgfPoint(3, 5))
+
+        val boardWithoutBlack = board.removeGroup(SgfPoint(3, 3))
+        val boardWithoutWhite = board.removeGroup(SgfPoint(3, 5))
+
+        val expectedBoardWithoutBlack = board.copy(
+            whiteCaptures = 2,
+            stones = board.stones - setOf(SgfPoint(3, 3), SgfPoint(3, 4))
+        )
+
+        val expectedBoardWithoutWhite = board.copy(
+            blackCaptures = 1,
+            stones = board.stones - setOf(SgfPoint(3, 5))
+        )
+
+        assertEquals(expectedBoardWithoutBlack, boardWithoutBlack)
+        assertEquals(expectedBoardWithoutWhite, boardWithoutWhite)
     }
 }

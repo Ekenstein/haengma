@@ -27,6 +27,21 @@ data class Board(
      */
     val height = boardSize.second
 
+    private val allIntersections by lazy {
+        (0 until (width * height)).map {
+            val x = (it % width)
+            val y = (it / height)
+            SgfPoint(x + 1, y + 1)
+        }.toSet()
+    }
+
+    /**
+     * Returns all the empty intersections of the board as a set of points.
+     */
+    val emptyIntersections by lazy {
+        allIntersections.filter { it !in stones }.toSet()
+    }
+
     companion object {
         /**
          * Returns an empty board position where the width and height of the board is the given [boardSize]
@@ -68,6 +83,80 @@ fun Board.print(): String {
     }
 
     return sb.toString()
+}
+
+/**
+ * Removes the group of stones connected to the given [point]
+ * from the board and increases the captures for the opponent.
+ * If there is no stone at the given [point], this is a no-op.
+ */
+fun Board.removeGroup(point: SgfPoint): Board {
+    val color = stones[point]
+        ?: return this
+
+    val group = getGroupContainingStone(color, point)
+    val captureCount = group.size
+
+    return increaseCaptureCount(color.flip(), captureCount).copy(
+        stones = stones - group
+    )
+}
+
+/**
+ * Counts the territory and returns the difference between the territories.
+ * If the result is negative, white is leading by the returned delta, otherwise black is leading.
+ */
+fun Board.count(komi: Double): Double {
+    val territoryByColor = getTerritories()
+    val blackTerritory = territoryByColor[SgfColor.Black].orEmpty().count()
+    val whiteTerritory = territoryByColor[SgfColor.White].orEmpty().count()
+
+    return blackTerritory - (whiteTerritory + komi)
+}
+
+/**
+ * Returns the mapped out territories. Dame, e.g. a territory that is shared
+ * by both white and black counts as a no-man's territory and thus will not be returned.
+ */
+fun Board.getTerritories(): Map<SgfColor, Set<SgfPoint>> {
+    val emptyIntersections = emptyIntersections.toMutableSet()
+    val territories = mutableListOf<Set<SgfPoint>>()
+
+    while (emptyIntersections.isNotEmpty()) {
+        val point = emptyIntersections.first()
+        val territory = buildTerritoryFromPoint(point)
+        territories += territory
+        emptyIntersections -= territory
+    }
+
+    return territories
+        .associateBy { territory -> getOwnerOfTerritory(territory) }
+        .filterKeys { it != null }
+        .mapKeys { (color, _) -> color!! }
+}
+
+private fun Board.getOwnerOfTerritory(territory: Set<SgfPoint>): SgfColor? {
+    val colors = territory
+        .flatMap { point -> point.adjacentPoints(boardSize).map { stones[it] } }
+        .filterNotNull()
+        .toSet()
+
+    return colors.singleOrNull()
+}
+
+private fun Board.buildTerritoryFromPoint(point: SgfPoint): Set<SgfPoint> {
+    val territory = mutableSetOf<SgfPoint>()
+    fun buildTerritory(point: SgfPoint) {
+        territory.add(point)
+        point.adjacentPoints(boardSize).filter {
+            it !in territory && it in emptyIntersections
+        }.forEach {
+            buildTerritory(it)
+        }
+    }
+
+    buildTerritory(point)
+    return territory
 }
 
 /**
