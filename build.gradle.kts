@@ -4,11 +4,11 @@ import java.nio.file.Paths
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.inputStream
 
-val kotlinVersion by extra("1.6.21")
+val kotlinVersion by extra("1.7.0")
 val junitVersion by extra("5.8.2")
 
 plugins {
-    kotlin("jvm") version "1.6.21"
+    kotlin("jvm") version "1.7.0"
     id("org.jetbrains.dokka") version "1.6.21"
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
     id("com.github.ben-manes.versions") version "0.42.0"
