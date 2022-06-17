@@ -6,6 +6,7 @@ import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.parser.from
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
@@ -194,6 +195,82 @@ class BoardTest {
 
         val actual = board.getTerritories()
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `rotating a board left four times will give back the initial position`() {
+        val sgf = "(;SZ[5]AW[cd][dd][ed][ce]AB[ca][cb][db][eb])"
+
+        val tree = SgfCollection.from(sgf).trees.head
+        val board = SgfEditor(tree).extractBoard()
+        val actual = (1..4).fold(board) { b, _ ->
+            b.rotateLeft()
+        }
+
+        assertEquals(board, actual)
+    }
+
+    @Test
+    fun `rotating an empty board to the left returns the initial position`() {
+        val board = Board.empty(19)
+        val actual = board.rotateLeft()
+        assertEquals(board, actual)
+    }
+
+    @Test
+    fun `rotating tengen returns tengen`() {
+        val board = Board.empty(19).placeStone(SgfColor.Black, SgfPoint(10, 10))
+        val actual = board.rotateLeft()
+        assertEquals(board, actual)
+    }
+
+    @Test
+    fun `the canonical hash is the same for each rotation of a board`() {
+        val sgf = "(;SZ[5]AW[cd][dd][ed][ce]AB[ca][cb][db][eb])"
+
+        val tree = SgfCollection.from(sgf).trees.head
+        val board = SgfEditor(tree).extractBoard()
+
+        val transposes = (1..4).map {
+            board.rotateLeft().canonicalHash()
+        }.toSet()
+
+        assertEquals(1, transposes.size)
+    }
+
+    @Test
+    fun `two equal boards has the same canonical hash`() {
+        val sgf = "(;SZ[5]AW[cd][dd][ed][ce]AB[ca][cb][db][eb])"
+
+        val tree = SgfCollection.from(sgf).trees.head
+        val board1 = SgfEditor(tree).extractBoard()
+        val board2 = SgfEditor(tree).extractBoard()
+
+        assertEquals(board1.canonicalHash(), board2.canonicalHash())
+    }
+
+    @Test
+    fun `two different board positions does not have the same canonical hash`() {
+        val board1 = SgfEditor().placeStone(SgfColor.Black, 3, 3).extractBoard()
+        val board2 = SgfEditor().placeStone(SgfColor.Black, 4, 4).extractBoard()
+        assertNotEquals(board1.canonicalHash(), board2.canonicalHash())
+    }
+
+    @Test
+    fun `two boards that are mirrored has the same canonical hash`() {
+        val board1 = SgfEditor()
+            .placeStone(SgfColor.Black, 4, 4)
+            .placeStone(SgfColor.White, 3, 6)
+            .placeStone(SgfColor.Black, 6, 3)
+            .extractBoard()
+
+        val board2 = SgfEditor()
+            .placeStone(SgfColor.Black, 16, 4)
+            .placeStone(SgfColor.White, 17, 6)
+            .placeStone(SgfColor.Black, 14, 3)
+            .extractBoard()
+
+        assertEquals(board1.canonicalHash(), board2.canonicalHash())
     }
 
     @Test

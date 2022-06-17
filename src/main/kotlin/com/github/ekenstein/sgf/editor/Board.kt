@@ -257,3 +257,43 @@ fun Board.isOccupied(point: SgfPoint) = stones.containsKey(point)
  * Returns true if the given point on the board is occupied by another stone, otherwise false.
  */
 fun Board.isOccupied(x: Int, y: Int) = isOccupied(SgfPoint(x, y))
+
+/**
+ * Rotates the board 90 degrees to the left.
+ */
+fun Board.rotateLeft(): Board = copy(
+    stones = stones.mapKeys { (point, _) ->
+        SgfPoint((height - point.y) + 1, point.x)
+    }
+)
+
+/**
+ * Mirrors the position
+ */
+fun Board.mirror(): Board = copy(
+    stones = stones.mapKeys { (point, _) ->
+        SgfPoint((width - point.x) + 1, point.y)
+    }
+)
+
+/**
+ * Returns a canonical hash for the current position.
+ */
+fun Board.canonicalHash(): Int {
+    tailrec fun Board.transpose(step: Int, result: List<Int>): List<Int> {
+        if (step <= 0) {
+            return result
+        }
+
+        val rotated = rotateLeft()
+        val mirrored = rotated.mirror()
+        val hashes = listOf(
+            rotated.stones.hashCode(),
+            mirrored.stones.hashCode()
+        )
+        return rotated.transpose(step - 1, result + hashes)
+    }
+
+    val transposes = transpose(4, emptyList())
+    return transposes.minOf { it }
+}
