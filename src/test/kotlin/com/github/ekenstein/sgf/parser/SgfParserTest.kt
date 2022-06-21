@@ -984,6 +984,25 @@ class SgfParserTest : RandomTest {
         }
     }
 
+    @Nested
+    inner class `parse real games` {
+        @Test
+        fun `huang longshi vs Zhou Donghou`() {
+            val file = SgfParserTest::class.java
+                .getResourceAsStream("/2i9-gokifu-17000101-Huang_Longshi-Zhou_Donghou.sgf")
+
+            checkNotNull(file) {
+                "Resource not found"
+            }
+
+            assertDoesNotThrow {
+                SgfCollection.from(file) {
+                    ignoreMalformedProperties = true
+                }
+            }
+        }
+    }
+
     private fun assertThrowsParseException(marker: Marker, block: () -> Unit) = try {
         block()
         assertTrue(false, "Expected an SgfException.ParseError")

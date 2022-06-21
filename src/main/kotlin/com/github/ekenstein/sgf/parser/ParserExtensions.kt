@@ -127,7 +127,17 @@ private fun SgfParser.SequenceContext.extract(configuration: SgfParserConfigurat
     node().map { it.extract(configuration) }
 
 private fun SgfParser.NodeContext.extract(configuration: SgfParserConfiguration): SgfNode {
-    val props = prop().mapNotNull { it.extract(configuration) }
+    val props = prop().mapNotNull {
+        try {
+            it.extract(configuration)
+        } catch (ex: SgfException.ParseError) {
+            if (configuration.ignoreMalformedProperties) {
+                null
+            } else {
+                throw ex
+            }
+        }
+    }
     return SgfNode(props.toPropertySet())
 }
 
