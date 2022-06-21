@@ -1,3 +1,4 @@
+import com.github.benmanes.gradle.versions.updates.resolutionstrategy.ComponentFilter
 import com.github.benmanes.gradle.versions.updates.resolutionstrategy.ComponentSelectionWithCurrent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.nio.file.Paths
@@ -9,7 +10,7 @@ val junitVersion by extra("5.8.2")
 
 plugins {
     kotlin("jvm") version "1.7.0"
-    id("org.jetbrains.dokka") version "1.6.21"
+    id("org.jetbrains.dokka") version "1.7.0"
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
     id("com.github.ben-manes.versions") version "0.42.0"
     antlr
@@ -45,7 +46,9 @@ dependencies {
 
 tasks {
     dependencyUpdates {
-        rejectVersionIf(UpgradeToUnstableFilter())
+        rejectVersionIf {
+            UpgradeToUnstableFilter().reject(this) || IgnoredDependencyFilter().reject(this)
+        }
     }
 
     val dependencyUpdateSentinel = register<DependencyUpdateSentinel>("dependencyUpdateSentinel", buildDir)
@@ -171,8 +174,20 @@ publishing {
     }
 }
 
-class UpgradeToUnstableFilter : com.github.benmanes.gradle.versions.updates.resolutionstrategy.ComponentFilter {
-    override fun reject(cs: ComponentSelectionWithCurrent) = reject(cs.currentVersion, cs.candidate.version)
+class IgnoredDependencyFilter : ComponentFilter {
+    val ignoredDependencies = mapOf(
+        "ktlint" to listOf("0.46.0") // doesn't currently work.
+    )
+
+    override fun reject(p0: ComponentSelectionWithCurrent): Boolean {
+        return ignoredDependencies[p0.candidate.module].orEmpty().contains(p0.candidate.version)
+    }
+}
+
+class UpgradeToUnstableFilter : ComponentFilter {
+    override fun reject(cs: ComponentSelectionWithCurrent): Boolean {
+        return reject(cs.currentVersion, cs.candidate.version)
+    }
 
     private fun reject(old: String, new: String): Boolean {
         return !isStable(new) && isStable(old) // no unstable proposals for stable dependencies
