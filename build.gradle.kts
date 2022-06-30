@@ -175,8 +175,8 @@ publishing {
 }
 
 class IgnoredDependencyFilter : ComponentFilter {
-    val ignoredDependencies = mapOf(
-        "ktlint" to listOf("0.46.0") // doesn't currently work.
+    private val ignoredDependencies = mapOf(
+        "ktlint" to listOf("0.46.0", "0.46.1") // doesn't currently work.
     )
 
     override fun reject(p0: ComponentSelectionWithCurrent): Boolean {
