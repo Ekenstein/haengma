@@ -12,4 +12,9 @@ class SgfParserConfiguration {
      * Whether malformed properties should be ignored or not. Default is false.
      */
     var ignoreMalformedProperties = false
+
+    /**
+     * Whether malformed properties should be preserved as a private property or not.
+     */
+    var preserveMalformedProperties = false
 }

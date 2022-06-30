@@ -133,6 +133,11 @@ private fun SgfParser.NodeContext.extract(configuration: SgfParserConfiguration)
         } catch (ex: SgfException.ParseError.MalformedPropertyValue) {
             if (configuration.ignoreMalformedProperties) {
                 null
+            } else if (configuration.preserveMalformedProperties) {
+                SgfProperty.Private(
+                    identifier = it.PROP_IDENTIFIER().text,
+                    values = it.VALUE()?.map { value -> value.textStrippedFromBrackets } ?: emptyList()
+                )
             } else {
                 throw ex
             }
@@ -142,199 +147,168 @@ private fun SgfParser.NodeContext.extract(configuration: SgfParserConfiguration)
 }
 
 private fun SgfParser.PropContext.extract(configuration: SgfParserConfiguration) =
-    when {
-        move() != null -> move().extract()
-        markup() != null -> markup().extract()
-        misc() != null -> misc().extract()
-        gameInfo() != null -> gameInfo().extract()
-        root() != null -> root().extract()
-        moveAnnotation() != null -> moveAnnotation().extract()
-        nodeAnnotation() != null -> nodeAnnotation().extract()
-        setup() != null -> setup().extract()
-        timing() != null -> timing().extract()
-        privateProp() != null -> when (configuration.preserveUnknownProperties) {
-            true -> privateProp().extract()
-            false -> null
+    when (val identifier = PROP_IDENTIFIER().text) {
+        "B" -> SgfProperty.Move.B(extractSingleValueOrNull { it.asMove() } ?: Move.Pass)
+        "W" -> SgfProperty.Move.W(extractSingleValueOrNull { it.asMove() } ?: Move.Pass)
+        "KO" -> SgfProperty.Move.KO
+        "MN" -> SgfProperty.Move.MN(extractSingleValue { it.asNumber() })
+        "AB" -> SgfProperty.Setup.AB(
+            extractValues { it.asCompressedPoint() }.flatten().toNonEmptySet()
+                ?: toMarker().throwMalformedPropertyValueException("AB must not contain an empty set of points")
+        )
+        "AW" -> SgfProperty.Setup.AW(
+            extractValues { it.asCompressedPoint() }.flatten().toNonEmptySet()
+                ?: toMarker().throwMalformedPropertyValueException("AW must not contain an empty set of points")
+        )
+        "AE" -> SgfProperty.Setup.AE(
+            extractValues { it.asCompressedPoint() }.flatten().toNonEmptySet()
+                ?: throw SgfException.ParseError.MalformedPropertyValue(
+                    "AE must not contain an empty set of points",
+                    toMarker()
+                )
+        )
+        "PL" -> SgfProperty.Setup.PL(extractSingleValue { it.asColor(true) })
+        "C" -> SgfProperty.NodeAnnotation.C(extractSingleValueOrNull { it.asText() } ?: "")
+        "DM" -> SgfProperty.NodeAnnotation.DM(extractSingleValue { it.asDouble() })
+        "GB" -> SgfProperty.NodeAnnotation.GB(extractSingleValue { it.asDouble() })
+        "GW" -> SgfProperty.NodeAnnotation.GW(extractSingleValue { it.asDouble() })
+        "HO" -> SgfProperty.NodeAnnotation.HO(extractSingleValue { it.asDouble() })
+        "N" -> SgfProperty.NodeAnnotation.N(extractSingleValueOrNull { it.asSimpleText() } ?: "")
+        "UC" -> SgfProperty.NodeAnnotation.UC(extractSingleValue { it.asDouble() })
+        "V" -> SgfProperty.NodeAnnotation.V(extractSingleValue { it.asReal() })
+        "BM" -> SgfProperty.MoveAnnotation.BM(extractSingleValue { it.asDouble() })
+        "DO" -> SgfProperty.MoveAnnotation.DO
+        "IT" -> SgfProperty.MoveAnnotation.IT
+        "TE" -> SgfProperty.MoveAnnotation.TE(extractSingleValue { it.asDouble() })
+        "CR" -> SgfProperty.Markup.CR(
+            extractValues { it.asCompressedPoint() }.flatten().toNonEmptySet()
+                ?: throw SgfException.ParseError.MalformedPropertyValue(
+                    "CR must not contain an empty set of points",
+                    toMarker()
+                )
+        )
+        "AR" -> SgfProperty.Markup.AR(
+            extractValues { it.asComposed(pointParser, pointParser) }.toNonEmptySet()
+                ?: throw SgfException.ParseError.MalformedPropertyValue(
+                    "AR must not contain an empty list of composed points",
+                    toMarker()
+                )
+        )
+        "LB" -> SgfProperty.Markup.LB(extractValues { it.asComposed(pointParser, simpleTextParser) }.toMap())
+        "LN" -> SgfProperty.Markup.LN(
+            extractValues { it.asComposed(pointParser, pointParser) }.toNonEmptySet()
+                ?: throw SgfException.ParseError.MalformedPropertyValue(
+                    "LN must not contain an empty set of composed points",
+                    toMarker()
+                )
+        )
+        "MA" -> SgfProperty.Markup.MA(
+            extractValues { it.asCompressedPoint() }.flatten().toNonEmptySet()
+                ?: throw SgfException.ParseError.MalformedPropertyValue(
+                    "MA must not contain an empty set of points",
+                    toMarker()
+                )
+        )
+        "SL" -> SgfProperty.Markup.SL(
+            extractValues { it.asCompressedPoint() }.flatten().toNonEmptySet()
+                ?: throw SgfException.ParseError.MalformedPropertyValue(
+                    "SL must not contain an empty set of points",
+                    toMarker()
+                )
+        )
+        "SQ" -> SgfProperty.Markup.SQ(
+            extractValues { it.asCompressedPoint() }.flatten().toNonEmptySet()
+                ?: throw SgfException.ParseError.MalformedPropertyValue(
+                    "SQ must not contain an empty set of points",
+                    toMarker()
+                )
+        )
+        "TR" -> SgfProperty.Markup.TR(
+            extractValues { it.asCompressedPoint() }.flatten().toNonEmptySet()
+                ?: throw SgfException.ParseError.MalformedPropertyValue(
+                    "TR must not contain an empty set of points",
+                    toMarker()
+                )
+        )
+        "DD" -> SgfProperty.Markup.DD(extractValues { it.asCompressedPoint() }.flatten().toSet())
+        "AP" -> {
+            val (name, version) = extractSingleValue { it.asComposed(simpleTextParser, simpleTextParser) }
+            SgfProperty.Root.AP(name, version)
         }
-        else -> throw SgfException.ParseError.Other("Unrecognized property", toMarker())
+        "FF" -> SgfProperty.Root.FF(extractSingleValue { it.asNumber(1..4) })
+        "GM" -> SgfProperty.Root.GM(extractSingleValue { it.asGameType() })
+        "SZ" -> {
+            val (width, height) = extractSingleValue { it.asSize() }
+            SgfProperty.Root.SZ(width, height)
+        }
+        "CA" -> SgfProperty.Root.CA(extractSingleValue { it.asCharset() })
+        "ST" -> SgfProperty.Root.ST(extractSingleValue { it.asNumber(0..3) })
+        "HA" -> SgfProperty.GameInfo.HA(extractSingleValue { it.asNumber(2..9) })
+        "KM" -> SgfProperty.GameInfo.KM(extractSingleValue { it.asReal() })
+        "EV" -> SgfProperty.GameInfo.EV(extractSingleValueOrNull { it.asSimpleText() } ?: "")
+        "PB" -> SgfProperty.GameInfo.PB(extractSingleValueOrNull { it.asSimpleText() } ?: "")
+        "PW" -> SgfProperty.GameInfo.PW(extractSingleValueOrNull { it.asSimpleText() } ?: "")
+        "WR" -> SgfProperty.GameInfo.WR(extractSingleValueOrNull { it.asSimpleText() } ?: "")
+        "BR" -> SgfProperty.GameInfo.BR(extractSingleValueOrNull { it.asSimpleText() } ?: "")
+        "DT" -> SgfProperty.GameInfo.DT(extractSingleValue { it.asGameDates() })
+        "RE" -> SgfProperty.GameInfo.RE(extractSingleValue { it.asGameResult() })
+        "TM" -> SgfProperty.GameInfo.TM(extractSingleValue { it.asReal() })
+        "SO" -> SgfProperty.GameInfo.SO(extractSingleValueOrNull { it.asSimpleText() } ?: "")
+        "GN" -> SgfProperty.GameInfo.GN(extractSingleValueOrNull { it.asSimpleText() } ?: "")
+        "GC" -> SgfProperty.GameInfo.GC(extractSingleValueOrNull { it.asText() } ?: "")
+        "ON" -> SgfProperty.GameInfo.ON(extractSingleValueOrNull { it.asSimpleText() } ?: "")
+        "OT" -> SgfProperty.GameInfo.OT(extractSingleValueOrNull { it.asSimpleText() } ?: "")
+        "RO" -> SgfProperty.GameInfo.RO(extractSingleValueOrNull { it.asSimpleText() } ?: "")
+        "RU" -> SgfProperty.GameInfo.RU(extractSingleValueOrNull { it.asSimpleText() } ?: "")
+        "US" -> SgfProperty.GameInfo.US(extractSingleValueOrNull { it.asSimpleText() } ?: "")
+        "WT" -> SgfProperty.GameInfo.WT(extractSingleValueOrNull { it.asSimpleText() } ?: "")
+        "BT" -> SgfProperty.GameInfo.BT(extractSingleValueOrNull { it.asSimpleText() } ?: "")
+        "AN" -> SgfProperty.GameInfo.AN(extractSingleValueOrNull { it.asSimpleText() } ?: "")
+        "CP" -> SgfProperty.GameInfo.CP(extractSingleValueOrNull { it.asSimpleText() } ?: "")
+        "PC" -> SgfProperty.GameInfo.PC(extractSingleValueOrNull { it.asSimpleText() } ?: "")
+        "BL" -> SgfProperty.Timing.BL(extractSingleValue { it.asReal() })
+        "WL" -> SgfProperty.Timing.WL(extractSingleValue { it.asReal() })
+        "OB" -> SgfProperty.Timing.OB(extractSingleValue { it.asNumber() })
+        "OW" -> SgfProperty.Timing.OW(extractSingleValue { it.asNumber() })
+        "FG" -> SgfProperty.Misc.FG(extractSingleValueOrNull { it.asComposed(numberParser(), simpleTextParser) })
+        "PM" -> SgfProperty.Misc.PM(extractSingleValue { it.asNumber() })
+        "VW" -> SgfProperty.Misc.VW(extractValues { it.asCompressedPoint() }.flatten().toSet())
+        else -> if (configuration.preserveUnknownProperties) {
+            SgfProperty.Private(identifier, VALUE()?.map { it.textStrippedFromBrackets } ?: emptyList())
+        } else {
+            val marker = toMarker()
+            throw SgfException.ParseError.Other(
+                "Encountered an unknown property ${PROP_IDENTIFIER().text}",
+                marker
+            )
+        }
     }
 
-private fun SgfParser.PrivatePropContext.extract(): SgfProperty = SgfProperty.Private(
-    identifier = PROP_IDENTIFIER().text,
-    values = VALUE()?.map { it.textStrippedFromBrackets } ?: emptyList()
-)
-
-private fun SgfParser.MoveContext.extract(): SgfProperty.Move = when (this) {
-    is SgfParser.BlackMoveContext -> SgfProperty.Move.B(VALUE()?.asMove() ?: Move.Pass)
-    is SgfParser.WhiteMoveContext -> SgfProperty.Move.W(VALUE()?.asMove() ?: Move.Pass)
-    is SgfParser.KoContext -> SgfProperty.Move.KO
-    is SgfParser.MoveNumberContext -> SgfProperty.Move.MN(VALUE().asNumber())
-    else -> throw SgfException.ParseError.Other("Unrecognized move property $text", toMarker())
-}
-
-private fun SgfParser.SetupContext.extract(): SgfProperty.Setup = when (this) {
-    is SgfParser.AddEmptyContext -> SgfProperty.Setup.AE(
-        VALUE().flatMap { it.asCompressedPoint() }.toNonEmptySet()
-            ?: throw SgfException.ParseError.MalformedPropertyValue(
-                "AE must not contain an empty set of points",
-                toMarker()
-            )
-    )
-    is SgfParser.AddBlackContext -> SgfProperty.Setup.AB(
-        VALUE().flatMap { it.asCompressedPoint() }.toNonEmptySet()
-            ?: throw SgfException.ParseError.MalformedPropertyValue(
-                "AB must not contain an empty set of points",
-                toMarker()
-            )
-    )
-    is SgfParser.AddWhiteContext -> SgfProperty.Setup.AW(
-        VALUE().flatMap { it.asCompressedPoint() }.toNonEmptySet()
-            ?: throw SgfException.ParseError.MalformedPropertyValue(
-                "AW must not contain an empty set of points",
-                toMarker()
-            )
-    )
-    is SgfParser.PlayerToPlayContext -> SgfProperty.Setup.PL(VALUE().asColor(true))
-    else -> throw SgfException.ParseError.Other("Unrecognized setup property $text", toMarker())
-}
-
-private fun SgfParser.NodeAnnotationContext.extract(): SgfProperty.NodeAnnotation = when (this) {
-    is SgfParser.CommentContext -> SgfProperty.NodeAnnotation.C(VALUE()?.asText() ?: "")
-    is SgfParser.EvenPositionContext -> SgfProperty.NodeAnnotation.DM(VALUE().asDouble())
-    is SgfParser.GoodForBlackContext -> SgfProperty.NodeAnnotation.GB(VALUE().asDouble())
-    is SgfParser.GoodForWhiteContext -> SgfProperty.NodeAnnotation.GW(VALUE().asDouble())
-    is SgfParser.HotspotContext -> SgfProperty.NodeAnnotation.HO(VALUE().asDouble())
-    is SgfParser.NodeNameContext -> SgfProperty.NodeAnnotation.N(VALUE()?.asSimpleText() ?: "")
-    is SgfParser.UnclearPositionContext -> SgfProperty.NodeAnnotation.UC(VALUE().asDouble())
-    is SgfParser.ValueContext -> SgfProperty.NodeAnnotation.V(VALUE().asReal())
-    else -> throw SgfException.ParseError.Other("Unrecognized node annotation property $text", toMarker())
-}
-
-private fun SgfParser.MoveAnnotationContext.extract(): SgfProperty.MoveAnnotation =
-    when (this) {
-        is SgfParser.BadMoveContext -> SgfProperty.MoveAnnotation.BM(VALUE().asDouble())
-        is SgfParser.DoubtfulContext -> SgfProperty.MoveAnnotation.DO
-        is SgfParser.InterestingContext -> SgfProperty.MoveAnnotation.IT
-        is SgfParser.TesujiContext -> SgfProperty.MoveAnnotation.TE(VALUE().asDouble())
-        else -> throw SgfException.ParseError.Other("Unrecognized move annotation property $text", toMarker())
+private fun <T> SgfParser.PropContext.extractSingleValueOrNull(block: (TerminalNode) -> T): T? {
+    val values = VALUE() ?: emptyList()
+    if (values.isEmpty()) {
+        return null
     }
 
-private fun SgfParser.MarkupContext.extract(): SgfProperty.Markup = when (this) {
-    is SgfParser.CircleContext -> SgfProperty.Markup.CR(
-        VALUE().flatMap { it.asCompressedPoint() }.toNonEmptySet()
-            ?: throw SgfException.ParseError.MalformedPropertyValue(
-                "CR must not contain an empty set of points",
-                toMarker()
-            )
-    )
-    is SgfParser.ArrowContext -> SgfProperty.Markup.AR(
-        VALUE().map { it.asComposed(pointParser, pointParser) }.toNonEmptySet()
-            ?: throw SgfException.ParseError.MalformedPropertyValue(
-                "AR must not contain an empty list of composed points",
-                toMarker()
-            )
-    )
-    is SgfParser.LabelContext -> SgfProperty.Markup.LB(
-        VALUE().associate { it.asComposed(pointParser, simpleTextParser) }
-
-    )
-    is SgfParser.LineContext -> SgfProperty.Markup.LN(
-        VALUE().map { it.asComposed(pointParser, pointParser) }.toNonEmptySet()
-            ?: throw SgfException.ParseError.MalformedPropertyValue(
-                "LN must not contain an empty set of composed points",
-                toMarker()
-            )
-    )
-    is SgfParser.MarkContext -> SgfProperty.Markup.MA(
-        VALUE().flatMap { it.asCompressedPoint() }.toNonEmptySet()
-            ?: throw SgfException.ParseError.MalformedPropertyValue(
-                "MA must not contain an empty set of points",
-                toMarker()
-            )
-    )
-    is SgfParser.SelectedContext -> SgfProperty.Markup.SL(
-        VALUE().flatMap { it.asCompressedPoint() }.toNonEmptySet()
-            ?: throw SgfException.ParseError.MalformedPropertyValue(
-                "SL must not contain an empty set of points",
-                toMarker()
-            )
-    )
-    is SgfParser.SquareContext -> SgfProperty.Markup.SQ(
-        VALUE().flatMap { it.asCompressedPoint() }.toNonEmptySet()
-            ?: throw SgfException.ParseError.MalformedPropertyValue(
-                "SQ must not contain an empty set of points",
-                toMarker()
-            )
-    )
-    is SgfParser.TriangleContext -> SgfProperty.Markup.TR(
-        VALUE().flatMap { it.asCompressedPoint() }.toNonEmptySet()
-            ?: throw SgfException.ParseError.MalformedPropertyValue(
-                "TR must not contain an empty set of points",
-                toMarker()
-            )
-    )
-    is SgfParser.DimPointsContext -> SgfProperty.Markup.DD(
-        VALUE()?.flatMap { it.asCompressedPoint() }?.toSet().orEmpty()
-    )
-    else -> throw SgfException.ParseError.Other("Unrecognized markup property $text", toMarker())
-}
-
-private fun SgfParser.RootContext.extract(): SgfProperty.Root = when (this) {
-    is SgfParser.ApplicationContext -> {
-        val (name, version) = VALUE().asComposed(simpleTextParser, simpleTextParser)
-        SgfProperty.Root.AP(name, version)
+    if (values.size > 1) {
+        toMarker().throwMalformedPropertyValueException("Expected NONE or a single value, but got $values")
     }
-    is SgfParser.FileFormatContext -> SgfProperty.Root.FF(VALUE().asNumber(1..4))
-    is SgfParser.GameContext -> SgfProperty.Root.GM(VALUE().asGameType())
-    is SgfParser.SizeContext -> {
-        val (width, height) = VALUE().asSize()
-        SgfProperty.Root.SZ(width, height)
+
+    return block(values[0])
+}
+
+private fun <T> SgfParser.PropContext.extractSingleValue(block: (TerminalNode) -> T): T {
+    val values = VALUE() ?: emptyList()
+    if (values.isEmpty() || values.size > 1) {
+        toMarker().throwMalformedPropertyValueException("Expected a single value, but got $values")
     }
-    is SgfParser.CharsetContext -> SgfProperty.Root.CA(VALUE().asCharset())
-    is SgfParser.StyleContext -> SgfProperty.Root.ST(VALUE().asNumber(0..3))
-    else -> throw SgfException.ParseError.Other("Unrecognized root property $text", toMarker())
+
+    return block(values[0])
 }
 
-private fun SgfParser.GameInfoContext.extract(): SgfProperty.GameInfo = when (this) {
-    is SgfParser.HandicapContext -> SgfProperty.GameInfo.HA(VALUE().asNumber(2..9))
-    is SgfParser.KomiContext -> SgfProperty.GameInfo.KM(VALUE().asReal())
-    is SgfParser.EventContext -> SgfProperty.GameInfo.EV(VALUE()?.asSimpleText() ?: "")
-    is SgfParser.PlayerBlackContext -> SgfProperty.GameInfo.PB(VALUE()?.asSimpleText() ?: "")
-    is SgfParser.PlayerWhiteContext -> SgfProperty.GameInfo.PW(VALUE()?.asSimpleText() ?: "")
-    is SgfParser.WhiteRankContext -> SgfProperty.GameInfo.WR(VALUE()?.asSimpleText() ?: "")
-    is SgfParser.BlackRankContext -> SgfProperty.GameInfo.BR(VALUE()?.asSimpleText() ?: "")
-    is SgfParser.DateContext -> SgfProperty.GameInfo.DT(VALUE().asGameDates())
-    is SgfParser.ResultContext -> SgfProperty.GameInfo.RE(VALUE().asGameResult())
-    is SgfParser.TimeLimitContext -> SgfProperty.GameInfo.TM(VALUE().asReal())
-    is SgfParser.SourceContext -> SgfProperty.GameInfo.SO(VALUE()?.asSimpleText() ?: "")
-    is SgfParser.GameNameContext -> SgfProperty.GameInfo.GN(VALUE()?.asSimpleText() ?: "")
-    is SgfParser.GameCommentContext -> SgfProperty.GameInfo.GC(VALUE()?.asText() ?: "")
-    is SgfParser.OpeningContext -> SgfProperty.GameInfo.ON(VALUE()?.asSimpleText() ?: "")
-    is SgfParser.OvertimeContext -> SgfProperty.GameInfo.OT(VALUE()?.asSimpleText() ?: "")
-    is SgfParser.RoundContext -> SgfProperty.GameInfo.RO(VALUE()?.asSimpleText() ?: "")
-    is SgfParser.RulesContext -> SgfProperty.GameInfo.RU(VALUE()?.asSimpleText() ?: "")
-    is SgfParser.UserContext -> SgfProperty.GameInfo.US(VALUE()?.asSimpleText() ?: "")
-    is SgfParser.WhiteTeamContext -> SgfProperty.GameInfo.WT(VALUE()?.asSimpleText() ?: "")
-    is SgfParser.BlackTeamContext -> SgfProperty.GameInfo.BT(VALUE()?.asSimpleText() ?: "")
-    is SgfParser.AnnotationContext -> SgfProperty.GameInfo.AN(VALUE()?.asSimpleText() ?: "")
-    is SgfParser.CopyrightContext -> SgfProperty.GameInfo.CP(VALUE()?.asSimpleText() ?: "")
-    is SgfParser.PlaceContext -> SgfProperty.GameInfo.PC(VALUE()?.asSimpleText() ?: "")
-    else -> throw SgfException.ParseError.Other("Unrecognized game info property $text", toMarker())
-}
-
-private fun SgfParser.TimingContext.extract(): SgfProperty.Timing = when (this) {
-    is SgfParser.BlackTimeLeftContext -> SgfProperty.Timing.BL(VALUE().asReal())
-    is SgfParser.WhiteTimeLeftContext -> SgfProperty.Timing.WL(VALUE().asReal())
-    is SgfParser.OtStonesBlackContext -> SgfProperty.Timing.OB(VALUE().asNumber())
-    is SgfParser.OtStonesWhiteContext -> SgfProperty.Timing.OW(VALUE().asNumber())
-    else -> throw SgfException.ParseError.Other("Unrecognized timing property $text", toMarker())
-}
-
-private fun SgfParser.MiscContext.extract(): SgfProperty.Misc = when (this) {
-    is SgfParser.FigureContext -> SgfProperty.Misc.FG(VALUE()?.asComposed(numberParser(), simpleTextParser))
-    is SgfParser.PrintMoveModeContext -> SgfProperty.Misc.PM(VALUE().asNumber())
-    is SgfParser.ViewContext -> SgfProperty.Misc.VW(VALUE().flatMap { it.asCompressedPoint() }.toSet())
-    else -> throw SgfException.ParseError.Other("Unrecognized misc property $text", toMarker())
+private fun <T> SgfParser.PropContext.extractValues(block: (TerminalNode) -> T): List<T> {
+    val values = VALUE() ?: emptyList()
+    return values.map(block)
 }
 
 private fun ParserRuleContext.toMarker(): Marker {
