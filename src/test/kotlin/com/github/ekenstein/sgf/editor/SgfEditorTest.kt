@@ -1137,7 +1137,6 @@ class SgfEditorTest : RandomTest {
 
         @Test
         fun `always branch out a move if there are no moves to the right and the children is not empty`() {
-            // you can create your own tree
             val editor = SgfEditor {
                 rules {
                     handicap = 2
