@@ -984,6 +984,21 @@ class SgfParserTest : RandomTest {
         }
     }
 
+    @Test
+    fun `if a property is malformed it can be preserved as a private property`() {
+        val tree = SgfCollection.from("(;GM[0])") {
+            preserveMalformedProperties = true
+        }.trees.head
+
+        val expected = SgfGameTree(
+            nelOf(
+                SgfNode(SgfProperty.Private("GM", listOf("0")))
+            )
+        )
+
+        assertEquals(expected, tree)
+    }
+
     @Nested
     inner class `parse real games` {
         @Test
