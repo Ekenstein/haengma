@@ -1,7 +1,7 @@
 package com.github.ekenstein.sgf.parser.valueparsers
 
 import com.github.ekenstein.sgf.SgfException
-import com.github.ekenstein.sgf.parser.throwParseException
+import com.github.ekenstein.sgf.parser.throwMalformedPropertyValueException
 
 internal val sizeParser = ValueParser { marker, value ->
     val numberParser = numberParser(1..52)
@@ -12,7 +12,10 @@ internal val sizeParser = ValueParser { marker, value ->
         try {
             composed(numberParser, numberParser).parse(marker, value)
         } catch (ex: SgfException.ParseError) {
-            marker.throwParseException("Expected a number or a composed value containing numbers, but got $value")
+            marker.throwMalformedPropertyValueException(
+                "Expected a number or a composed value containing numbers, " +
+                    "but got $value"
+            )
         }
     }
 }

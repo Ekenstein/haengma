@@ -1,6 +1,6 @@
 package com.github.ekenstein.sgf.parser.valueparsers
 
-import com.github.ekenstein.sgf.parser.throwParseException
+import com.github.ekenstein.sgf.parser.throwMalformedPropertyValueException
 
 private data class Composed(val left: String, val right: String)
 
@@ -12,7 +12,7 @@ internal fun <L, R> composed(
     val parts = value.split(regex)
 
     if (parts.isEmpty() || parts.size >= 3) {
-        marker.throwParseException("Expected a composed value, but got $value")
+        marker.throwMalformedPropertyValueException("Expected a composed value, but got $value")
     }
 
     val (leftPart, rightPart) = when (parts.size) {
@@ -23,11 +23,11 @@ internal fun <L, R> composed(
             } else if (part.endsWith(":")) {
                 Composed(part, "")
             } else {
-                marker.throwParseException("Expected a composed value, but got $value")
+                marker.throwMalformedPropertyValueException("Expected a composed value, but got $value")
             }
         }
         2 -> Composed(parts[0], parts[1])
-        else -> marker.throwParseException("Expected a composed value, but got $value")
+        else -> marker.throwMalformedPropertyValueException("Expected a composed value, but got $value")
     }
 
     val left = leftParser.parse(

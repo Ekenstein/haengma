@@ -9,5 +9,5 @@ data class Marker(
     val endColumn: Int
 )
 
-internal fun Marker.throwParseException(message: String, cause: Throwable? = null): Nothing =
-    throw SgfException.ParseError(message, this, cause)
+internal fun Marker.throwMalformedPropertyValueException(message: String, cause: Throwable? = null): Nothing =
+    throw SgfException.ParseError.MalformedPropertyValue(message, this, cause)

@@ -2,7 +2,7 @@ package com.github.ekenstein.sgf.parser.valueparsers
 
 import com.github.ekenstein.sgf.GameDate
 import com.github.ekenstein.sgf.parser.Marker
-import com.github.ekenstein.sgf.parser.throwParseException
+import com.github.ekenstein.sgf.parser.throwMalformedPropertyValueException
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
@@ -54,10 +54,10 @@ private fun toPartialDate(parsedDates: List<PartialDate>, string: String, marker
     when (string.length) {
         2 -> {
             val dayOrMonth = string.toIntOrNull()
-                ?: marker.throwParseException("Expected a day or month, but got $string")
+                ?: marker.throwMalformedPropertyValueException("Expected a day or month, but got $string")
 
             val lastParsedDate = parsedDates.lastOrNull()
-                ?: marker.throwParseException(
+                ?: marker.throwMalformedPropertyValueException(
                     "A day or a month must be preceded by one of YYYY-MM-DD, YYYY-MM, MM-DD, MM or DD"
                 )
 
@@ -67,7 +67,7 @@ private fun toPartialDate(parsedDates: List<PartialDate>, string: String, marker
                 is PartialDate.MonthAndDay -> PartialDate.Day(dayOrMonth)
                 is PartialDate.YearAndMonth,
                 is PartialDate.Month -> PartialDate.Month(dayOrMonth)
-                is PartialDate.Year -> marker.throwParseException(
+                is PartialDate.Year -> marker.throwMalformedPropertyValueException(
                     "A day or a month must be preceded by one of YYYY-MM-DD, YYYY-MM, MM-DD, MM or DD, " +
                         "but last parsed date was YYYY: '${lastParsedDate.year}'"
                 )
@@ -77,24 +77,27 @@ private fun toPartialDate(parsedDates: List<PartialDate>, string: String, marker
         }
         4 -> {
             val year = string.toIntOrNull()
-                ?: marker.throwParseException("Expected a year, but got $string")
+                ?: marker.throwMalformedPropertyValueException("Expected a year, but got $string")
             PartialDate.Year(year)
         }
         5 -> {
             val lastDate = parsedDates.lastOrNull()
-                ?: marker.throwParseException("Expected YYYY-MM-DD, YYYY-MM, MM-DD, MM or DD but got $string")
+                ?: marker.throwMalformedPropertyValueException(
+                    "Expected YYYY-MM-DD, YYYY-MM, MM-DD, MM or DD " +
+                        "but got $string"
+                )
 
             val partials = string.split("-").takeIf { it.size == 2 }
-                ?: marker.throwParseException("Expected MM-DD but got $string")
+                ?: marker.throwMalformedPropertyValueException("Expected MM-DD but got $string")
 
             val (sMonth, sDay) = partials
             val month = sMonth.toIntOrNull()
-                ?: marker.throwParseException("Expected a month, but got $sMonth")
+                ?: marker.throwMalformedPropertyValueException("Expected a month, but got $sMonth")
             val day = sDay.toIntOrNull()
-                ?: marker.throwParseException("Expected a day, but got $sDay")
+                ?: marker.throwMalformedPropertyValueException("Expected a day, but got $sDay")
 
             when (lastDate) {
-                is PartialDate.Year -> marker.throwParseException(
+                is PartialDate.Year -> marker.throwMalformedPropertyValueException(
                     "MM-DD must be preceded by YYYY-MM-DD, YYYY-MM, MM-DD, MM or DD"
                 )
                 else -> Unit
@@ -104,13 +107,13 @@ private fun toPartialDate(parsedDates: List<PartialDate>, string: String, marker
         }
         7 -> {
             val partials = string.split("-").takeIf { it.size == 2 }
-                ?: marker.throwParseException("Expected YYYY-MM but got $string")
+                ?: marker.throwMalformedPropertyValueException("Expected YYYY-MM but got $string")
 
             val (sYear, sMonth) = partials
             val year = sYear.toIntOrNull()
-                ?: marker.throwParseException("Expected a year, but got $sYear")
+                ?: marker.throwMalformedPropertyValueException("Expected a year, but got $sYear")
             val month = sMonth.toIntOrNull()
-                ?: marker.throwParseException("Expected a month, but got $sMonth")
+                ?: marker.throwMalformedPropertyValueException("Expected a month, but got $sMonth")
 
             PartialDate.YearAndMonth(year, month)
         }
@@ -118,6 +121,6 @@ private fun toPartialDate(parsedDates: List<PartialDate>, string: String, marker
             val date = LocalDate.parse(string, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
             PartialDate.Date(date)
         } catch (ex: DateTimeParseException) {
-            marker.throwParseException("Expected YYYY-MM-DD but got $string")
+            marker.throwMalformedPropertyValueException("Expected YYYY-MM-DD but got $string")
         }
     }

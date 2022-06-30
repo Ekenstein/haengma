@@ -1,6 +1,7 @@
 package com.github.ekenstein.sgf.parser.valueparsers
 
 import com.github.ekenstein.sgf.GameType
+import com.github.ekenstein.sgf.parser.throwMalformedPropertyValueException
 
 internal val gameTypeParser = ValueParser { marker, value ->
     val allGameTypes = GameType.values().associateBy { it.value }
@@ -9,5 +10,9 @@ internal val gameTypeParser = ValueParser { marker, value ->
     val numberParser = numberParser(IntRange(min, max))
 
     val number = numberParser.parse(marker, value)
-    allGameTypes.getValue(number)
+    try {
+        allGameTypes.getValue(number)
+    } catch (ex: NoSuchElementException) {
+        marker.throwMalformedPropertyValueException("Couldn't recognize the game type $number", ex)
+    }
 }
