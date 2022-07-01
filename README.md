@@ -177,50 +177,67 @@ fun main() {
 }
 ```
 
-### Displaying a game
+### Iterating moves
 ```kotlin
-import com.github.ekenstein.sgf.SgfCollection
 import com.github.ekenstein.sgf.editor.SgfEditor
 import com.github.ekenstein.sgf.editor.extractBoard
-import com.github.ekenstein.sgf.editor.goToNextNode
+import com.github.ekenstein.sgf.editor.goToLastNode
+import com.github.ekenstein.sgf.editor.goToNextMove
 import com.github.ekenstein.sgf.editor.print
-import com.github.ekenstein.sgf.editor.repeat
+import com.github.ekenstein.sgf.editor.stay
+import com.github.ekenstein.sgf.editor.tryRepeat
 import com.github.ekenstein.sgf.parser.from
+import com.github.ekenstein.sgf.utils.get
+import com.github.ekenstein.sgf.utils.orElse
 import java.nio.file.Path
 
 fun main() {
-    val collection = SgfCollection.from(Path.of("Kamakura-Jubango-Game-5.sgf"))
-    val tree = collection.trees.head
+    val gameTree = SgfCollection.from(Path.of("game.sgf")).trees.head
+    val moveNumber = 253
+    val editor = SgfEditor(gameTree).tryRepeat(moveNumber) {
+        it.goToNextMove()
+    }.orElse {
+        it.goToLastNode().stay()
+    }.get()
 
-    // ... Load the game you wish to display. In this case we wish to see the position of
-    // the Kamakura Jubango game 5 at the 10th move.
-    val editor = SgfEditor(tree).repeat(10) { it.goToNextNode() }
+    val position = editor.extractBoard()
+    println(position.print())
+}
+```
 
-    // ... extract the board from the current position
-    val board = editor.extractBoard()
+### Scoring game
+```kotlin
+import com.github.ekenstein.sgf.editor.SgfEditor
+import com.github.ekenstein.sgf.editor.commit
+import com.github.ekenstein.sgf.editor.count
+import com.github.ekenstein.sgf.editor.extractBoard
+import com.github.ekenstein.sgf.editor.getGameInfo
+import com.github.ekenstein.sgf.editor.goToLastNode
+import com.github.ekenstein.sgf.editor.removeGroup
+import com.github.ekenstein.sgf.editor.updateGameInfo
+import com.github.ekenstein.sgf.parser.from
+import com.github.ekenstein.sgf.serialization.encodeToString
+import java.nio.file.Path
+import kotlin.math.abs
 
-    // ... and print it
-    println(board.print())
+fun main() {
+    val gameTree = SgfCollection.from(Path.of("game.sgf")).trees.head
+    val editor = SgfEditor(gameTree).goToLastNode()
+    val komi = editor.getGameInfo().rules.komi
+    val score = editor.extractBoard()
+        .removeGroup(SgfPoint(4, 4)) // remove dead groups
+        .removeGroup(SgfPoint(16, 16))
+        .count(komi)
 
-    // ... which prints to
-    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-    //    .  .  .  O  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  #  .  #  .  .
-    //    .  .  O  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  #  .  .
-    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-    //    .  .  .  #  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-    //    .  .  #  .  .  .  .  .  .  .  .  .  .  .  O  .  O  .  .
-    //    .  .  .  .  O  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-    //    .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+    val gameResult = if (score < 0) {
+        SgfColor.White wins abs(score)
+    } else if (score > 0) {
+        SgfColor.Black wins score
+    } else {
+        GameResult.Draw
+    }
+
+    val updatedGameTree = editor.updateGameInfo { result = gameResult }.commit()
+    val sgf = updatedGameTree.encodeToString()
 }
 ```

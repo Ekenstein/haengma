@@ -492,6 +492,8 @@ sealed class GameResult {
     data class Wins(val winner: SgfColor) : GameResult()
 }
 
+infix fun SgfColor.wins(score: Double) = GameResult.Score(this, score)
+
 enum class GameType(internal val value: Int) {
     Go(1),
     Othello(2),
