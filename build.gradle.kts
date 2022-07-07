@@ -5,11 +5,11 @@ import java.nio.file.Paths
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.inputStream
 
-val kotlinVersion by extra("1.7.0")
+val kotlinVersion by extra("1.7.10")
 val junitVersion by extra("5.8.2")
 
 plugins {
-    kotlin("jvm") version "1.7.0"
+    kotlin("jvm") version "1.7.10"
     id("org.jetbrains.dokka") version "1.7.0"
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
     id("com.github.ben-manes.versions") version "0.42.0"
@@ -38,10 +38,16 @@ dependencies {
     implementation("org.jetbrains.kotlin", "kotlin-stdlib", kotlinVersion)
     testImplementation("org.jetbrains.kotlin", "kotlin-test", kotlinVersion)
     antlr("org.antlr", "antlr4", "4.10.1")
+    implementation("org.antlr", "antlr4-runtime", "4.10.1")
 
     testImplementation("org.junit.jupiter", "junit-jupiter-params", junitVersion)
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)
     testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
+}
+
+// Exclude antlr4 from transitive dependencies (https://github.com/gradle/gradle/issues/820)
+configurations[JavaPlugin.API_CONFIGURATION_NAME].let { apiConfiguration ->
+    apiConfiguration.setExtendsFrom(apiConfiguration.extendsFrom.filter { it.name != "antlr" })
 }
 
 tasks {
