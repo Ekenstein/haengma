@@ -10,7 +10,7 @@ val junitVersion by extra("5.8.2")
 
 plugins {
     kotlin("jvm") version "1.7.10"
-    id("org.jetbrains.dokka") version "1.7.0"
+    id("org.jetbrains.dokka") version "1.7.10"
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
     id("com.github.ben-manes.versions") version "0.42.0"
     antlr
@@ -19,7 +19,7 @@ plugins {
 }
 
 group = "com.github.ekenstein"
-version = "2.2.3"
+version = "2.2.5"
 val kotlinJvmTarget = "1.8"
 
 repositories {

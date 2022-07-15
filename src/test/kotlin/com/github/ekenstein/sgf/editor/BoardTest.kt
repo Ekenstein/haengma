@@ -4,6 +4,7 @@ import com.github.ekenstein.sgf.SgfCollection
 import com.github.ekenstein.sgf.SgfColor
 import com.github.ekenstein.sgf.SgfPoint
 import com.github.ekenstein.sgf.parser.from
+import com.github.ekenstein.sgf.utils.orStay
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -295,5 +296,22 @@ class BoardTest {
 
         assertEquals(expectedBoardWithoutBlack, boardWithoutBlack)
         assertEquals(expectedBoardWithoutWhite, boardWithoutWhite)
+    }
+
+    @Test
+    fun `extracting board should contain the current sequence and its parent sequence`() {
+        val editor = SgfEditor()
+            .placeStone(SgfColor.Black, 4, 4)
+            .placeStone(SgfColor.White, 16, 4)
+            .goToPreviousNode()
+            .orStay()
+            .placeStone(SgfColor.White, 16, 16)
+
+        val expectedBoard = Board.empty(19)
+            .placeStone(SgfColor.Black, SgfPoint(4, 4))
+            .placeStone(SgfColor.White, SgfPoint(16, 16))
+
+        val actualBoard = editor.extractBoard()
+        assertEquals(expectedBoard, actualBoard)
     }
 }
