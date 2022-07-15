@@ -100,6 +100,7 @@ $dokka.location:com.github.ekenstein.sgf.parser/Marker/startLineNumber/#/Pointin
 $dokka.location:com.github.ekenstein.sgf.parser/SgfParserConfiguration///PointingToDeclaration/haengma/com.github.ekenstein.sgf.parser/-sgf-parser-configuration/index.html
 $dokka.location:com.github.ekenstein.sgf.parser/SgfParserConfiguration/SgfParserConfiguration/#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.parser/-sgf-parser-configuration/-sgf-parser-configuration.html
 $dokka.location:com.github.ekenstein.sgf.parser/SgfParserConfiguration/ignoreMalformedProperties/#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.parser/-sgf-parser-configuration/ignore-malformed-properties.html
+$dokka.location:com.github.ekenstein.sgf.parser/SgfParserConfiguration/preserveMalformedProperties/#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.parser/-sgf-parser-configuration/preserve-malformed-properties.html
 $dokka.location:com.github.ekenstein.sgf.parser/SgfParserConfiguration/preserveUnknownProperties/#/PointingToDeclaration/haengma/com.github.ekenstein.sgf.parser/-sgf-parser-configuration/preserve-unknown-properties.html
 $dokka.location:com.github.ekenstein.sgf.serialization////PointingToDeclaration/haengma/com.github.ekenstein.sgf.serialization/index.html
 $dokka.location:com.github.ekenstein.sgf.serialization//encode/com.github.ekenstein.sgf.SgfCollection#java.io.OutputStream/PointingToDeclaration/haengma/com.github.ekenstein.sgf.serialization/encode.html
@@ -231,6 +232,7 @@ $dokka.location:com.github.ekenstein.sgf//gameInfo/#kotlin.Function1[com.github.
 $dokka.location:com.github.ekenstein.sgf//propertySetOf/#kotlin.Array[com.github.ekenstein.sgf.SgfProperty]/PointingToDeclaration/haengma/com.github.ekenstein.sgf/property-set-of.html
 $dokka.location:com.github.ekenstein.sgf//propertySetOfNotNull/#kotlin.Array[com.github.ekenstein.sgf.SgfProperty?]/PointingToDeclaration/haengma/com.github.ekenstein.sgf/property-set-of-not-null.html
 $dokka.location:com.github.ekenstein.sgf//toPropertySet/kotlin.collections.Iterable[com.github.ekenstein.sgf.SgfProperty]#/PointingToDeclaration/haengma/com.github.ekenstein.sgf/to-property-set.html
+$dokka.location:com.github.ekenstein.sgf//wins/com.github.ekenstein.sgf.SgfColor#kotlin.Double/PointingToDeclaration/haengma/com.github.ekenstein.sgf/wins.html
 $dokka.location:com.github.ekenstein.sgf/GameDate.Companion///PointingToDeclaration/haengma/com.github.ekenstein.sgf/-game-date/-companion/index.html
 $dokka.location:com.github.ekenstein.sgf/GameDate.Companion/of/#kotlin.Int#kotlin.Int#kotlin.Int/PointingToDeclaration/haengma/com.github.ekenstein.sgf/-game-date/-companion/of.html
 $dokka.location:com.github.ekenstein.sgf/GameDate.Companion/of/#kotlin.Int#kotlin.Int/PointingToDeclaration/haengma/com.github.ekenstein.sgf/-game-date/-companion/of.html
