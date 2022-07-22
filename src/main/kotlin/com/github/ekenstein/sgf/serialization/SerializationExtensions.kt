@@ -137,7 +137,11 @@ private val SgfProperty.valueSerializer: ValueSerializer
         is SgfProperty.NodeAnnotation.N -> valueSerializer(textSerializer(name, false))
         is SgfProperty.NodeAnnotation.UC -> valueSerializer(doubleSerializer(value))
         is SgfProperty.NodeAnnotation.V -> valueSerializer(numberSerializer(value))
-        is SgfProperty.Private -> valueSerializer { appendable -> values.forEach { appendable.append(it) } }
+        is SgfProperty.Private -> valueSerializer(
+            values.map {
+                ValueSerializer { appendable -> appendable.append(it) }
+            }
+        )
         is SgfProperty.Root.AP -> valueSerializer(
             composedSerializer(simpleTextSerializer(name, true), simpleTextSerializer(version, true))
         )
