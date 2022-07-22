@@ -83,6 +83,19 @@ class SgfSerializationTest {
         assertEquals(expected, actual)
     }
 
+    @Test
+    fun `private properties with a list value should be serialized to sgf list values`() {
+        val tree = SgfGameTree(
+            nelOf(
+                SgfNode(SgfProperty.Private("TW", listOf("aa", "bb")))
+            )
+        )
+
+        val sgf = tree.encodeToString()
+        val expected = "(;TW[aa][bb])"
+        assertEquals(expected, sgf)
+    }
+
     private fun <T> withLocale(locale: Locale, block: () -> T): T {
         val default = Locale.getDefault()
         try {
