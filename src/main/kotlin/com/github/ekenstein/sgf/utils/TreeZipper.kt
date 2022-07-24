@@ -115,6 +115,16 @@ fun <T> TreeZipper<T>.insertDownLeft(
     LinkedList.Nil -> error("There are no nodes to insert")
 }
 
+fun <T> TreeZipper<T>.insertDownRight(values: LinkedList<T>) = when (values) {
+    is LinkedList.Cons -> copy(
+        left = unzip.unzip(focus).reverse(),
+        focus = values.head,
+        right = values.tail,
+        top = linkedListOf(Triple(left, focus, right)) + top
+    )
+    LinkedList.Nil -> error("There are no nodes to insert")
+}
+
 fun <T> TreeZipper<T>.commit() = goToRoot().focus
 
 /**
