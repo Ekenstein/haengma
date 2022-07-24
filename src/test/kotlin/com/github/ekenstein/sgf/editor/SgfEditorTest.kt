@@ -69,13 +69,13 @@ class SgfEditorTest : RandomTest {
             nelOf(SgfNode(GameInfo.default.toSgfProperties())),
             listOf(
                 SgfGameTree(
+                    nelOf(SgfNode(SgfProperty.Move.B(3, 3)))
+                ),
+                SgfGameTree(
                     nelOf(
                         SgfNode(SgfProperty.Move.B(4, 4)),
                         SgfNode(SgfProperty.Move.W(5, 5))
                     )
-                ),
-                SgfGameTree(
-                    nelOf(SgfNode(SgfProperty.Move.B(3, 3)))
                 )
             )
         )
@@ -99,21 +99,21 @@ class SgfEditorTest : RandomTest {
             nelOf(SgfNode(GameInfo.default.toSgfProperties())),
             listOf(
                 SgfGameTree(
+                    nelOf(SgfNode(SgfProperty.Move.B(3, 3)))
+                ),
+                SgfGameTree(
                     nelOf(SgfNode(SgfProperty.Move.B(4, 4))),
                     listOf(
+                        SgfGameTree(
+                            nelOf(SgfNode(SgfProperty.Move.W(5, 5)))
+                        ),
                         SgfGameTree(
                             nelOf(
                                 SgfNode(SgfProperty.Move.W(6, 6)),
                                 SgfNode(SgfProperty.Move.B(7, 7))
                             )
-                        ),
-                        SgfGameTree(
-                            nelOf(SgfNode(SgfProperty.Move.W(5, 5)))
                         )
                     )
-                ),
-                SgfGameTree(
-                    nelOf(SgfNode(SgfProperty.Move.B(3, 3)))
                 )
             )
         )
@@ -140,13 +140,13 @@ class SgfEditorTest : RandomTest {
             ),
             listOf(
                 SgfGameTree(
-                    nelOf(SgfNode(SgfProperty.Move.W(5, 5)))
-                ),
-                SgfGameTree(
                     nelOf(
                         SgfNode(SgfProperty.Move.W(4, 4)),
                         SgfNode(SgfProperty.Move.B(5, 5))
                     )
+                ),
+                SgfGameTree(
+                    nelOf(SgfNode(SgfProperty.Move.W(5, 5)))
                 )
             )
         )
@@ -858,13 +858,13 @@ class SgfEditorTest : RandomTest {
                         ),
                         listOf(
                             SgfGameTree(
-                                nelOf(SgfNode(SgfProperty.Setup.AW(nonEmptySetOf(SgfPoint(6, 6)))))
+                                nelOf(SgfNode(SgfProperty.Move.W(5, 5)))
                             ),
                             SgfGameTree(
                                 nelOf(SgfNode(SgfProperty.Setup.AB(nonEmptySetOf(SgfPoint(5, 5)))))
                             ),
                             SgfGameTree(
-                                nelOf(SgfNode(SgfProperty.Move.W(5, 5)))
+                                nelOf(SgfNode(SgfProperty.Setup.AW(nonEmptySetOf(SgfPoint(6, 6)))))
                             )
                         )
                     )
@@ -1052,13 +1052,13 @@ class SgfEditorTest : RandomTest {
                 listOf(
                     SgfGameTree(
                         nelOf(
-                            SgfNode(SgfProperty.Setup.PL(SgfColor.Black)),
-                            SgfNode(SgfProperty.Move.B(6, 6))
+                            SgfNode(SgfProperty.Move.W(6, 6))
                         )
                     ),
                     SgfGameTree(
                         nelOf(
-                            SgfNode(SgfProperty.Move.W(6, 6))
+                            SgfNode(SgfProperty.Setup.PL(SgfColor.Black)),
+                            SgfNode(SgfProperty.Move.B(6, 6))
                         )
                     )
                 )
@@ -1110,23 +1110,23 @@ class SgfEditorTest : RandomTest {
                 sequence = nelOf(SgfNode(GameInfo.default.toSgfProperties())),
                 trees = listOf(
                     SgfGameTree(
-                        nelOf(
-                            SgfNode(SgfProperty.Move.B(3, 3)),
-                            SgfNode(SgfProperty.Move.W(16, 4))
-                        )
-                    ),
-                    SgfGameTree(
                         nelOf(SgfNode(SgfProperty.Move.B(4, 4))),
                         listOf(
+                            SgfGameTree(
+                                nelOf(SgfNode(SgfProperty.Move.W(16, 4)))
+                            ),
                             SgfGameTree(
                                 nelOf(
                                     SgfNode(SgfProperty.Move.W(16, 16)),
                                     SgfNode(SgfProperty.Move.B(16, 4))
                                 )
-                            ),
-                            SgfGameTree(
-                                nelOf(SgfNode(SgfProperty.Move.W(16, 4)))
                             )
+                        )
+                    ),
+                    SgfGameTree(
+                        nelOf(
+                            SgfNode(SgfProperty.Move.B(3, 3)),
+                            SgfNode(SgfProperty.Move.W(16, 4))
                         )
                     )
                 )
@@ -1158,7 +1158,6 @@ class SgfEditorTest : RandomTest {
             val expectedTree = SgfGameTree(
                 nelOf(SgfNode(editor.getGameInfo().toSgfProperties())),
                 listOf(
-                    SgfGameTree(nelOf(SgfNode(SgfProperty.Move.W(16, 16)))),
                     SgfGameTree(
                         nelOf(
                             SgfNode(SgfProperty.Move.W(17, 3)),
@@ -1168,7 +1167,7 @@ class SgfEditorTest : RandomTest {
                         listOf(
                             SgfGameTree(
                                 nelOf(
-                                    SgfNode(SgfProperty.Move.B(4, 4))
+                                    SgfNode(SgfProperty.Move.B(17, 5))
                                 )
                             ),
                             SgfGameTree(
@@ -1178,11 +1177,12 @@ class SgfEditorTest : RandomTest {
                             ),
                             SgfGameTree(
                                 nelOf(
-                                    SgfNode(SgfProperty.Move.B(17, 5))
+                                    SgfNode(SgfProperty.Move.B(4, 4))
                                 )
                             )
                         )
-                    )
+                    ),
+                    SgfGameTree(nelOf(SgfNode(SgfProperty.Move.W(16, 16)))),
                 )
             )
 
@@ -1375,8 +1375,6 @@ class SgfEditorTest : RandomTest {
                     }
                     .placeStone(SgfColor.Black, 3, 3)
                     .placeStone(SgfColor.White, 4, 4)
-                    .goToPreviousNodeOrStay()
-                    .placeStone(SgfColor.White, 5, 5)
                     .annotateNode {
                         isHotspot = true
                     }
@@ -1386,7 +1384,7 @@ class SgfEditorTest : RandomTest {
                     .orStay()
 
                 val expectedCurrentNode = SgfNode(
-                    SgfProperty.Move.W(5, 5),
+                    SgfProperty.Move.W(3, 3),
                     SgfProperty.NodeAnnotation.HO(SgfDouble.Normal)
                 )
                 assertEquals(expectedCurrentNode, editor.currentNode)
@@ -1451,6 +1449,53 @@ class SgfEditorTest : RandomTest {
                 assertEquals(expected, actual.commit())
             }
         )
+    }
+
+    @Test
+    fun `main variation is always the left-most tree and alternate variations are placed to the right`() {
+        val tree = SgfEditor()
+            .placeStone(SgfColor.Black, 3, 3)
+            .placeStone(SgfColor.White, 16, 16)
+            .placeStone(SgfColor.Black, 10, 10)
+            .goToPreviousNodeOrStay()
+            .placeStone(SgfColor.Black, 5, 5)
+            .goToPreviousNodeOrStay()
+            .placeStone(SgfColor.Black, 6, 6)
+            .goToPreviousNodeOrStay()
+            .placeStone(SgfColor.Black, 7, 7)
+            .commit()
+
+        val expected = SgfGameTree(
+            nelOf(
+                SgfNode(GameInfo.default.toSgfProperties()),
+                SgfNode(SgfProperty.Move.B(3, 3)),
+                SgfNode(SgfProperty.Move.W(16, 16))
+            ),
+            listOf(
+                SgfGameTree(
+                    nelOf(
+                        SgfNode(SgfProperty.Move.B(10, 10))
+                    )
+                ),
+                SgfGameTree(
+                    nelOf(
+                        SgfNode(SgfProperty.Move.B(5, 5))
+                    )
+                ),
+                SgfGameTree(
+                    nelOf(
+                        SgfNode(SgfProperty.Move.B(6, 6))
+                    )
+                ),
+                SgfGameTree(
+                    nelOf(
+                        SgfNode(SgfProperty.Move.B(7, 7))
+                    )
+                )
+            )
+        )
+
+        assertEquals(expected, tree)
     }
 
     @Test

@@ -19,16 +19,18 @@ import com.github.ekenstein.sgf.utils.Zipper
 import com.github.ekenstein.sgf.utils.commit
 import com.github.ekenstein.sgf.utils.commitAtCurrentPosition
 import com.github.ekenstein.sgf.utils.get
+import com.github.ekenstein.sgf.utils.goRight
 import com.github.ekenstein.sgf.utils.goRightUnsafe
 import com.github.ekenstein.sgf.utils.goUp
 import com.github.ekenstein.sgf.utils.indexOfCurrent
-import com.github.ekenstein.sgf.utils.insertDownLeft
+import com.github.ekenstein.sgf.utils.insertDownRight
 import com.github.ekenstein.sgf.utils.insertRight
 import com.github.ekenstein.sgf.utils.linkedListOfNotNull
 import com.github.ekenstein.sgf.utils.map
 import com.github.ekenstein.sgf.utils.nelOf
 import com.github.ekenstein.sgf.utils.onSuccess
 import com.github.ekenstein.sgf.utils.orElse
+import com.github.ekenstein.sgf.utils.orStay
 import com.github.ekenstein.sgf.utils.toLinkedList
 import com.github.ekenstein.sgf.utils.toNel
 import com.github.ekenstein.sgf.utils.toZipper
@@ -212,7 +214,7 @@ private fun applyNodePropertiesToBoard(
 }
 
 internal fun SgfEditor.insertBranch(node: SgfNode): SgfEditor {
-    val mainVariation = SgfGameTree(nelOf(node))
+    val variation = SgfGameTree(nelOf(node))
     val restOfSequence = currentSequence.right.toNel()?.let {
         SgfGameTree(
             sequence = it,
@@ -231,8 +233,11 @@ internal fun SgfEditor.insertBranch(node: SgfNode): SgfEditor {
     }
 
     return copy(
-        currentSequence = mainVariation.sequence.toZipper(),
-        currentTree = newTree.insertDownLeft(linkedListOfNotNull(mainVariation, restOfSequence))
+        currentSequence = variation.sequence.toZipper(),
+        currentTree = newTree
+            .insertDownRight(linkedListOfNotNull(restOfSequence, variation))
+            .goRight()
+            .orStay()
     )
 }
 
