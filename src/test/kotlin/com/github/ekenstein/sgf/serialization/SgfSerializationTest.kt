@@ -1,17 +1,19 @@
 package com.github.ekenstein.sgf.serialization
 
 import com.github.ekenstein.sgf.GameDate
+import com.github.ekenstein.sgf.SgfCollection
 import com.github.ekenstein.sgf.SgfGameTree
 import com.github.ekenstein.sgf.SgfNode
 import com.github.ekenstein.sgf.SgfProperty
+import com.github.ekenstein.sgf.parser.from
 import com.github.ekenstein.sgf.utils.nelOf
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import java.io.ByteArrayOutputStream
 import java.util.Locale
-import kotlin.test.assertEquals
 
 class SgfSerializationTest {
     @ParameterizedTest
@@ -79,7 +81,7 @@ class SgfSerializationTest {
         val outputStream = ByteArrayOutputStream()
         SgfGameTree(nelOf(SgfNode(SgfProperty.GameInfo.KM(6.5)))).encode(outputStream)
         val expected = "(;KM[6.5])"
-        val actual = outputStream.toString(Charsets.UTF_8)
+        val actual = String(outputStream.toByteArray())
         assertEquals(expected, actual)
     }
 
@@ -94,6 +96,41 @@ class SgfSerializationTest {
         val sgf = tree.encodeToString()
         val expected = "(;TW[aa][bb])"
         assertEquals(expected, sgf)
+    }
+
+    @Test
+    fun `serializing a non-composed text will escape necessary chars`() {
+        val tree = SgfGameTree(nelOf(SgfNode(SgfProperty.NodeAnnotation.C("gibodibo [2d]: hi \\o/"))))
+        val expected = "(;C[gibodibo [2d\\]: hi \\\\o/])"
+        val actual = tree.encodeToString()
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `serializing a non-composed simple text will escape necessary chars`() {
+        val tree = SgfGameTree(nelOf(SgfNode(SgfProperty.NodeAnnotation.N("gibodibo [2d]: hi \\o/"))))
+        val expected = "(;N[gibodibo [2d\\]: hi \\\\o/])"
+        val actual = tree.encodeToString()
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `serializing a number will keep all the digits regardless of length`() {
+        val tree = SgfGameTree(nelOf(SgfNode(SgfProperty.Timing.WL(0.7003728838801924))))
+        val expected = "(;WL[0.7003728838801924])"
+        val actual = tree.encodeToString()
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `serializing a composed value with backslashes`() {
+        val tree = SgfGameTree(nelOf(SgfNode(SgfProperty.Root.AP("apa\\", "bepa"))))
+        val expected = "(;AP[apa\\\\:bepa])"
+        val actual = tree.encodeToString()
+        assertEquals(expected, actual)
+
+        val t = SgfCollection.from(actual).trees.head
+        assertEquals(tree, t)
     }
 
     private fun <T> withLocale(locale: Locale, block: () -> T): T {

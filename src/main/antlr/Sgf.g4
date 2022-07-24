@@ -11,7 +11,7 @@ prop            : PROP_IDENTIFIER (NONE | VALUE+);
 WS: [ \n\r\t]+ -> skip;
 PROP_IDENTIFIER : 'A'..'Z'+;
 NONE            : L_BRACKET R_BRACKET;
-VALUE           : L_BRACKET ('\\]'|.)*? R_BRACKET;
+VALUE           : L_BRACKET ('\\\\'|'\\]'|.)*? R_BRACKET;
 
 fragment L_BRACKET : '[';
 fragment R_BRACKET : ']';
