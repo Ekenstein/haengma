@@ -905,6 +905,22 @@ class SgfParserTest : RandomTest {
     }
 
     @Test
+    fun `parsing a text will replace escaped char with the char`() {
+        val sgf = "(;C[gibodibo [2d\\]: hi])"
+        val actual = SgfCollection.from(sgf).trees.head
+        val expected = SgfGameTree(nelOf(SgfNode(SgfProperty.NodeAnnotation.C("gibodibo [2d]: hi"))))
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `parsing a simple text will replace escaped char with the char`() {
+        val sgf = "(;N[gibodibo [2d\\]: hi])"
+        val actual = SgfCollection.from(sgf).trees.head
+        val expected = SgfGameTree(nelOf(SgfNode(SgfProperty.NodeAnnotation.N("gibodibo [2d]: hi"))))
+        assertEquals(expected, actual)
+    }
+
+    @Test
     fun `can serialize and then parse back the same tree`() {
         val trees = random.list(100) { gameTree(3) }
 
@@ -917,6 +933,21 @@ class SgfParserTest : RandomTest {
                 }
             }
         )
+    }
+
+    @Test
+    fun `escaped backslashes before an ending bracket are parsed correctly`() {
+        val sgf = "(;C[\\\\\\\\\\\\\\\\\\\\\\\\\\\\]B[aa])"
+        val expected = SgfGameTree(
+            nelOf(
+                SgfNode(
+                    SgfProperty.NodeAnnotation.C("""\\\\\\\"""),
+                    SgfProperty.Move.B(1, 1)
+                )
+            )
+        )
+        val actual = SgfCollection.from(sgf).trees.head
+        assertEquals(expected, actual)
     }
 
     @Test
@@ -982,6 +1013,14 @@ class SgfParserTest : RandomTest {
         assertThrowsParseException(marker(0, 0)) {
             SgfCollection.from("")
         }
+    }
+
+    @Test
+    fun `numbers will keep their number of digits regardless of length`() {
+        val sgf = "(;WL[0.7003728838801924])"
+        val actual = SgfCollection.from(sgf).trees.head
+        val expected = SgfGameTree(nelOf(SgfNode(SgfProperty.Timing.WL(0.7003728838801924))))
+        assertEquals(expected, actual)
     }
 
     @Test

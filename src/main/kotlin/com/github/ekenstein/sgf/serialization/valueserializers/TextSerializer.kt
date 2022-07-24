@@ -13,14 +13,14 @@ private fun escapeRegex(isComposed: Boolean): Regex {
 
 internal fun simpleTextSerializer(string: String, isComposed: Boolean) = ValueSerializer { appendable ->
     val serialized = string.replace(whitespaceExceptSpaceRegex, " ")
-        .replace(escapeRegex(isComposed), "\\$0")
+        .replace(escapeRegex(isComposed), """\\$0""")
 
     appendable.append(serialized)
 }
 
 internal fun textSerializer(string: String, isComposed: Boolean) = ValueSerializer { appendable ->
     val serialized = string.replace(whitespaceExceptNewLineRegex, " ")
-        .replace(escapeRegex(isComposed), "\\$0")
+        .replace(escapeRegex(isComposed), """\\$0""")
 
     appendable.append(serialized)
 }

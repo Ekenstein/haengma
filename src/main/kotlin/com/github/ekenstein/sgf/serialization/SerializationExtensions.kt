@@ -134,7 +134,7 @@ private val SgfProperty.valueSerializer: ValueSerializer
         is SgfProperty.NodeAnnotation.GB -> valueSerializer(doubleSerializer(value))
         is SgfProperty.NodeAnnotation.GW -> valueSerializer(doubleSerializer(value))
         is SgfProperty.NodeAnnotation.HO -> valueSerializer(doubleSerializer(value))
-        is SgfProperty.NodeAnnotation.N -> valueSerializer(textSerializer(name, false))
+        is SgfProperty.NodeAnnotation.N -> valueSerializer(simpleTextSerializer(name, false))
         is SgfProperty.NodeAnnotation.UC -> valueSerializer(doubleSerializer(value))
         is SgfProperty.NodeAnnotation.V -> valueSerializer(numberSerializer(value))
         is SgfProperty.Private -> valueSerializer(
